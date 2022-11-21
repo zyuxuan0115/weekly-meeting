@@ -1,5 +1,5 @@
 ## weekly meeting updates of code layout optimization at runtime
-To make it work on your machine
+To make it work on your Mac
 ```bash
 > brew install chruby ruby-install xz
 > ruby-install ruby
