@@ -12,3 +12,5 @@ To make it work on your Mac
 > bundle exec jekyll serve
 ```
 Then browse to http://localhost:4000
+
+Or, you can directly open files in [_posts](https://github.com/zyuxuan0115/weekly-meeting/tree/main/_posts) directory.
