@@ -11,8 +11,10 @@ categories: cont-opt
 #### 2 questions
 - How to map profile1 to the original binary and then produce a BOLTed binary? 
 	* Function Reordering: 
+![function reordering](/assets/2022-11-21/func-reorder.png)
 		+ Ocolos maintains a map table between the starting addr of original functions and the starting addr of BOLTed functions.
 	* Basic Block Reordering:
+![bb reordering](/assets/2022-11-21/bb-reorder.png)
 		+ BOLT's BAT-dump maintains a map table between the branch insns in the original functions and branch insns in the BOLTed functions.
 		+ BAT-dump related thing can be found [here](BAT-usage.html)
 	* Use Ocolos and BAT-dump to change the records (addr recorded) in the profile data.
@@ -28,14 +30,21 @@ categories: cont-opt
 
 ### 3 different profiles 
 - profile for C0 
-  * In the blue column, all addresses are lower than `0x300000`.
+  * In the blue column, all addresses are lower than `0x3000000`.
   * ![perf script results with only events collected from mysqld](/assets/2022-11-21/c0.png)
 
 - profile for C1
-  * In the blue column, all addresses are still lower than `0x300000`.
+  * In the blue column, all addresses are still lower than `0x3000000`.
   * ![perf script results with only events collected from mysqld](/assets/2022-11-21/c1.png)
 
 - profile for offline BOLTed mysqld
-  * In the blue column, all addresses are greater than `0x480000`.
+  * In the blue column, all addresses are greater than `0x4800000`.
   * ![perf script results with only events collected from mysqld](/assets/2022-11-21/bolt.png)
 
+
+### perf2bolt on perf.data collected from C1 round
+- perf2bolt on perf.data collected from C0 round
+![perf2bolt on c0](/assets/2022-11-21/c0perf2bolt.png)
+
+- perf2bolt on perf2.data collected from C1 round
+![perf2bolt on c1](/assets/2022-11-21/c1perf2bolt.png)
