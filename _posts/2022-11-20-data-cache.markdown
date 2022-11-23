@@ -2,7 +2,7 @@
 layout: post
 title:  "2022-11-21 data cache"
 date:   2022-11-20 13:13:46 -0500
-categories: cont-opt
+categories: data-cache
 ---
 - Previous efforts on adding `__builtin_prefetch()` in the source code of `cc` and `pr` doesn't show significant performance improvement.
 	* OoO will hide some of the memory latency. OoO only fails to hide latency when 
