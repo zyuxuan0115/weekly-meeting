@@ -65,6 +65,7 @@ dedf0/P/-/-/9  0x483b767/0x483bd42/P/-/-/60
 - The output of `perf script -F pid,event,addr,ip`:
 	* empty
 	* `perf script -F pid,event,addr,ip` on the original binary's perf.data is also empty
+	* `perf script -F pid,event,addr,ip` on the BOLTed binary's perf.data is also empty
 
 - the output of `perf script --show-mmap-events`:
 ```
