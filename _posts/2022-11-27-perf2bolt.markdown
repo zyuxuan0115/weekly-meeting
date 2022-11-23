@@ -23,7 +23,7 @@ categories: cont-opt
 		+ task events: `perf script --show-task-events`
 
 
-	* The output of `perf script -F pid,event,ip`:
+- The output of `perf script -F pid,event,ip`:
 ```
 973068 cycles:u:           481cd08
 973068 cycles:u:           481cd08
@@ -44,7 +44,7 @@ categories: cont-opt
 973068 cycles:u:      7f2b7d240ac6
 ```
 
-	* The output of `perf script -F pid,ip,brstack`: 
+- The output of `perf script -F pid,ip,brstack`: 
 ```
 973068           481cd08
 973068           481cd0a 0xffffffffb9e00ae7/0x481cd08/P/-/-/0
@@ -62,12 +62,12 @@ dedf0/P/-/-/9  0x483b767/0x483bd42/P/-/-/60
 /-/-/4  0x482f83b/0x482f2ce/P/-/-/1
 ```
 
-	* The output of `perf script -F pid,event,addr,ip`:
-		+ empty
-		+ `perf script -F pid,event,addr,ip` on the original binary's perf.data is also empty
+- The output of `perf script -F pid,event,addr,ip`:
+	* empty
+	* `perf script -F pid,event,addr,ip` on the original binary's perf.data is also empty
 
-	* the output of `perf script --show-mmap-events`:
-		```
+- the output of `perf script --show-mmap-events`:
+```
           mysqld     0     0.000000: PERF_RECORD_MMAP2 973068/973068: [0x290e000(0x52000) @ 0x250e000 09:00 179636315 0]: r-xp /usr/local/mysql/bin/mysqld
           mysqld     0     0.000000: PERF_RECORD_MMAP2 973068/973068: [0x2960000(0x3000) @ 0x2560000 09:00 179636315 0]: rwxp /usr/local/mysql/bin/mysqld
           mysqld     0     0.000000: PERF_RECORD_MMAP2 973068/973068: [0x2963000(0x11d000) @ 0x2563000 09:00 179636315 0]: r-xp /usr/local/mysql/bin/mysqld
@@ -81,8 +81,8 @@ dedf0/P/-/-/9  0x483b767/0x483bd42/P/-/-/60
           mysqld     0     0.000000: PERF_RECORD_MMAP2 973068/973068: [0x4818000(0x3000) @ 0 00:00 0 0]: r-xp //anon
           mysqld     0     0.000000: PERF_RECORD_MMAP2 973068/973068: [0x481b000(0x5000) @ 0 00:00 0 0]: r-xp //anon
           mysqld     0     0.000000: PERF_RECORD_MMAP2 973068/973068: [0x4820000(0x3000) @ 0 00:00 0 0]: r-xp //anon
-		```
-		```
+```
+```
       connection 973119 31430143.905635:     433845 cycles:u:      7f2b7da48a3f [unknown] (/usr/lib/x86_64-linux-gnu/libssl.so.1.1)
       connection 973119 31430143.905922:     430157 cycles:u:           4877029 [unknown] (/tmp/perf-973068.map)
       connection 973119 31430143.906182:     423148 cycles:u:           482fade [unknown] (/tmp/perf-973068.map)
@@ -91,11 +91,11 @@ dedf0/P/-/-/9  0x483b767/0x483bd42/P/-/-/60
       connection 973129 31430143.906562:          1 cycles:u:      7f2b7d240ac6 ppoll+0xa6 (/usr/lib/x86_64-linux-gnu/libc-2.31.so)
       connection 973129 31430143.906567:          4 cycles:u:      7f2b7d240ac6 ppoll+0xa6 (/usr/lib/x86_64-linux-gnu/libc-2.31.so)
       connection 973129 31430143.906571:         29 cycles:u:      7f2b7d240ac6 ppoll+0xa6 (/usr/lib/x86_64-linux-gnu/libc-2.31.so)
-		```
+```
 
 
-	* the output of `perf script --show-task-events`:
-		```
+- the output of `perf script --show-task-events`:
+```
       connection 973129 31430143.922020:     385182 cycles:u:           296e310 my_lengthsp_8bit+0x20 (/usr/local/mysql/bin/mysqld)
       connection 973127 31430143.922043:     391238 cycles:u:      7f2b7d240a24 ppoll+0x4 (/usr/lib/x86_64-linux-gnu/libc-2.31.so)
       connection 973119 31430143.922061:     390898 cycles:u:           27b3420 pfs_memory_free_vc+0x0 (/usr/local/mysql/bin/mysqld)
@@ -116,4 +116,4 @@ dedf0/P/-/-/9  0x483b767/0x483bd42/P/-/-/60
       connection 973127 31430143.923057:     388099 cycles:u:           484aec0 [unknown] (/tmp/perf-973068.map)
       connection 973119 31430143.923062:     393649 cycles:u:           4877207 [unknown] (/tmp/perf-973068.map)
       connection 973128 31430143.923080:     382195 cycles:u:           4830c0f [unknown] (/tmp/perf-973068.map)
-		```
+```
