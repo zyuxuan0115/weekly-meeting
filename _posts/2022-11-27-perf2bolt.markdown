@@ -24,7 +24,7 @@ categories: cont-opt
 
 
 	* The output of `perf script -F pid,event,ip`:
-		```
+```
 973068 cycles:u:           481cd08
 973068 cycles:u:           481cd08
 973068 cycles:u:           481cd08
@@ -42,7 +42,7 @@ categories: cont-opt
 973068 cycles:u:           482e412
 973068 cycles:u:      7f2b7d240ac6
 973068 cycles:u:      7f2b7d240ac6
-		```
+```
 
 	* The output of `perf script -F pid,ip,brstack`: 
 ```
