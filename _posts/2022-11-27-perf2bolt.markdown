@@ -45,7 +45,7 @@ categories: cont-opt
 		```
 
 	* The output of `perf script -F pid,ip,brstack`: 
-    ```
+```
 973068           481cd08
 973068           481cd0a 0xffffffffb9e00ae7/0x481cd08/P/-/-/0
 973068           4840cb5 0x4840baa/0x4840c80/P/-/-/2  0x4840c12/0x4840b93/P/-/-/10  0x4840b8e/0x4840c00/P/-/-/218  0x481ea12/0x4840b48/P/-/-/18  0x481c8c1/0x481e9c0/P/-/-/74  0x481c872/0x481c89c/P/-/-/3  0x481caf1/0x481c849/M/-/-/19
@@ -60,7 +60,7 @@ dedf0/P/-/-/9  0x483b767/0x483bd42/P/-/-/60
 9  0x482dd39/0x482dcd5/P/-/-/1  0x482d34b/0x482dd37/P/-/-/1  0x482dd31/0x482d340/P/-/-/11  0x482dcc7/0x482dd31/P/-/-/1  0x482dca1/0x482dcbc/P/-/-/20  0x482dbfa/0x482dc80/P/-/-/4  0x482dc0a/0x482dbf1/P/-/-/1  0x482dd30/0x482dbff/P/-/
 -/3  0x482ddbe/0x482dd0e/P/-/-/36  0x482dd53/0x482dd80/M/-/-/30  0x482dd08/0x482dd4c/M/-/-/8  0x482ddbe/0x482dcf1/P/-/-/11  0x482dceb/0x482dd80/P/-/-/2  0x482dd63/0x482dccf/P/-/-/1  0x482dcc9/0x482dd5a/P/-/-/2  0x482f307/0x482dcac/P
 /-/-/4  0x482f83b/0x482f2ce/P/-/-/1
-		```
+```
 
 	* The output of `perf script -F pid,event,addr,ip`:
 		+ empty
