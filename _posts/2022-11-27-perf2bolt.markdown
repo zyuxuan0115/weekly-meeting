@@ -21,6 +21,11 @@ categories: cont-opt
 		+ mem events: `perf script -F pid,event,addr,ip`
 		+ process events: `perf script --show-mmap-events`
 		+ task events: `perf script --show-task-events`
+  * In [DataAggregator::start()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L162)
+    + `MainEventsPPI` can either be with Branch events or without Branch events. Normally it will contain Branch event, unless `-nl` is specified.  
+    + 4 launchPerfProcess will be running. 
+    + `MemEventsPPI` will not contain anything.
+
 
 
 - The output of `perf script -F pid,event,ip`:
@@ -118,3 +123,55 @@ dedf0/P/-/-/9  0x483b767/0x483bd42/P/-/-/60
       connection 973119 31430143.923062:     393649 cycles:u:           4877207 [unknown] (/tmp/perf-973068.map)
       connection 973128 31430143.923080:     382195 cycles:u:           4830c0f [unknown] (/tmp/perf-973068.map)
 ```
+
+- Trying perf2bolt on perf2.data (profiles collected from C1 round)
+	* The command here is `perf2bolt --ignore-build-id -p perf2.data -o perf2.fdata mysqld.bolt`
+![c1 perf data](/assets/2022-11-28/c1_perf2bolt.png)
+
+	* The function that process the mmap events is [prepareToParse("mmap events", MMapEventsPPI);](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L538), and [parseMMapEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L539). 
+		+ [parseMMapEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1988) generages the error message. 
+		+ In [parseMMapEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1988), if we output the first element of the `FileMMapInfo`, and the PID of the second element ([MMapInfo struct](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/include/bolt/Profile/DataAggregator.h#L172)): 
+
+```
+    ErrorOr<std::pair<StringRef, MMapInfo>> FileMMapInfoRes = parseMMapEvent();
+    if (std::error_code EC = FileMMapInfoRes.getError())
+      return EC;
+
+    std::pair<StringRef, MMapInfo> FileMMapInfo = FileMMapInfoRes.get();
+    outs()<<FileMMapInfo.first.str()<<","<<FileMMapInfo.second.PID<<", "<<FileMMapInfo.second.BaseAddress<<", "<<FileMMapInfo.second.MMapAddress<<", "<<FileMMapInfo.second.Offset<<"\n";
+```
+
+For most of the time, the first element is empty string, and the second element is -1. Some times it prints the following information:
+
+```
+mysqld,2833111, 0, 60698624, 58593280
+mysqld,2833111, 0, 60788736, 58683392
+mysqld,2833111, 0, 60960768, 58855424
+,-1, 0, 0, 0
+,-1, 0, 0, 0
+,-1, 0, 0, 0
+,-1, 0, 0, 0
+,-1, 0, 0, 0
+,-1, 0, 0, 0
+libnss_sss.so.2,2833111, 0, 140087967264768, 8192
+libnss_systemd.so.2,2833111, 0, 140087967330304, 24576
+libnss_files-2.31.so,2833111, 0, 140087967563776, 12288
+libc-2.31.so,2833111, 0, 140088160489472, 139264
+libgcc_s.so.1,2833111, 0, 140088162410496, 12288
+libm-2.31.so,2833111, 0, 140088162562048, 53248
+libstdc++.so.6.0.28,2833111, 0, 140088164495360, 614400
+libnuma.so.1.0.0,2833111, 0, 140088165867520, 12288
+libprotobuf-lite.so.3.11.4,2833111, 0, 140088166174720, 262144
+libdl-2.31.so,2833111, 0, 140088166522880, 4096
+libcrypto.so.1.1,2833111, 0, 140088167043072, 491520
+libssl.so.1.1,2833111, 0, 140088169639936, 114688
+librt-2.31.so,2833111, 0, 140088170135552, 8192
+libpthread-2.31.so,2833111, 0, 140088170192896, 24576
+component_reference_cache.so,2833111, 0, 140088170409984, 8192
+replace_function.so,2833111, 0, 140088170483712, 45056
+ld-2.31.so,2833111, 0, 140088170545152, 4096
+```  
+
+The `,-1, 0, 0, 0` is the records perf collected from the C1 round `mysqld`
+
+It shows that the C1 round profile data is not extracted correctly. The profile data is extracted from [DataAggregator::parseMMapEvent()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1913)
