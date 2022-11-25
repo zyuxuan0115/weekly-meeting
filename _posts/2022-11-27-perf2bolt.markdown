@@ -124,6 +124,7 @@ dedf0/P/-/-/9  0x483b767/0x483bd42/P/-/-/60
       connection 973119 31430143.923062:     393649 cycles:u:           4877207 [unknown] (/tmp/perf-973068.map)
       connection 973128 31430143.923080:     382195 cycles:u:           4830c0f [unknown] (/tmp/perf-973068.map)
 ```
+- A [comparison](perfdata4bolted.html) with the `perf script` on profiles collected from offline BOLTed mysqld.bolt
 
 ### perf2bolt on profiles collected from C1 + mysqld.bolt (generated in C0 round)
 - Trying perf2bolt on perf2.data (profiles collected from C1 round)
