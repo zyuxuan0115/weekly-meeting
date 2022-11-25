@@ -176,6 +176,7 @@ It shows that the C1 round profile data is not extracted correctly. The profile 
 ### change the code to make perf2bolt work for C1's perf.data
 - I add [--cont-opt](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L68) flag to `perf2bolt`
 	* when Ocolos performs continuous optimization, use `perf2bolt` with this flag to process the perf.data collect from Cn round.
+	* the command is `perf2bolt --ignore-build-id --cont-opt -p perf2.data -o perf2.fdata mysqld.bolt`
 - In function [DataAggregator::parseMMapEvent()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1947), I add code to change `//anon` to be `/home/zyuxuan/ocolos_data/mysqld.bolt`
 - Now the output becomes
 ```
@@ -202,7 +203,10 @@ ld-2.31.so, 2833111, 0, 140088170545152, 4096
 		+ (1) what is the offset? why it's still 0? 
 		+ (2) do we need to change `mysqld` to be `mysqld.bolt`? 
 - However, even after changing the code, perf2bolt will discard the `mysqld.bolt` record, and then still report the same error.
-	* This is the warning message that `perf2bolt` discard the `mysqld.bolt` record
+	* This is the warning message that `perf2bolt` discards the `mysqld.bolt` record
 ```
 PERF2BOLT-WARNING: ignoring mapping of mysqld.bolt at 0x4600000
-``` 
+```
+- To prevent `perf2bolt` discards the `mysqld.bolt` record
+	* In [parseMMapEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L2122), I add some code.
+	* ![perf2bolt](/assets/2022-11-28/perf2bolt_fixed.png)
