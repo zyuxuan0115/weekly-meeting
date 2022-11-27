@@ -1,0 +1,213 @@
+---
+layout: post
+title:  "2022-11-28 perf2bolt"
+date:   2022-11-24 12:53:46 -0500
+categories: cont-opt
+---
+### perf2bolt usage for BOLTed binary
+- We can use profiles collected from the BOLTed binary + original binary to create a BOLTed binary
+```
+> llvm-bolt {executable} -o {executable}.bolt --enable-bat -data=perf.fdata -reorder-blocks=cache+ -reorder-functions=hfsort
+> perf record -e cycles:u -j any,u -o perf.data -- {executable}.bolt <args> ...
+> perf2bolt -p perf.data -o perf_new.fdata {executable}.bolt
+> llvm-bolt {executable} -o {executable}_new.bolt --enable-bat -data=perf_new.fdata -reorder-blocks=cache+ -reorder-functions=hfsort
+```
+
+### perf2bolt's perf script subprocess's exploration
+- In the BOLT's [dataAggregator.h](https://github.com/llvm/llvm-project/blob/main/bolt/include/bolt/Profile/DataAggregator.h) they heavily use perf script to get the LBR information. 
+	* the function to run perf is `launchPerfProcess`
+	* in [dataAggregator.cpp](https://github.com/llvm/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L156)'s `DataAggregator::start()`, we know BOLT use the following perf script command:
+		+ events without LBR: `perf script -F pid,event,ip`
+		+ branch events: `perf script -F pid,ip,brstack`
+		+ mem events: `perf script -F pid,event,addr,ip`
+		+ process events: `perf script --show-mmap-events`
+		+ task events: `perf script --show-task-events`
+  * In [DataAggregator::start()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L162)
+    + `MainEventsPPI` can either be with Branch events or without Branch events. Normally it will contain Branch event, unless `-nl` is specified.  
+    + 4 launchPerfProcess will be running. 
+    + `MemEventsPPI` will not contain anything.
+
+
+
+- The output of `perf script -F pid,event,ip`:
+```
+973068 cycles:u:           481cd08
+973068 cycles:u:           481cd08
+973068 cycles:u:           481cd08
+973068 cycles:u:           481cd08
+973068 cycles:u:           481cd08
+973068 cycles:u:           481cd0a
+973068 cycles:u:           4840cb5
+973068 cycles:u:           27b3467
+973068 cycles:u:           482e2fd
+973068 cycles:u:           481b7ec
+973068 cycles:u:           486b31f
+973068 cycles:u:      7f2b7da48a3f
+973068 cycles:u:           4877029
+973068 cycles:u:           482fade
+973068 cycles:u:           482e412
+973068 cycles:u:      7f2b7d240ac6
+973068 cycles:u:      7f2b7d240ac6
+```
+
+- The output of `perf script -F pid,ip,brstack`: 
+```
+973068           481cd08
+973068           481cd0a 0xffffffffb9e00ae7/0x481cd08/P/-/-/0
+973068           4840cb5 0x4840baa/0x4840c80/P/-/-/2  0x4840c12/0x4840b93/P/-/-/10  0x4840b8e/0x4840c00/P/-/-/218  0x481ea12/0x4840b48/P/-/-/18  0x481c8c1/0x481e9c0/P/-/-/74  0x481c872/0x481c89c/P/-/-/3  0x481caf1/0x481c849/M/-/-/19
+8  0x481cd55/0x481ca8d/M/-/-/379  0xffffffffb9e00ae7/0x481cd0a/P/-/-/0  0xffffffffb9e00ae7/0x481cd08/P/-/-/0
+973068           27b3467 0x27cdec7/0x27b3457/P/-/-/30  0x27b3452/0x27cdea0/P/-/-/5  0x480006e/0x27b3420/P/-/-/272  0x481a6ea/0x4800040/P/-/-/10  0x481a42e/0x481a6c0/P/-/-/2  0x481a75e/0x481a426/P/-/-/3  0x481a7b8/0x481a74f/P/-/-/1
+0x4827a71/0x481a7ad/P/-/-/1  0x483bd31/0x4827a6d/P/-/-/3  0x4827a68/0x483bd10/P/-/-/3  0x481a7a8/0x4827a60/P/-/-/3  0x481a74a/0x481a792/P/-/-/15  0x481a421/0x481a71c/P/-/-/1  0x481a75e/0x481a410/P/-/-/3  0x481a7b8/0x481a74f/P/-/-/5
+ 0x4827a71/0x481a7ad/P/-/-/4  0x483bd31/0x4827a6d/P/-/-/2  0x4827a68/0x483bd10/P/-/-/7  0x481a7a8/0x4827a60/P/-/-/21  0x481a74a/0x481a792/P/-/-/13  0x481a40b/0x481a71c/P/-/-/3  0x481acc8/0x481a3d5/P/-/-/14  0x481a3d0/0x481ac8a/P/-/-
+/1  0x481aa96/0x481a3cd/P/-/-/11  0x481a3c8/0x481aa52/P/-/-/1  0x483b2a0/0x481a3c5/P/-/-/4  0x483b7b8/0x483b271/P/-/-/54  0x483be01/0x483b76c/P/-/-/24  0x7f2b7d1c2c7d/0x483bdc6/P/-/-/1  0xcdedf4/0x7f2b7d1c2c70/P/-/-/1  0x483bdc1/0xc
+dedf0/P/-/-/9  0x483b767/0x483bd42/P/-/-/60
+973068           482e2fd 0x482e2ee/0x482e2f4/P/-/-/61  0x482e09c/0x482e2e0/P/-/-/28  0x4834f41/0x482e081/P/-/-/15  0x4834f0b/0x4834f1b/P/-/-/1  0x4834f19/0x4834eff/P/-/-/7  0x482dd63/0x4834eb4/P/-/-/2  0x4834eae/0x482dd5a/P/-/-/58
+0x482e07c/0x4834e5c/P/-/-/32  0x482dc15/0x482e048/P/-/-/15  0x482dd30/0x482dbff/P/-/-/3  0x484aecb/0x482dd0e/P/-/-/1  0x482dd53/0x484aec0/P/-/-/1  0x482dd08/0x482dd4c/P/-/-/8  0x484aecb/0x482dcf1/P/-/-/15  0x482dceb/0x484aec0/P/-/-/
+9  0x482dd39/0x482dcd5/P/-/-/1  0x482d34b/0x482dd37/P/-/-/1  0x482dd31/0x482d340/P/-/-/11  0x482dcc7/0x482dd31/P/-/-/1  0x482dca1/0x482dcbc/P/-/-/20  0x482dbfa/0x482dc80/P/-/-/4  0x482dc0a/0x482dbf1/P/-/-/1  0x482dd30/0x482dbff/P/-/
+-/3  0x482ddbe/0x482dd0e/P/-/-/36  0x482dd53/0x482dd80/M/-/-/30  0x482dd08/0x482dd4c/M/-/-/8  0x482ddbe/0x482dcf1/P/-/-/11  0x482dceb/0x482dd80/P/-/-/2  0x482dd63/0x482dccf/P/-/-/1  0x482dcc9/0x482dd5a/P/-/-/2  0x482f307/0x482dcac/P
+/-/-/4  0x482f83b/0x482f2ce/P/-/-/1
+```
+
+- The output of `perf script -F pid,event,addr,ip`:
+	* empty
+	* `perf script -F pid,event,addr,ip` on the original binary's perf.data is also empty
+	* `perf script -F pid,event,addr,ip` on the BOLTed binary's perf.data is also empty
+
+- the output of `perf script --show-mmap-events`:
+```
+          mysqld     0     0.000000: PERF_RECORD_MMAP2 973068/973068: [0x290e000(0x52000) @ 0x250e000 09:00 179636315 0]: r-xp /usr/local/mysql/bin/mysqld
+          mysqld     0     0.000000: PERF_RECORD_MMAP2 973068/973068: [0x2960000(0x3000) @ 0x2560000 09:00 179636315 0]: rwxp /usr/local/mysql/bin/mysqld
+          mysqld     0     0.000000: PERF_RECORD_MMAP2 973068/973068: [0x2963000(0x11d000) @ 0x2563000 09:00 179636315 0]: r-xp /usr/local/mysql/bin/mysqld
+          mysqld     0     0.000000: PERF_RECORD_MMAP2 973068/973068: [0x3aa0000(0xa000) @ 0x369f000 09:00 179636315 0]: rwxp /usr/local/mysql/bin/mysqld
+          mysqld     0     0.000000: PERF_RECORD_MMAP2 973068/973068: [0x3ab5000(0x3000) @ 0x36b4000 09:00 179636315 0]: rwxp /usr/local/mysql/bin/mysqld
+          mysqld     0     0.000000: PERF_RECORD_MMAP2 973068/973068: [0x3ab9000(0x10e000) @ 0x36b8000 09:00 179636315 0]: rwxp /usr/local/mysql/bin/mysqld
+          mysqld     0     0.000000: PERF_RECORD_MMAP2 973068/973068: [0x3bc8000(0x46000) @ 0x37c7000 09:00 179636315 0]: rwxp /usr/local/mysql/bin/mysqld
+          mysqld     0     0.000000: PERF_RECORD_MMAP2 973068/973068: [0x4800000(0x7000) @ 0 00:00 0 0]: r-xp //anon
+          mysqld     0     0.000000: PERF_RECORD_MMAP2 973068/973068: [0x4807000(0x9000) @ 0 00:00 0 0]: r-xp //anon
+          mysqld     0     0.000000: PERF_RECORD_MMAP2 973068/973068: [0x4810000(0x8000) @ 0 00:00 0 0]: r-xp //anon
+          mysqld     0     0.000000: PERF_RECORD_MMAP2 973068/973068: [0x4818000(0x3000) @ 0 00:00 0 0]: r-xp //anon
+          mysqld     0     0.000000: PERF_RECORD_MMAP2 973068/973068: [0x481b000(0x5000) @ 0 00:00 0 0]: r-xp //anon
+          mysqld     0     0.000000: PERF_RECORD_MMAP2 973068/973068: [0x4820000(0x3000) @ 0 00:00 0 0]: r-xp //anon
+```
+```
+      connection 973119 31430143.905635:     433845 cycles:u:      7f2b7da48a3f [unknown] (/usr/lib/x86_64-linux-gnu/libssl.so.1.1)
+      connection 973119 31430143.905922:     430157 cycles:u:           4877029 [unknown] (/tmp/perf-973068.map)
+      connection 973119 31430143.906182:     423148 cycles:u:           482fade [unknown] (/tmp/perf-973068.map)
+      connection 973119 31430143.906462:     421190 cycles:u:           482e412 [unknown] (/tmp/perf-973068.map)
+      connection 973129 31430143.906552:          1 cycles:u:      7f2b7d240ac6 ppoll+0xa6 (/usr/lib/x86_64-linux-gnu/libc-2.31.so)
+      connection 973129 31430143.906562:          1 cycles:u:      7f2b7d240ac6 ppoll+0xa6 (/usr/lib/x86_64-linux-gnu/libc-2.31.so)
+      connection 973129 31430143.906567:          4 cycles:u:      7f2b7d240ac6 ppoll+0xa6 (/usr/lib/x86_64-linux-gnu/libc-2.31.so)
+      connection 973129 31430143.906571:         29 cycles:u:      7f2b7d240ac6 ppoll+0xa6 (/usr/lib/x86_64-linux-gnu/libc-2.31.so)
+```
+
+
+- the output of `perf script --show-task-events`:
+```
+      connection 973129 31430143.922020:     385182 cycles:u:           296e310 my_lengthsp_8bit+0x20 (/usr/local/mysql/bin/mysqld)
+      connection 973127 31430143.922043:     391238 cycles:u:      7f2b7d240a24 ppoll+0x4 (/usr/lib/x86_64-linux-gnu/libc-2.31.so)
+      connection 973119 31430143.922061:     390898 cycles:u:           27b3420 pfs_memory_free_vc+0x0 (/usr/local/mysql/bin/mysqld)
+      connection 973128 31430143.922096:     376723 cycles:u:           48769b6 [unknown] (/tmp/perf-973068.map)
+      connection 973129 31430143.922296:     387294 cycles:u:           48a9aae [unknown] (/tmp/perf-973068.map)
+      connection 973127 31430143.922311:     394489 cycles:u:      7f2b7d6790e0 __pthread_mutex_lock+0x120 (/usr/lib/x86_64-linux-gnu/libpthread-2.31.so)
+      connection 973119 31430143.922314:     390239 cycles:u:           4810649 [unknown] (/tmp/perf-973068.map)
+      connection 973128 31430143.922343:     376439 cycles:u:      7f2b7da323ab [unknown] (/usr/lib/x86_64-linux-gnu/libssl.so.1.1)
+      connection 973129 31430143.922526:     382635 cycles:u:           4810c04 [unknown] (/tmp/perf-973068.map)
+      connection 973119 31430143.922539:     389557 cycles:u:      7f2b7d67a7d8 __pthread_mutex_unlock+0x28 (/usr/lib/x86_64-linux-gnu/libpthread-2.31.so)
+      connection 973127 31430143.922569:     391205 cycles:u:           480c7f3 [unknown] (/tmp/perf-973068.map)
+      connection 973128 31430143.922591:     376946 cycles:u:           480bfce [unknown] (/tmp/perf-973068.map)
+      connection 973129 31430143.922790:     386761 cycles:u:           484fac4 [unknown] (/tmp/perf-973068.map)
+      connection 973119 31430143.922796:     394899 cycles:u:      7f2b7d6813a4 __libc_read+0x84 (/usr/lib/x86_64-linux-gnu/libpthread-2.31.so)
+      connection 973128 31430143.922817:     377339 cycles:u:           4810c51 [unknown] (/tmp/perf-973068.map)
+      connection 973127 31430143.922828:     389780 cycles:u:           4810649 [unknown] (/tmp/perf-973068.map)
+      connection 973129 31430143.923042:     384334 cycles:u:           48128ce [unknown] (/tmp/perf-973068.map)
+      connection 973127 31430143.923057:     388099 cycles:u:           484aec0 [unknown] (/tmp/perf-973068.map)
+      connection 973119 31430143.923062:     393649 cycles:u:           4877207 [unknown] (/tmp/perf-973068.map)
+      connection 973128 31430143.923080:     382195 cycles:u:           4830c0f [unknown] (/tmp/perf-973068.map)
+```
+- A [comparison](perfdata4bolted.html) with the `perf script` on profiles collected from offline BOLTed mysqld.bolt
+
+### perf2bolt on profiles collected from C1 + mysqld.bolt (generated in C0 round)
+- Trying perf2bolt on perf2.data (profiles collected from C1 round)
+	* The command here is `perf2bolt --ignore-build-id -p perf2.data -o perf2.fdata mysqld.bolt`
+![c1 perf data](/assets/2022-11-28/c1_perf2bolt.png)
+
+	* The function that process the mmap events is [prepareToParse("mmap events", MMapEventsPPI);](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L538), and [parseMMapEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L539). 
+		+ [parseMMapEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L2064) generages the error message. 
+		+ In [parseMMapEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L2064), if we output the first element of the `FileMMapInfo`, and the PID of the second element ([MMapInfo struct](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/include/bolt/Profile/DataAggregator.h#L172)): 
+
+```
+    ErrorOr<std::pair<StringRef, MMapInfo>> FileMMapInfoRes = parseMMapEvent();
+    if (std::error_code EC = FileMMapInfoRes.getError())
+      return EC;
+
+    std::pair<StringRef, MMapInfo> FileMMapInfo = FileMMapInfoRes.get();
+    outs()<<FileMMapInfo.first.str()<<","<<FileMMapInfo.second.PID<<", "<<FileMMapInfo.second.BaseAddress<<", "<<FileMMapInfo.second.MMapAddress<<", "<<FileMMapInfo.second.Offset<<"\n";
+```
+
+For most of the time, the first element is empty string, and the second element is -1. Some times it prints the following information:
+
+```
+mysqld, 2833111, 0, 60698624, 58593280
+mysqld, 2833111, 0, 60788736, 58683392
+mysqld, 2833111, 0, 60960768, 58855424
+, -1, 0, 0, 0
+, -1, 0, 0, 0
+, -1, 0, 0, 0
+, -1, 0, 0, 0
+, -1, 0, 0, 0
+, -1, 0, 0, 0
+libnss_sss.so.2, 2833111, 0, 140087967264768, 8192
+libnss_systemd.so.2, 2833111, 0, 140087967330304, 24576
+libnss_files-2.31.so, 2833111, 0, 140087967563776, 12288
+libc-2.31.so, 2833111, 0, 140088160489472, 139264
+libgcc_s.so.1, 2833111, 0, 140088162410496, 12288
+libm-2.31.so, 2833111, 0, 140088162562048, 53248
+libstdc++.so.6.0.28, 2833111, 0, 140088164495360, 614400
+librt-2.31.so, 2833111, 0, 140088170135552, 8192
+libpthread-2.31.so, 2833111, 0, 140088170192896, 24576
+component_reference_cache.so, 2833111, 0, 140088170409984, 8192
+replace_function.so, 2833111, 0, 140088170483712, 45056
+ld-2.31.so, 2833111, 0, 140088170545152, 4096
+```  
+
+The `,-1, 0, 0, 0` is the records perf collected from the C1 round `mysqld`
+
+It shows that the C1 round profile data is not extracted correctly. The profile data is extracted from [DataAggregator::parseMMapEvent()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1913)
+
+### change the code to make perf2bolt work for C1's perf.data
+- I add [--cont-opt](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L68) flag to `perf2bolt`
+	* when Ocolos performs continuous optimization, use `perf2bolt` with this flag to process the perf.data collect from Cn round.
+	* the command is `perf2bolt --ignore-build-id --cont-opt -p perf2.data -o perf2.fdata mysqld.bolt`
+- In function [DataAggregator::parseMMapEvent()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1947), I add code to change `//anon` to be `/home/zyuxuan/ocolos_data/mysqld.bolt`
+- Now the output becomes
+```
+mysqld, 2833111, 0, 28454912, 26353664
+mysqld, 2833111, 0, 59568128, 57462784
+mysqld, 2833111, 0, 60547072, 58441728
+mysqld.bolt, 2833111, 0, 73428992, 0
+mysqld.bolt, 2833111, 0, 73465856, 0
+mysqld.bolt, 2833111, 0, 73498624, 0
+mysqld.bolt, 2833111, 0, 73510912, 0
+mysqld.bolt, 2833111, 0, 73539584, 0
+mysqld.bolt, 2833111, 0, 73576448, 0
+libnss_sss.so.2, 2833111, 0, 140087967264768, 8192
+libnss_systemd.so.2, 2833111, 0, 140087967330304, 24576
+libnss_files-2.31.so, 2833111, 0, 140087967563776, 12288
+libc-2.31.so, 2833111, 0, 140088160489472, 139264
+libgcc_s.so.1, 2833111, 0, 140088162410496, 12288
+libm-2.31.so, 2833111, 0, 140088162562048, 53248
+libstdc++.so.6.0.28, 2833111, 0, 140088164495360, 614400
+replace_function.so, 2833111, 0, 140088170483712, 45056
+ld-2.31.so, 2833111, 0, 140088170545152, 4096
+```
+	* TODO: 
+		+ (1) what is the offset? why it's still 0? 
+		+ (2) do we need to change `mysqld` to be `mysqld.bolt`? 
+- However, even after changing the code, perf2bolt will discard the `mysqld.bolt` record, and then still report the same error.
+	* This is the warning message that `perf2bolt` discards the `mysqld.bolt` record
+```
+PERF2BOLT-WARNING: ignoring mapping of mysqld.bolt at 0x4600000
+```
+- To prevent `perf2bolt` discards the `mysqld.bolt` record
+	* In [parseMMapEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L2122), I add some code.
+	* ![perf2bolt](/assets/2022-11-28/perf2bolt_fixed.png)
