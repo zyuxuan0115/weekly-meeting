@@ -6,28 +6,28 @@ categories: data-cache
 ---
 |    pagerank   | func that causes<br>most LLC-miss | deliquent load PCs<br> for each function| prefetch dist |
 | :----:        |    :----:							|   :----:			| :----: |
-| <strong>web-Google</strong><br>Vertices:916428<br> Degree:456  |   main: 32.85% <br> do_work: 15.41%   |Function Name:    main<br>PC:401e9b  43%<br>PC:401e7a 29%<br>Function Name: do_work<br>PC:401460 72%| 32   | 
-| <strong>web-BerkStan</strong><br>Vertices:685231<br> Degree:249  |   do_work: 34.36% <br> main: 13.32% |Function Name:    main<br>PC:401e9b  40%<br>PC:401e7a 37%<br>Function Name: do_work<br>PC:401460 99%| <span style="color:blue">1/3/4/32</span>   | 
-| <strong>web-Stanford</strong><br>Vertices:281904<br> Degree:255  |   main: 25.07% <br> do_work: 23.38%   |Function Name:    main<br>PC:401e9b  47%<br>PC:401e7a 38%<br>Function Name: do_work<br>PC:401460 91%| 32   | 
-| <strong>web-NotreDame</strong><br>Vertices:325729<br> Degree:3445  |   do_work: 5.19% <br> main: 3.15%   |Function Name: do_work<br>PC:401460 89%| 32   | 
-| <strong>roadNet-PA</strong><br>Vertices:1090920<br> Degree:9  |   do_work: 65.16% <br> do_work: 26.16%   |Function Name: do_work<br>PC:401460 93%| 32   | 
-| <strong>roadNet-CA</strong><br>Vertices:1971281<br> Degree:12  |   do_work: 62.36% <br> do_work: 25.53%   |Function Name: do_work<br>PC:401460 82%| 32   | 
+| <strong>web-Google</strong><br>Vertices:916428<br> Degree:456  |   <strong>main</strong>: 32.85% <br> <strong>do_work</strong>: 15.41%   |Function Name:    <strong>main</strong><br>PC:401e9b  43%<br>PC:401e7a 29%<br>Function Name: <strong>do_work</strong><br>PC:401460 72%| 32   | 
+| <strong>web-BerkStan</strong><br>Vertices:685231<br> Degree:249  |   <strong>do_work</strong>: 34.36% <br> <strong>main</strong>: 13.32% |Function Name:    <strong>main</strong><br>PC:401e9b  40%<br>PC:401e7a 37%<br>Function Name: <strong>do_work</strong><br>PC:401460 99%| <span style="color:blue">1/3/4/32</span>   | 
+| <strong>web-Stanford</strong><br>Vertices:281904<br> Degree:255  |   <strong>main</strong>: 25.07% <br> <strong>do_work</strong>: 23.38%   |Function Name:    <strong>main</strong><br>PC:401e9b  47%<br>PC:401e7a 38%<br>Function Name: <strong>do_work</strong><br>PC:401460 91%| 32   | 
+| <strong>web-NotreDame</strong><br>Vertices:325729<br> Degree:3445  |   <strong>do_work</strong>: 5.19% <br> <strong>main</strong>: 3.15%   |Function Name: <strong>do_work</strong><br>PC:401460 89%| 32   | 
+| <strong>roadNet-PA</strong><br>Vertices:1090920<br> Degree:9  |   <strong>do_work</strong>: 65.16% <br> <strong>do_work</strong>: 26.16%   |Function Name: <strong>do_work</strong><br>PC:401460 93%| 32   | 
+| <strong>roadNet-CA</strong><br>Vertices:1971281<br> Degree:12  |   <strong>do_work</strong>: 62.36% <br> <strong>do_work</strong>: 25.53%   |Function Name: <strong>do_work</strong><br>PC:401460 82%| 32   | 
 
 
 
 |    bfs   | func that causes<br>most LLC-miss | deliquent load PCs<br> for each function| prefetch dist |
 | :----:        |    :----:							|   :----:			| :----: |
-| <strong>loc-brightkite_edges</strong><br>Vertices:36681<br> Degree:456  |   do_work: 20.39% <br> main: 0.05%   |Function Name:    do_work<br>PC:401471  99%<br>Function Name: main<br>PC:401826 44% <br>PC:401b5b 36%| 32   | 
-| <strong></strong>Vertices:200000<br> Degree:2  |   do_work: 99.34% <br> main: 0.06%   |Function Name:    do_work<br>PC:401471  99% | <span style="color:blue">102/107/100/96</span> | 
-| <strong></strong>Vertices:100000<br> Degree:4  |   do_work: 98.31% <br> main: 0.14%   |Function Name:    do_work<br>PC:401471  98% | <span style="color:blue">205/200/202/32x3</span> | 
-| <strong></strong>Vertices:300000<br> Degree:6  |   do_work: 99.82% <br> main: 0.01%   |Function Name:    do_work<br>PC:401471  99% | <span style="color:blue">286/32x2/282</span>  | 
-| <strong></strong>Vertices:100000<br> Degree:8  |   do_work: 99.28% <br> main: 0.04%   |Function Name:    do_work<br>PC:401471  99% | 32   | 
-| <strong></strong>Vertices:100000<br> Degree:16  |   do_work: 99.23% <br> main: 0.02%   |Function Name:    do_work<br>PC:401471  99%| 32   | 
-| <strong></strong>Vertices:200000<br> Degree:32  |   do_work: 99.7% <br> main: 0.12%   |Function Name:    do_work<br>PC:401471  99% | 32   | 
-| <strong></strong>Vertices:300000<br> Degree:64  |   do_work: 99.39% <br> main: 0.1%   |Function Name:    do_work<br>PC:401471  99% | 32   | 
-| <strong></strong>Vertices:200000<br> Degree:128  |   do_work: 99.13% <br> main: 0.4%   |Function Name:    do_work<br>PC:401471  99% | 32   | 
-| <strong></strong>Vertices:200000<br> Degree:150  |   do_work: 98.55% <br> main: 0.29%   |Function Name:    do_work<br>PC:401471  99% | 32   | 
-| <strong></strong>Vertices:300000<br> Degree:200  |   do_work: 97% <br> main: 0.47%   |Function Name:    do_work<br>PC:401471  98% | 32   | 
+| <strong>loc-brightkite_edges</strong><br>Vertices:36681<br> Degree:456  |   <strong>do_work</strong>: 20.39% <br> <strong>main</strong>: 0.05%   |Function Name:    <strong>do_work</strong><br>PC:401471  99%<br>Function Name: <strong>main</strong><br>PC:401826 44% <br>PC:401b5b 36%| 32   | 
+| <strong></strong>Vertices:200000<br> Degree:2  |   <strong>do_work</strong>: 99.34% <br> main: 0.06%   |Function Name:    <strong>do_work</strong><br>PC:401471  99% | <span style="color:blue">102/107/100/96</span> | 
+| <strong></strong>Vertices:100000<br> Degree:4  |   <strong>do_work</strong>: 98.31% <br> <strong>main</strong>: 0.14%   |Function Name:    <strong>do_work</strong><br>PC:401471  98% | <span style="color:blue">205/200/202/<br>32x3</span> | 
+| <strong></strong>Vertices:300000<br> Degree:6  |   <strong>do_work</strong>: 99.82% <br> <strong>main</strong>: 0.01%   |Function Name:    <strong>do_work</strong><br>PC:401471  99% | <span style="color:blue">286/32x2/282</span>  | 
+| <strong></strong>Vertices:100000<br> Degree:8  |   <strong>do_work</strong>: 99.28% <br> <strong>main</strong>: 0.04%   |Function Name:    <strong>do_work</strong><br>PC:401471  99% | 32   | 
+| <strong></strong>Vertices:100000<br> Degree:16  |   <strong>do_work</strong>: 99.23% <br> <strong>main</strong>: 0.02%   |Function Name:    <strong>do_work</strong><br>PC:401471  99% | 32   | 
+| <strong></strong>Vertices:200000<br> Degree:32  |   <strong>do_work</strong>: 99.7% <br> <strong>main</strong>: 0.12%   |Function Name:    <strong>do_work</strong><br>PC:401471  99% | 32   | 
+| <strong></strong>Vertices:300000<br> Degree:64  |   <strong>do_work</strong>: 99.39% <br> <strong>main</strong>: 0.1%   |Function Name:    <strong>do_work</strong><br>PC:401471  99% | 32   | 
+| <strong></strong>Vertices:200000<br> Degree:128  |   <strong>do_work</strong>: 99.13% <br> <strong>main</strong>: 0.4%   |Function Name:    <strong>do_work</strong><br>PC:401471  99% | 32   | 
+| <strong></strong>Vertices:200000<br> Degree:150  |   <strong>do_work</strong>: 98.55% <br> <strong>main</strong>: 0.29%   |Function Name:    <strong>do_work</strong><br>PC:401471  99% | 32   | 
+| <strong></strong>Vertices:300000<br> Degree:200  |   <strong>do_work</strong>: 97% <br> <strong>main</strong>: 0.47%   |Function Name:    <strong>do_work</strong><br>PC:401471  98% | 32   | 
 | <strong></strong>Vertices:300000<br> Degree:256  |   <strong>do_work</strong>: 96.83% <br> <strong>main</strong>: 0.62%   |Function Name:    <strong>do_work</strong><br>PC:401471  98% | 32   | 
 | <strong></strong>Vertices:200000<br> Degree:400  |   <strong>do_work</strong>: 94.79% <br> <strong>init_weights</strong>: 1.46%   |Function Name:    <strong>do_work</strong><br>PC:401471  98% | 32   | 
 | <strong></strong>Vertices:200000<br> Degree:512  |   <strong>do_work</strong>: 92.01% <br> <strong>main</strong>: 1.8%   |Function Name:    <strong>do_work</strong><br>PC:401471  98% | 32   | 
@@ -55,10 +55,10 @@ categories: data-cache
 | <strong></strong>Vertices:40000<br> Degree:10  |   <strong>do_work</strong>: 12.53%  |Function Name:    <strong>do_work</strong><br>PC:401561 55%<br>PC:401565 25% | 32   | 
 | <strong></strong>Vertices:20000<br> Degree:50  |   <strong>do_work</strong>: 5.45%  |Function Name:   <strong>do_work</strong><br>PC:401561  39%<br>PC:40156b 33% | 32   | 
 | <strong></strong>Vertices:20000<br> Degree:100  |   <strong>do_work</strong>: 40.84%  |Function Name:    <strong>do_work</strong><br>PC:401561  73% | <span style="color:blue">32x3/394/418</span>   |
- | <strong></strong>Vertices:20000<br> Degree:200  |  <strong>do_work</strong>: %  |Function Name:   <strong>do_work</strong><br>PC:401561  % | <span style="color:blue"></span>   |
+ | <strong></strong>Vertices:20000<br> Degree:200  |  <strong>do_work</strong>: 27.41%  |Function Name:   <strong>do_work</strong><br>PC:401561  83% | <span style="color:blue"></span>32   |
 | <strong></strong>Vertices:20000<br> Degree:300  |   <strong>do_work</strong>: 87.95%<br> <strong>init_weights</strong>: 0.01%  |Function Name:  <strong>do_work</strong><br>PC:401561  90% | <span style="color:blue">390</span>   |
 | <strong></strong>Vertices:10000<br> Degree:500  |   <strong>do_work</strong>: 88.29%<br> <strong>init_weights</strong>: 0.02% |Function Name:    <strong>do_work</strong><br>PC:401561  62%<br>PC:401565 36% | <span style="color:blue">32/375/377/392/346</span>   | 
-| <strong></strong>Vertices:20000<br> Degree:700  |   <strong>do_work</strong>: 89.91%<br> <strong>init_weights</strong>: 0.01%  |Function Name:  <strong>do_work</strong><br>PC:401561  77% | <span style="color:blue"></span>   |
+| <strong></strong>Vertices:20000<br> Degree:700  |   <strong>do_work</strong>: 89.91%<br> <strong>init_weights</strong>: 0.01%  |Function Name:  <strong>do_work</strong><br>PC:401561  77% | <span style="color:blue">400</span>   |
 | <strong></strong>Vertices:10000<br> Degree:1000  |   <strong>do_work</strong>: 90.83%<br> <strong>init_weights</strong>: 0.01%  |Function Name:    <strong>do_work</strong><br>PC:401561  84% | <span style="color:blue">278/279/293</span>   | 
 
 
