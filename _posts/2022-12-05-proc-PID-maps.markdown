@@ -1,59 +1,11 @@
 ---
 layout: post
-title:  "2022-12-05 perf2bolt"
+title:  "2022-12-05 /proc/PID/maps"
 date:   2022-12-01 12:53:46 -0500
 categories: cont-opt
 ---
 When I tested where got wrong in perf2bolt that generate the following error message 
 ![error in C1 profile](/assets/2022-11-28/c1_perf2bolt.png)
-
-The code that causes this error [on github](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L2122)
-```
-bool MatchFound = llvm::any_of(
-  llvm::make_second_range(BC->SegmentMapInfo),
-  [&](SegmentInfo &SegInfo) {
-    // The mapping is page-aligned and hence the MMapAddress could be
-    // different from the segment start address. We cannot know the page
-    // size of the mapping, but we know it should not exceed the segment
-    // alignment value. Hence we are performing an approximate check.
-    return SegInfo.Address >= MMapInfo.MMapAddress &&
-           SegInfo.Address - MMapInfo.MMapAddress < SegInfo.Alignment;
-  }
-);
-if (!MatchFound) {
-  errs() << "PERF2BOLT-WARNING: ignoring mapping of " << NameToUse
-         << " at 0x" << Twine::utohexstr(MMapInfo.MMapAddress) << '\n';
-  continue;
-}
-```
-
-I print all address of `SegInfo.Address` and `MMapInfo.MMapAddress` when I run:
-- `perf2bolt --ignore-build-id --cont-opt -p perf.data -o perf.fdata mysqld`
-- `perf2bolt --ignore-build-id --cont-opt -p perf2.data -o perf2.fdata mysqld.bolt`
-
-where `perf.data` is profile collected from C0 round and `perf2.data` is profile collected from C1 round.
-
-From output of the `perf2bolt` on perf.data + original binary is:
-```
-SegInfo.Addr=0x200000, SegInfo.Alignment=4096, MMapInfo.MMapAddr=0x1B23000
-SegInfo.Addr=0x1B23240, SegInfo.Alignment=4096, MMapInfo.MMapAddr=0x1B23000
-``` 
-
-From the output of the `perf2bolt` on perf2.data + BOLTed binary is:
-```
-SegInfo.Addr=0x200000, SegInfo.Alignment=4096, MMapInfo.MMapAddr=0x4600000
-SegInfo.Addr=0x1B23240, SegInfo.Alignment=4096, MMapInfo.MMapAddr=0x4600000
-SegInfo.Addr=0x38CDD60, SegInfo.Alignment=4096, MMapInfo.MMapAddr=0x4600000
-SegInfo.Addr=0x3A425E0, SegInfo.Alignment=4096, MMapInfo.MMapAddr=0x4600000
-SegInfo.Addr=0x4400000, SegInfo.Alignment=0x200000, MMapInfo.MMapAddr=0x4600000
-```
-
-From the output of `perf2bolt` on perf_offline_bolt.data + BOLTed binary is:
-```
-SegInfo.Addr=0x200000, SegInfo.Alignment=4096, MMapInfo.MMapAddr=0x1B23000
-SegInfo.Addr=0x1B23240, SegInfo.Alignment=4096, MMapInfo.MMapAddr=0x1B23000
-```
-
 
 - `/proc/{mysqld}/maps`
 ```

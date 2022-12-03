@@ -129,11 +129,12 @@ dedf0/P/-/-/9  0x483b767/0x483bd42/P/-/-/60
 ### perf2bolt on profiles collected from C1 + mysqld.bolt (generated in C0 round)
 - Trying perf2bolt on perf2.data (profiles collected from C1 round)
 	* The command here is `perf2bolt --ignore-build-id -p perf2.data -o perf2.fdata mysqld.bolt`
+
 ![c1 perf data](/assets/2022-11-28/c1_perf2bolt.png)
 
-	* The function that process the mmap events is [prepareToParse("mmap events", MMapEventsPPI);](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L538), and [parseMMapEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L539). 
-		+ [parseMMapEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L2064) generages the error message. 
-		+ In [parseMMapEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L2064), if we output the first element of the `FileMMapInfo`, and the PID of the second element ([MMapInfo struct](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/include/bolt/Profile/DataAggregator.h#L172)): 
+- The function that process the mmap events is [prepareToParse("mmap events", MMapEventsPPI);](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L538), and [parseMMapEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L539). 
+  + [parseMMapEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L2064) generages the error message. 
+  + In [parseMMapEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L2064), if we output the first element of the `FileMMapInfo`, and the PID of the second element ([MMapInfo struct](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/include/bolt/Profile/DataAggregator.h#L172)): 
 
 ```
     ErrorOr<std::pair<StringRef, MMapInfo>> FileMMapInfoRes = parseMMapEvent();
