@@ -4,10 +4,9 @@ title:  "2022-12-05 /proc/PID/maps"
 date:   2022-12-01 12:53:46 -0500
 categories: cont-opt
 ---
-When I tested where got wrong in perf2bolt that generate the following error message 
-![error in C1 profile](/assets/2022-11-28/c1_perf2bolt.png)
 
 - `/proc/{mysqld}/maps`
+
 ```
   1 00200000-01b23000 r--p 00000000 09:00 179636315                   /usr/local/mysql/bin/mysqld
   2 01b23000-038cd000 r-xp 01922000 09:00 179636315                   /usr/local/mysql/bin/mysqld
@@ -29,7 +28,8 @@ When I tested where got wrong in perf2bolt that generate the following error mes
   7 05255000-07b7d000 rw-p 00000000 00:00 0                           [heap] 
 ```
 
-/proc/{mysqld after cope replacement PID}/maps
+- `/proc/{mysqld after cope replacement PID}/maps`
+
 ```
   1 00200000-01b23000 r--p 00000000 09:00 179636315                   /usr/local/mysql/bin/mysqld
   2 01b23000-01b28000 r-xp 01922000 09:00 179636315                   /usr/local/mysql/bin/mysqld

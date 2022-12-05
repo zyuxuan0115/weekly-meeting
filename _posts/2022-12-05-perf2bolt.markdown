@@ -54,104 +54,47 @@ SegInfo.Addr=0x200000, SegInfo.Alignment=4096, MMapInfo.MMapAddr=0x1B23000
 SegInfo.Addr=0x1B23240, SegInfo.Alignment=4096, MMapInfo.MMapAddr=0x1B23000
 ```
 
+in [preprocessProfile()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L468), after process `mmap events`, perf2bolt processes `task events` by [parseTaskEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L544).
+And its real location is [here](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L2187).
 
-- `/proc/{mysqld}/maps`
+The `perf script --show-task-events`'s output has 2 format.
+In `parseTaskEvents()`'s [parseCommExecEvent()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1824), it only extract the PID(567882) from the first format.
 ```
-  1 00200000-01b23000 r--p 00000000 09:00 179636315                   /usr/local/mysql/bin/mysqld
-  2 01b23000-038cd000 r-xp 01922000 09:00 179636315                   /usr/local/mysql/bin/mysqld
-  3 038cd000-03a42000 r--p 036cb000 09:00 179636315                   /usr/local/mysql/bin/mysqld
-  4 03a42000-03dcd000 rw-p 0383f000 09:00 179636315                   /usr/local/mysql/bin/mysqld
-  5 03dcd000-042ff000 rw-p 00000000 00:00 0
-  6 0524e000-07b76000 rw-p 00000000 00:00 0                           [heap]
-```
-
-- `/proc/{mysqld.bolt pid}/maps`
-
-```
-  1 00200000-01b23000 r--p 00000000 09:00 179639298                   /usr/local/mysql/bin/mysqld.bolt
-  2 01b23000-038cd000 r-xp 01922000 09:00 179639298                   /usr/local/mysql/bin/mysqld.bolt
-  3 038cd000-03a42000 r--p 036cb000 09:00 179639298                   /usr/local/mysql/bin/mysqld.bolt
-  4 03a42000-03dcd000 rw-p 0383f000 09:00 179639298                   /usr/local/mysql/bin/mysqld.bolt
-  5 03dcd000-042ff000 rw-p 00000000 00:00 0
-  6 04400000-04b1b000 r-xp 04200000 09:00 179639298                   /usr/local/mysql/bin/mysqld.bolt
-  7 05255000-07b7d000 rw-p 00000000 00:00 0                           [heap] 
+          mysqld     0     0.000000: PERF_RECORD_COMM: mysqld:567882/567882
+      ib_io_ibuf     0     0.000000: PERF_RECORD_COMM: ib_io_ibuf:567882/567886
+       ib_io_log     0     0.000000: PERF_RECORD_COMM: ib_io_log:567882/567887
+      ib_io_rd-1     0     0.000000: PERF_RECORD_COMM: ib_io_rd-1:567882/567888
+      ib_io_rd-2     0     0.000000: PERF_RECORD_COMM: ib_io_rd-2:567882/567889
+       evt_sched     0     0.000000: PERF_RECORD_COMM: evt_sched:567882/567925
+     sig_handler     0     0.000000: PERF_RECORD_COMM: sig_handler:567882/567926
+    xpl_accept-2     0     0.000000: PERF_RECORD_COMM: xpl_accept-2:567882/567927
+        gtid_zip     0     0.000000: PERF_RECORD_COMM: gtid_zip:567882/567929
+      connection     0     0.000000: PERF_RECORD_COMM: connection:567882/567935
+      connection     0     0.000000: PERF_RECORD_COMM: connection:567882/567943
+      connection     0     0.000000: PERF_RECORD_COMM: connection:567882/567945
+            perf     0     0.000000: PERF_RECORD_COMM: perf:567984/567984
 ```
 
-/proc/{mysqld after cope replacement PID}/maps
 ```
-  1 00200000-01b23000 r--p 00000000 09:00 179636315                   /usr/local/mysql/bin/mysqld
-  2 01b23000-01b28000 r-xp 01922000 09:00 179636315                   /usr/local/mysql/bin/mysqld
-  3 01b28000-01b2b000 rwxp 01927000 09:00 179636315                   /usr/local/mysql/bin/mysqld
-  4 01b2b000-01b40000 r-xp 0192a000 09:00 179636315                   /usr/local/mysql/bin/mysqld
-  5 01b40000-01b47000 rwxp 0193f000 09:00 179636315                   /usr/local/mysql/bin/mysqld
-  6 01b47000-021da000 r-xp 01946000 09:00 179636315                   /usr/local/mysql/bin/mysqld
-  7 021da000-021dc000 rwxp 01fd9000 09:00 179636315                   /usr/local/mysql/bin/mysqld
-  8 021dc000-021ea000 r-xp 01fdb000 09:00 179636315                   /usr/local/mysql/bin/mysqld
-  9 021ea000-021ec000 rwxp 01fe9000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 10 021ec000-021ed000 r-xp 01feb000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 11 021ed000-021ef000 rwxp 01fec000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 12 021ef000-02bc6000 r-xp 01fee000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 13 02bc6000-02bc9000 rwxp 029c5000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 14 02bc9000-034de000 r-xp 029c8000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 15 034de000-034e0000 rwxp 032dd000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 16 034e0000-03688000 r-xp 032df000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 17 03688000-0368b000 rwxp 03487000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 18 0368b000-03748000 r-xp 0348a000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 19 03748000-0374a000 rwxp 03547000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 20 0374a000-03751000 r-xp 03549000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 21 03751000-03754000 rwxp 03550000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 22 03754000-038cd000 r-xp 03553000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 23 038cd000-038cf000 r--p 036cb000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 24 038cf000-039bb000 rwxp 036cd000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 25 039bb000-039be000 r--p 037b9000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 26 039be000-039e2000 rwxp 037bc000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 27 039e2000-039e3000 r--p 037e0000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 28 039e3000-039f8000 rwxp 037e1000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 29 039f8000-039f9000 r--p 037f6000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 30 039f9000-03a1e000 rwxp 037f7000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 31 03a1e000-03a23000 r--p 0381c000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 32 03a23000-03a42000 rwxp 03821000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 33 03a42000-03dcd000 rw-p 0383f000 09:00 179636315                   /usr/local/mysql/bin/mysqld
- 34 03dcd000-042ff000 rw-p 00000000 00:00 0
- 35 04600000-04603000 r-xp 00000000 00:00 0
- 36 04603000-04607000 r-xp 00000000 00:00 0
- 37 04607000-04610000 r-xp 00000000 00:00 0
- 38 04610000-04618000 r-xp 00000000 00:00 0
- 39 04618000-0461b000 r-xp 00000000 00:00 0
- 40 0461b000-0461e000 r-xp 00000000 00:00 0
- 41 0461e000-04623000 r-xp 00000000 00:00 0
- 42 04623000-04628000 r-xp 00000000 00:00 0
- 43 04628000-0462b000 r-xp 00000000 00:00 0
- 44 0462b000-04635000 r-xp 00000000 00:00 0
- 45 04635000-0463a000 r-xp 00000000 00:00 0
- 46 0463a000-0463d000 r-xp 00000000 00:00 0
- 47 0463d000-04641000 r-xp 00000000 00:00 0
- 48 04641000-04646000 r-xp 00000000 00:00 0
- 49 04646000-0464a000 r-xp 00000000 00:00 0
- 50 0464a000-0464d000 r-xp 00000000 00:00 0
- 51 0464d000-04651000 r-xp 00000000 00:00 0
- 52 04651000-04658000 r-xp 00000000 00:00 0
- 53 04658000-04660000 r-xp 00000000 00:00 0
- 54 04660000-04668000 r-xp 00000000 00:00 0
- 55 04668000-0466e000 r-xp 00000000 00:00 0
- 56 0466e000-04675000 r-xp 00000000 00:00 0
- 57 04675000-046a5000 r-xp 00000000 00:00 0
- 58 046a5000-046a9000 r-xp 00000000 00:00 0
- 59 046a9000-046af000 r-xp 00000000 00:00 0
- 60 046af000-046b9000 r-xp 00000000 00:00 0
- 61 046b9000-046c1000 r-xp 00000000 00:00 0
- 62 046c1000-046c4000 r-xp 00000000 00:00 0
- 63 046c4000-046c7000 r-xp 00000000 00:00 0
- 64 046c7000-046cb000 r-xp 00000000 00:00 0
- 65 046cb000-046d0000 r-xp 00000000 00:00 0
- 66 046d0000-046d4000 r-xp 00000000 00:00 0
- 67 046d4000-046dd000 r-xp 00000000 00:00 0
- 68 046dd000-046e5000 r-xp 00000000 00:00 0
- 69 046e5000-046e9000 r-xp 00000000 00:00 0
- 70 046e9000-046f5000 r-xp 00000000 00:00 0
- 71 046f5000-046fc000 r-xp 00000000 00:00 0
- 72 046fc000-04705000 r-xp 00000000 00:00 0
- 73 04705000-04707000 r-xp 00000000 00:00 0
- 74 05baa000-084d2000 rw-p 00000000 00:00 0                                  [heap]
+      connection 2833674 31994311.298462:       6739 cycles:u:           37aa2c0 pfs_ssl_bio_callback_ex+0x0 (/usr/local/mysql/bin/mysqld)
+      connection 2833674 31994311.298477:      26254 cycles:u:           37acaa9 my_hash_sort_bin+0x39 (/usr/local/mysql/bin/mysqld)
+      connection 2833674 31994311.298503:      80685 cycles:u:           1f69a24 MYSQLparse+0x1d1c4 (/usr/local/mysql/bin/mysqld)
+      connection 2833674 31994311.298565:     167253 cycles:u:           2fcd17b my_lfind+0xeb (/usr/local/mysql/bin/mysqld)
+      connection 2833674 31994311.298711:     231161 cycles:u:      7f68d1721b17 BIO_write+0x27 (/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1)
+      connection 2833674 31994311.298917:     251726 cycles:u:      7f68d1212ae0 __strcmp_avx2+0x0 (/usr/lib/x86_64-linux-gnu/libc-2.31.so)
+      connection 2833674 31994311.299172:     258355 cycles:u:           4637c86 [unknown] (/tmp/perf-2833111.map)
+      connection 2833674 31994311.299460:     257795 cycles:u:           37e3880 my_mbcharlen_utf8mb4+0x0 (/usr/local/mysql/bin/mysqld)
+      connection 2833674 31994311.299686:     253478 cycles:u:      7f68d19ff003 __pthread_enable_asynccancel+0x23 (/usr/lib/x86_64-linux-gnu/libpthread-2.31.so)
+      connection 2833674 31994311.299934:     236427 cycles:u:           35daf77 pfs_memory_free_vc+0x37 (/usr/local/mysql/bin/mysqld)
+      connection 2833674 31994311.300185:     236573 cycles:u:           462dba8 [unknown] (/tmp/perf-2833111.map)
+      connection 2833674 31994311.300435:     236538 cycles:u:           2fcd124 my_lfind+0x94 (/usr/local/mysql/bin/mysqld)
+      connection 2833674 31994311.300645:     236557 cycles:u:           461dfec [unknown] (/tmp/perf-2833111.map)
+      connection 2833675 31994311.300655:          1 cycles:u:           46024c5 [unknown] (/tmp/perf-2833111.map)
+      connection 2833675 31994311.300666:          1 cycles:u:           46024c5 [unknown] (/tmp/perf-2833111.map)
+      connection 2833675 31994311.300672:          4 cycles:u:           46024c5 [unknown] (/tmp/perf-2833111.map)
+      connection 2833675 31994311.300678:         25 cycles:u:           46024c5 [unknown] (/tmp/perf-2833111.map)
+      connection 2833675 31994311.300683:        160 cycles:u:           46024c5 [unknown] (/tmp/perf-2833111.map)
+      connection 2833675 31994311.300689:       1016 cycles:u:           46024c5 [unknown] (/tmp/perf-2833111.map)
 ```
 
+`parseTaskEvents()` also has a [parseForkEvent()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L2202) function, and it checks whether the perf script result contains ["PERF_RECORD_FORK"](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1864	) 
