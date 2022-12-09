@@ -7,6 +7,9 @@ categories: cont-opt
 When I tested where got wrong in perf2bolt that generate the following error message 
 ![error in C1 profile](/assets/2022-11-28/c1_perf2bolt.png)
 
+and 
+`PERF2BOLT-WARNING: ignoring mapping of mysqld.bolt at 0x4600000`
+
 The code that causes this error [on github](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L2122)
 ```
 bool MatchFound = llvm::any_of(
