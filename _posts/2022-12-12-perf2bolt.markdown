@@ -4,20 +4,124 @@ title:  "2022-12-12 perf2bolt"
 date:   2022-12-8 10:53:46 -0500
 categories: cont-opt 
 ---
+### Recap for continuous optimization previous weeks
+![perf2bolt](/assets/2022-11-28/perf2bolt_fixed.png)
+
+
 ### The output of perf script for Branch Events
 ```
-973068           481cd08
-973068           481cd0a 0xffffffffb9e00ae7/0x481cd08/P/-/-/0
-973068           4840cb5 0x4840baa/0x4840c80/P/-/-/2  0x4840c12/0x4840b93/P/-/-/10  0x4840b8e/0x4840c00/P/-/-/218 0x481ea12/0x4840b48/P/-/-/18  0x481c8c1/0x481e9c0/P/-/-/74  0x481c872/0x481c89c/P/-/-/3  0x481caf1/0x481c849/M/-/-/198  0x481cd55/0x481ca8d/M/-/-/379  0xffffffffb9e00ae7/0x481cd0a/P/-/-/0  0xffffffffb9e00ae7/0x481cd08/P/-/-/0
-973068           27b3467 0x27cdec7/0x27b3457/P/-/-/30  0x27b3452/0x27cdea0/P/-/-/5  0x480006e/0x27b3420/P/-/-/272 0x481a6ea/0x4800040/P/-/-/10  0x481a42e/0x481a6c0/P/-/-/2  0x481a75e/0x481a426/P/-/-/3  0x481a7b8/0x481a74f/P/-/-/1 0x4827a71/0x481a7ad/P/-/-/1  0x483bd31/0x4827a6d/P/-/-/3  0x4827a68/0x483bd10/P/-/-/3  0x481a7a8/0x4827a60/P/-/-/3  0x481a74a/0x481a792/P/-/-/15  0x481a421/0x481a71c/P/-/-/1  0x481a75e/0x481a410/P/-/-/3  0x481a7b8/0x481a74f/P/-/-/5 0x4827a71/0x481a7ad/P/-/-/4  0x483bd31/0x4827a6d/P/-/-/2  0x4827a68/0x483bd10/P/-/-/7  0x481a7a8/0x4827a60/P/-/-/21 0x481a74a/0x481a792/P/-/-/13  0x481a40b/0x481a71c/P/-/-/3  0x481acc8/0x481a3d5/P/-/-/14  0x481a3d0/0x481ac8a/P/-/-/1 0x481aa96/0x481a3cd/P/-/-/11  0x481a3c8/0x481aa52/P/-/-/1  0x483b2a0/0x481a3c5/P/-/-/4  0x483b7b8/0x483b271/P/-/-/54 0x483be01/0x483b76c/P/-/-/24  0x7f2b7d1c2c7d/0x483bdc6/P/-/-/1  0xcdedf4/0x7f2b7d1c2c70/P/-/-/1  0x483bdc1/0xcdedf0/P/-/-/9  0x483b767/0x483bd42/P/-/-/60
-973068           482e2fd 0x482e2ee/0x482e2f4/P/-/-/61  0x482e09c/0x482e2e0/P/-/-/28  0x4834f41/0x482e081/P/-/-/15 0x4834f0b/0x4834f1b/P/-/-/1  0x4834f19/0x4834eff/P/-/-/7  0x482dd63/0x4834eb4/P/-/-/2  0x4834eae/0x482dd5a/P/-/-/58 0x482e07c/0x4834e5c/P/-/-/32  0x482dc15/0x482e048/P/-/-/15  0x482dd30/0x482dbff/P/-/-/3  0x484aecb/0x482dd0e/P/-/-/1 0x482dd53/0x484aec0/P/-/-/1  0x482dd08/0x482dd4c/P/-/-/8  0x484aecb/0x482dcf1/P/-/-/15  0x482dceb/0x484aec0/P/-/-/9 0x482dd39/0x482dcd5/P/-/-/1  0x482d34b/0x482dd37/P/-/-/1  0x482dd31/0x482d340/P/-/-/11  0x482dcc7/0x482dd31/P/-/-/1 0x482dca1/0x482dcbc/P/-/-/20  0x482dbfa/0x482dc80/P/-/-/4  0x482dc0a/0x482dbf1/P/-/-/1  0x482dd30/0x482dbff/P/-/-/3 0x482ddbe/0x482dd0e/P/-/-/36  0x482dd53/0x482dd80/M/-/-/30  0x482dd08/0x482dd4c/M/-/-/8  0x482ddbe/0x482dcf1/P/-/-/11 0x482dceb/0x482dd80/P/-/-/2  0x482dd63/0x482dccf/P/-/-/1  0x482dcc9/0x482dd5a/P/-/-/2  0x482f307/0x482dcac/P/-/-/4 0x482f83b/0x482f2ce/P/-/-/1
+2833111           21dda10 0x46024d4/0x21dda10/M/-/-/368  0xffffffffb9e00ae7/0x46024c5/P/-/-/0
+2833111      7ffcf9d2b840 0x1f3a70d/0x38ca5e0/P/-/-/7  0x2068d51/0x1f3a6e0/P/-/-/28  0x35d6e8a/0x2068d1a/P/-/-/13  0x1f38590/0x35d6e70/P/-/-/38  0x2068d15/0x1f38580/P/-/-/2  0x35da62d/0x2068d05/P/-/-/1  0x35da638/0x35da61d/P/-/-/1  0x35da61b/0x35da630/P/-/-/1  0x35da613/0x35da618/P/-/-/2  0x35f6cb4/0x35da5fc/P/-/-/2  0x35da5f7/0x35f6c90/P/-/-/3  0x2068d00/0x35da5e0/P/-/-/2  0x20a8773/0x2068cdc/P/-/-/6  0x2068cd7/0x20a8730/P/-/-/1  0x2068ca3/0x2068cc9/P/-/-/166  0x206bcb1/0x2068c40/P/-/-/3  0x37a904c/0x206bca8/P/-/-/1  0x37a9064/0x37a904a/P/-/-/1  0x37a9057/0x37a9061/P/-/-/1  0x37a9048/0x37a9050/P/-/-/47  0x37a86be/0x37a9040/P/-/-/8  0x37a86cd/0x37a86bb/P/-/-/1  0x37a86aa/0x37a86c0/P/-/-/1  0x37a869e/0x37a86a8/P/-/-/40  0x21d1233/0x37a8680/P/-/-/91  0x206bca3/0x21d1220/P/-/-/25  0x1e8ee6e/0x206bc7e/P/-/-/96  0x206bc79/0x1e8ee60/P/-/-/127  0x4601ec5/0x206bc60/M/-/-/2  0x4602cff/0x4601eb8/P/-/-/4  0x4604018/0x4602cc7/P/-/-/8  0x46044d9/0x4603f91/P/-/-/2
+2833111           46021c0 0x206bd10/0x4601f44/P/-/-/1  0x206bc3b/0x206bd10/P/-/-/90  0x37a904c/0x206bc1d/P/-/-/8  0x37a9064/0x37a904a/P/-/-/3  0x37a9057/0x37a9061/P/-/-/8  0x37a9048/0x37a9050/P/-/-/10  0x37a86be/0x37a9040/P/-/-/2  0x37a86cd/0x37a86bb/P/-/-/10  0x37a86aa/0x37a86c0/P/-/-/1  0x37a869e/0x37a86a8/P/-/-/50  0x21d1233/0x37a8680/P/-/-/2  0x206bc18/0x21d1220/P/-/-/1  0x1e8e50e/0x206bc0c/P/-/-/6  0x206bc07/0x1e8e500/P/-/-/13  0x1fc6b68/0x206bc00/P/-/-/50  0x206bbfb/0x1fc6b20/P/-/-/40  0x21d4fe3/0x206bba0/P/-/-/1  0x21d4ff6/0x21d4fe0/P/-/-/1  0x1fb3a56/0x21d4ff4/P/-/-/4  0x1e8e50e/0x1fb3a2c/P/-/-/7  0x1fb3a27/0x1e8e500/P/-/-/114  0x21d4fef/0x1fb3a10/P/-/-/90  0x206bd0c/0x21d4fe8/M/-/-/30  0x1e8ee6e/0x206bcc5/P/-/-/38  0x206bcc0/0x1e8ee60/P/-/-/52  0x2069583/0x206bcb6/M/-/-/3  0x20a863c/0x206955b/P/-/-/1  0x20a8610/0x20a8638/P/-/-/1  0x20a85db/0x20a8602/P/-/-/1  0x20a85a3/0x20a85d7/P/-/-/2  0x2069556/0x20a8590/P/-/-/1  0x2069fa5/0x206954f/P/-/-/1
+2833111      7f68d1497a15 0x38ca664/0x7f68d14979d0/P/-/-/14  0x4637f8d/0x38ca660/P/-/-/2  0x4628bc2/0x4637f6f/P/-/-/10  0x7f68d121a676/0x4628b99/P/-/-/1  0x7f68d121a649/0x7f68d121a662/P/-/-/1  0x7f68d121a5fb/0x7f68d121a646/P/-/-/1  0x38ca214/0x7f68d121a5f0/P/-/-/1  0x4628b94/0x38ca210/P/-/-/1  0x4628bdf/0x4628b8e/P/-/-/1  0x7f68d1497b3f/0x4628bd1/P/-/-/1  0x7f68d11291bd/0x7f68d1497b39/P/-/-/2  0x7f68d1129243/0x7f68d11291b6/P/-/-/29  0x7f68d112915f/0x7f68d1129210/P/-/-/6  0x7f68d11291cc/0x7f68d1129143/P/-/-/2  0x7f68d1129141/0x7f68d11291c0/P/-/-/4  0x7f68d1487f14/0x7f68d1129110/P/-/-/11  0x7f68d1497b34/0x7f68d1487f10/P/-/-/101  0x7f68d14879f4/0x7f68d1497b20/M/-/-/80  0x7f68d152feca/0x7f68d14879f0/P/-/-/4  0x7f68d152fea1/0x7f68d152fec6/P/-/-/89  0x38ca224/0x7f68d152fe80/P/-/-/1  0x4628bcc/0x38ca220/P/-/-/1  0x4628b7e/0x4628bc3/P/-/-/5  0x4637f6a/0x4628b40/P/-/-/4  0x7f68d19f701b/0x4637f21/P/-/-/2  0x7f68d19f70f9/0x7f68d19f7004/P/-/-/19  0x7f68d19f7069/0x7f68d19f70ca/P/-/-/1  0x7f68d19f6fdc/0x7f68d19f7058/P/-/-/3  0x38ca024/0x7f68d19f6fc0/P/-/-/1  0x4637f1c/0x38ca020/P/-/-/110  0x460ac3c/0x4637e8a/P/-/-/6  0x4637e85/0x460ac26/P/-/-/1
+2833111           4621705 0x46215dd/0x46216c0/P/-/-/6  0x4621105/0x46215c0/P/-/-/16  0x4640b44/0x46210db/P/-/-/2  0x4640c99/0x4640b2f/P/-/-/31  0x4640ee0/0x4640c77/P/-/-/12  0x4640c72/0x4640ec0/P/-/-/20  0x4640b2a/0x4640c00/P/-/-/2  0x4640b92/0x4640b13/P/-/-/6  0x4640b0e/0x4640b80/P/-/-/25  0x46210d6/0x4640ac8/P/-/-/6  0x4628bc2/0x4621092/P/-/-/12  0x7f68d121a687/0x4628b99/P/-/-/10  0x7f68d121a64e/0x7f68d121a677/P/-/-/10  0x7f68d121a5fb/0x7f68d121a646/P/-/-/1  0x38ca214/0x7f68d121a5f0/P/-/-/8  0x4628b94/0x38ca210/P/-/-/50  0x462108d/0x4628b40/P/-/-/2  0x7f68d12176fd/0x462107f/P/-/-/5  0x7f68d12175ff/0x7f68d12176f0/P/-/-/31  0x38ca0a4/0x7f68d12175e0/P/-/-/1  0x462107a/0x38ca0a0/P/-/-/10  0x461faef/0x4621000/P/-/-/21  0x461f8de/0x461fa1a/P/-/-/27  0x461f4b6/0x461f898/P/-/-/16  0x461c146/0x461f4a2/P/-/-/5  0x461f49f/0x461c140/P/-/-/102  0x461bbac/0x461f400/M/-/-/2  0x461c146/0x461bb8e/P/-/-/1  0x461bb8b/0x461c140/P/-/-/125  0x206330c/0x461bac0/M/-/-/40  0x2065606/0x20632ff/P/-/-/18  0x20654d1/0x20655f0/P/-/-/33
 ```
+
+The [explanation](https://github.com/torvalds/linux/blob/master/tools/perf/Documentation/perf-script.txt#L237) of `perf script -F pid,ip,brstack`
+
+```
+The brstack output includes branch related information with raw addresses using the
+	/v/v/v/v/cycles syntax in the following order:
+	FROM: branch source instruction
+	TO  : branch target instruction
+        M/P/-: M=branch target mispredicted or branch direction was mispredicted, P=target predicted or direction predicted, -=not supported
+	X/- : X=branch inside a transactional region, -=not in transaction region or not supported
+	A/- : A=TSX abort entry, -=not aborted region or not supported
+	cycles
+```
+
+
+### Why LBR traces mismatch with the functions in BOLTed mysqld?
+```
+2833111           46021c0 
+0x206bd10/0x4601f44/P/-/-/1  
+0x206bc3b/0x206bd10/P/-/-/90  
+0x37a904c/0x206bc1d/P/-/-/8  
+0x37a9064/0x37a904a/P/-/-/3  
+0x37a9057/0x37a9061/P/-/-/8  
+0x37a9048/0x37a9050/P/-/-/10  
+0x37a86be/0x37a9040/P/-/-/2  
+0x37a86cd/0x37a86bb/P/-/-/10  
+0x37a86aa/0x37a86c0/P/-/-/1  
+0x37a869e/0x37a86a8/P/-/-/50  
+0x21d1233/0x37a8680/P/-/-/2  
+0x206bc18/0x21d1220/P/-/-/1  
+0x1e8e50e/0x206bc0c/P/-/-/6  
+0x206bc07/0x1e8e500/P/-/-/13  
+0x1fc6b68/0x206bc00/P/-/-/50  
+0x206bbfb/0x1fc6b20/P/-/-/40  
+0x21d4fe3/0x206bba0/P/-/-/1  
+0x21d4ff6/0x21d4fe0/P/-/-/1  
+0x1fb3a56/0x21d4ff4/P/-/-/4  
+0x1e8e50e/0x1fb3a2c/P/-/-/7  
+0x1fb3a27/0x1e8e500/P/-/-/114  
+0x21d4fef/0x1fb3a10/P/-/-/90  
+0x206bd0c/0x21d4fe8/M/-/-/30  
+0x1e8ee6e/0x206bcc5/P/-/-/38  
+0x206bcc0/0x1e8ee60/P/-/-/52  
+0x2069583/0x206bcb6/M/-/-/3  
+0x20a863c/0x206955b/P/-/-/1  
+0x20a8610/0x20a8638/P/-/-/1  
+0x20a85db/0x20a8602/P/-/-/1  
+0x20a85a3/0x20a85d7/P/-/-/2  
+0x2069556/0x20a8590/P/-/-/1  
+0x2069fa5/0x206954f/P/-/-/1
+```
+
+In mysqld, if we disassemble `mysqld` at address `0x206bd10`.
+```
+zyuxuan@acgcascade52:~$ gdb mysqld
+(gdb) disas 0x206bd10
+Dump of assembler code for function _Z10do_commandP3THD:
+   0x000000000206bba0 <+0>:	endbr64
+   0x000000000206bba4 <+4>:	push   %rbp
+   0x000000000206bba5 <+5>:	mov    %rsp,%rbp
+   0x000000000206bba8 <+8>:	push   %r15
+   0x000000000206bbaa <+10>:	push   %r14
+   0x000000000206bbac <+12>:	push   %r13
+   ...
+   0x000000000206bd0c <+364>:	ret
+   0x000000000206bd0d <+365>:	nopl   (%rax)
+   0x000000000206bd10 <+368>:	call   *%rax
+   0x000000000206bd12 <+370>:	mov    %eax,%r13d
+   0x000000000206bd15 <+373>:	test   %eax,%eax
+   ...
+   0x000000000206be76 <+726>:	call   0x21d1c80 <_ZN6String10real_allocEm>
+   0x000000000206be7b <+731>:	jmp    0x206bc9a <_Z10do_commandP3THD+250>
+   0x000000000206be80 <+736>:	call   0x38c9e30
+End of assembler dump.
+```
+
+However, if we disassemble `mysqld.bolt` at address `0x206bd10`.
+```
+zyuxuan@acgcascade52:~$ gdb mysqld.bolt
+(gdb) disas 0x206bd10
+No function contains specified address.
+```
+
+And then we try the disassemble second address `0x4601f44` of `mysqld.bolt`
+```
+(gdb) disas 0x4601f44
+Dump of assembler code for function _ZN16Thd_mem_cnt_conn5resetEv:
+   0x0000000004601f44 <+0>:	endbr64
+   0x0000000004601f48 <+4>:	push   %rbp
+   0x0000000004601f49 <+5>:	mov    %rsp,%rbp
+   0x0000000004601f4c <+8>:	push   %r15
+   0x0000000004601f4e <+10>:	push   %r14
+   0x0000000004601f50 <+12>:	push   %r13
+   ...
+   0x000000000460201c <+216>:	mov    %rbx,%rdi
+   0x000000000460201f <+219>:	call   0x38ca020
+   0x0000000004602024 <+224>:	lea    -0x82e5db(%rip),%rax
+```
+
 
 
 In [parseBranchEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1395), it calls [parseBranchSample()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1069)
 - `parseBranchSample()` will first extract PID from the `perf script`'s output
   + compare this PID with the PID stored in `BinaryMMapInfo`
-- `parseBranchSample()` will then extract Address from the `perf script`'s output
+- `parseBranchSample()` will then extract instruction pointer from the `perf script`'s output
+  + My guess is that this IP is the record of the current IP when perf read data from LBR buffer. 
 - after get the `PID` and `Address` of the branch, `parseBranchSample()` calls [parseLBREntry()]()
 - In `parseLBREntry()`, it parses the string by `/`, and then records:
   + the first address to `Res.From`
@@ -66,4 +170,11 @@ PID=2833111, 0000000004637c86
 - Finally it checks if `BC->HasFixedLoadAddress` is true
   + If it's not `true`, need to run `adjustLBR`
   + However it seems it's always `true`
+- PC and the multiple LBR samples will be recorded into the `PerfBranchSample` struct as the return value of `parseBranchSample()`.
+
+After `parseBranchSample()` returns, we come back to `parseBranchEvents()`.
+- In `parseBranchEvents()`, in our case, the `NeedsSkylakeFix` will be change to `true`. (need to pay attention to this //TODO)
+- If `uint64_t From = LBR.From;` and `uint64_t To = LBR.To;` are addresses from Library (starting address at `7FXXXXXXXXXX`), they will also be ignore
+- After ignoring lib and sys addresses, `parseBranchEvents()` update records in [BranchLBRs](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/include/bolt/Profile/DataAggregator.h#L132)
+
 
