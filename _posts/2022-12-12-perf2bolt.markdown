@@ -5,10 +5,17 @@ date:   2022-12-8 10:53:46 -0500
 categories: cont-opt 
 ---
 ### Recap for continuous optimization previous weeks
+`perf2bolt --ignore-build-id --cont-opt -p perf2.data -o perf2.fdata mysqld.bolt`
+- `--cont-opt` flag is added by processing profiles collected from Cn (NOT C0!),
+- perf2.data is profile collected from Cn round.
+
+![perfscript](/assets/2022-12-12/perfscript.png)
 ![perf2bolt](/assets/2022-11-28/perf2bolt_fixed.png)
 
 
 ### The output of perf script for Branch Events
+- snippet of `perf script -F pid,ip,brstack`'s output
+
 ```
 2833111           21dda10 0x46024d4/0x21dda10/M/-/-/368  0xffffffffb9e00ae7/0x46024c5/P/-/-/0
 2833111      7ffcf9d2b840 0x1f3a70d/0x38ca5e0/P/-/-/7  0x2068d51/0x1f3a6e0/P/-/-/28  0x35d6e8a/0x2068d1a/P/-/-/13  0x1f38590/0x35d6e70/P/-/-/38  0x2068d15/0x1f38580/P/-/-/2  0x35da62d/0x2068d05/P/-/-/1  0x35da638/0x35da61d/P/-/-/1  0x35da61b/0x35da630/P/-/-/1  0x35da613/0x35da618/P/-/-/2  0x35f6cb4/0x35da5fc/P/-/-/2  0x35da5f7/0x35f6c90/P/-/-/3  0x2068d00/0x35da5e0/P/-/-/2  0x20a8773/0x2068cdc/P/-/-/6  0x2068cd7/0x20a8730/P/-/-/1  0x2068ca3/0x2068cc9/P/-/-/166  0x206bcb1/0x2068c40/P/-/-/3  0x37a904c/0x206bca8/P/-/-/1  0x37a9064/0x37a904a/P/-/-/1  0x37a9057/0x37a9061/P/-/-/1  0x37a9048/0x37a9050/P/-/-/47  0x37a86be/0x37a9040/P/-/-/8  0x37a86cd/0x37a86bb/P/-/-/1  0x37a86aa/0x37a86c0/P/-/-/1  0x37a869e/0x37a86a8/P/-/-/40  0x21d1233/0x37a8680/P/-/-/91  0x206bca3/0x21d1220/P/-/-/25  0x1e8ee6e/0x206bc7e/P/-/-/96  0x206bc79/0x1e8ee60/P/-/-/127  0x4601ec5/0x206bc60/M/-/-/2  0x4602cff/0x4601eb8/P/-/-/4  0x4604018/0x4602cc7/P/-/-/8  0x46044d9/0x4603f91/P/-/-/2
@@ -17,7 +24,7 @@ categories: cont-opt
 2833111           4621705 0x46215dd/0x46216c0/P/-/-/6  0x4621105/0x46215c0/P/-/-/16  0x4640b44/0x46210db/P/-/-/2  0x4640c99/0x4640b2f/P/-/-/31  0x4640ee0/0x4640c77/P/-/-/12  0x4640c72/0x4640ec0/P/-/-/20  0x4640b2a/0x4640c00/P/-/-/2  0x4640b92/0x4640b13/P/-/-/6  0x4640b0e/0x4640b80/P/-/-/25  0x46210d6/0x4640ac8/P/-/-/6  0x4628bc2/0x4621092/P/-/-/12  0x7f68d121a687/0x4628b99/P/-/-/10  0x7f68d121a64e/0x7f68d121a677/P/-/-/10  0x7f68d121a5fb/0x7f68d121a646/P/-/-/1  0x38ca214/0x7f68d121a5f0/P/-/-/8  0x4628b94/0x38ca210/P/-/-/50  0x462108d/0x4628b40/P/-/-/2  0x7f68d12176fd/0x462107f/P/-/-/5  0x7f68d12175ff/0x7f68d12176f0/P/-/-/31  0x38ca0a4/0x7f68d12175e0/P/-/-/1  0x462107a/0x38ca0a0/P/-/-/10  0x461faef/0x4621000/P/-/-/21  0x461f8de/0x461fa1a/P/-/-/27  0x461f4b6/0x461f898/P/-/-/16  0x461c146/0x461f4a2/P/-/-/5  0x461f49f/0x461c140/P/-/-/102  0x461bbac/0x461f400/M/-/-/2  0x461c146/0x461bb8e/P/-/-/1  0x461bb8b/0x461c140/P/-/-/125  0x206330c/0x461bac0/M/-/-/40  0x2065606/0x20632ff/P/-/-/18  0x20654d1/0x20655f0/P/-/-/33
 ```
 
-The [explanation](https://github.com/torvalds/linux/blob/master/tools/perf/Documentation/perf-script.txt#L237) of `perf script -F pid,ip,brstack`
+- The [explanation](https://github.com/torvalds/linux/blob/master/tools/perf/Documentation/perf-script.txt#L237) of `perf script -F pid,ip,brstack`
 
 ```
 The brstack output includes branch related information with raw addresses using the
@@ -32,6 +39,8 @@ The brstack output includes branch related information with raw addresses using 
 
 
 ### Why LBR traces mismatch with the functions in BOLTed mysqld?
+consider this LBR sample
+
 ```
 2833111           46021c0 
 0x206bd10/0x4601f44/P/-/-/1  
@@ -115,14 +124,14 @@ Dump of assembler code for function _ZN16Thd_mem_cnt_conn5resetEv:
    0x0000000004602024 <+224>:	lea    -0x82e5db(%rip),%rax
 ```
 
-
+![code layouy](/assets/2022-12-12/code_layout.png)
 
 In [parseBranchEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1395), it calls [parseBranchSample()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1069)
 - `parseBranchSample()` will first extract PID from the `perf script`'s output
   + compare this PID with the PID stored in `BinaryMMapInfo`
 - `parseBranchSample()` will then extract instruction pointer from the `perf script`'s output
   + My guess is that this IP is the record of the current IP when perf read data from LBR buffer. 
-- after get the `PID` and `Address` of the branch, `parseBranchSample()` calls [parseLBREntry()]()
+- After getting the `PID` and `Address` of the branch, `parseBranchSample()` calls [parseLBREntry()]()
 - In `parseLBREntry()`, it parses the string by `/`, and then records:
   + the first address to `Res.From`
   + the second address to `Res.To`
