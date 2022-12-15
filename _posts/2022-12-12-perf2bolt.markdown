@@ -78,7 +78,7 @@ consider this LBR sample
 ```
 
 In mysqld, if we disassemble `mysqld` at address `0x206bd10`.
-```
+```gdb
 zyuxuan@acgcascade52:~$ gdb mysqld
 (gdb) disas 0x206bd10
 Dump of assembler code for function _Z10do_commandP3THD:
@@ -109,7 +109,7 @@ No function contains specified address.
 ```
 
 And then we try the disassemble second address `0x4601f44` of `mysqld.bolt`
-```
+```gdb
 (gdb) disas 0x4601f44
 Dump of assembler code for function _ZN16Thd_mem_cnt_conn5resetEv:
    0x0000000004601f44 <+0>:	endbr64
@@ -124,8 +124,116 @@ Dump of assembler code for function _ZN16Thd_mem_cnt_conn5resetEv:
    0x0000000004602024 <+224>:	lea    -0x82e5db(%rip),%rax
 ```
 
+My guess why this happens
 ![code layouy](/assets/2022-12-12/code_layout.png)
 
+### To check whether my guess is true
+- the code that prints `!! WARNING !! This high mismatch ratio indicates the input ...` is [here](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1562)
+  + It compares the `Perc` variable with 10%
+  + `Perc = NumInvalidTraces * 100.0% / NumTraces;`
+  + `NumInvalidTraces` is incremented in the [following block of code](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1437)
+
+```cpp
+for (const LBREntry &LBR : Sample.LBR) {
+    const uint64_t TraceFrom = LBR.To;
+    const uint64_t TraceTo = NextPC;
+    if (TraceBF && TraceBF->containsAddress(TraceTo)) {
+        FTInfo &Info = FallthroughLBRs[Trace(TraceFrom, TraceTo)];
+        if (TraceBF->containsAddress(LBR.From))
+            ++Info.InternCount;
+        else
+            ++Info.ExternCount;
+    } 
+    else {
+        if (TraceBF && getBinaryFunctionContainingAddress(TraceTo)) {
+            LLVM_DEBUG(dbgs()
+                << "Invalid trace starting in "
+                << TraceBF->getPrintName() << " @ "
+                << Twine::utohexstr(TraceFrom)
+                << " and ending @ " << Twine::utohexstr(TraceTo)
+                << '\n');
+            ++NumInvalidTraces;
+        }
+        ...
+    }
+    ++NumTraces;
+    NextPC = LBR.From;
+    ...
+}
+```
+
+- the sample output of this error message
+
+```
+Invalid trace starting in _Z19lf_dynarray_iterateP11LF_DYNARRAYPFiPvS1_ES1_ @ 2fcd074 and ending @ 2fcd088
+Invalid trace starting in my_hash_sort_8bit_bin/1(*2) @ 37aca90 and ending @ 37acaca
+Invalid trace starting in _Z10MYSQLparseP3THDPP15Parse_tree_root.cold/1(*2) @ 1f6f4c2 and ending @ 1f6f4f2
+```
+- then we check the addresses that causes these error messages by using `gdb` on both `mysqld.bolt` & `mysqld`
+    + `gdb mysqld.bolt`'s result
+```
+(gdb) disas 0x2fcd074
+No function contains specified address.
+(gdb) disas 0x37aca90
+No function contains specified address.
+(gdb) disas 0x1f6f4c2
+No function contains specified address.
+```
+    + `gdb mysqld`'s result
+```
+(gdb) disas 0x2fcd074
+Dump of assembler code for function cset_hash_sort_adapter(LF_HASH const*, uchar const*, size_t):
+   0x0000000002fcd030 <+0>:	endbr64
+   0x0000000002fcd034 <+4>:	push   %rbp
+   0x0000000002fcd035 <+5>:	mov    %rsp,%rbp
+   ...
+   0x0000000002fcd062 <+50>:	mov    0xc0(%rdi),%rax
+   0x0000000002fcd069 <+57>:	movq   $0x4,-0x10(%rbp)
+   0x0000000002fcd071 <+65>:	call   *0x50(%rax)
+   0x0000000002fcd074 <+68>:	mov    -0x18(%rbp),%rax
+   ...
+   0x0000000002fcd088 <+88>:	ret
+   0x0000000002fcd089 <+89>:	call   0x38c9e30
+End of assembler dump.
+```
+```
+(gdb) disas 0x37aca90
+Dump of assembler code for function my_hash_sort_bin(CHARSET_INFO const*, uchar const*, size_t, uint64*, uint64*):
+   0x00000000037aca70 <+0>:	endbr64
+   0x00000000037aca74 <+4>:	push   %rbp
+   ...
+   0x00000000037aca8b <+27>:	nopl   0x0(%rax,%rax,1)
+   0x00000000037aca90 <+32>:	mov    %rdi,%rax
+   0x00000000037aca93 <+35>:	movzbl (%rsi),%r10d
+   ...
+   0x00000000037acac8 <+88>:	pop    %rbx
+   0x00000000037acac9 <+89>:	pop    %rbp
+   0x00000000037acaca <+90>:	ret
+End of assembler dump.
+```
+```
+(gdb) disas 0x1f6f4c2
+Dump of assembler code for function _Z10MYSQLparseP3THDPP15Parse_tree_root:
+Address range 0x1f4c860 to 0x1f7dfd3:
+   0x0000000001f4c860 <+0>:	endbr64
+   0x0000000001f4c864 <+4>:	push   %rbp
+   0x0000000001f4c865 <+5>:	mov    %rsp,%rbp
+   0x0000000001f4c868 <+8>:	push   %r15
+   0x0000000001f4c86a <+10>:	push   %r14
+   0x0000000001f4c86c <+12>:	push   %r13
+   0x0000000001f4c86e <+14>:	push   %r12
+   0x0000000001f4c870 <+16>:	push   %rbx
+   0x0000000001f4c871 <+17>:	sub    $0x1000,%rsp
+   ...
+   0x0000000001f6f4bd <+142429>:	jmp    0x1f5e6f0 <_Z10MYSQLparseP3THDPP15Parse_tree_root+73360>
+   0x0000000001f6f4c2 <+142434>:	mov    -0x1ec0(%rbp),%rax
+   0x0000000001f6f4c9 <+142441>:	mov    0x8(%r15),%r8
+   ... 
+```
+
+These results prove that the invalid traces are caused by 
+
+### how to change these problematic address in BOLT's code
 In [parseBranchEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1395), it calls [parseBranchSample()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1069)
 - `parseBranchSample()` will first extract PID from the `perf script`'s output
   + compare this PID with the PID stored in `BinaryMMapInfo`
@@ -136,6 +244,9 @@ In [parseBranchEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/b
   + the first address to `Res.From`
   + the second address to `Res.To`
   + the third element into `Res.Mispred`
+
+
+
 
 ```
 PID=2833111, 0000000004637c86

@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "2022-12-12 data cache"
-date:   2022-12-5 10:53:46 -0500
+date:   2022-12-05 10:53:46 -0500
 categories: data-cache 
 ---
 
@@ -39,13 +39,6 @@ synthetic workloads for pagerank.
 | Vertices:200000<br> Degree:200 |  182<br>141<br>120<br>167<br>101 | 13.051599(182)<br>13.353129(141)<br>13.442306(120)<br>13.469791(167)<br>13.384551(101) | 13.028119(182)<br>13.406983(141)<br>13.277799(120)<br>13.349196(167)<br>13.258522(101) | 0.203% |
 
 
-The [explanation](https://stackoverflow.com/questions/22813512/continuous-wavelet-transform-with-scipy-signal-python-what-is-parameter-widt) of the `widths` of [scipy.signal.find_peaks_cw](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks_cwt.html)
-
-[Wavelet Transformation](https://zhuanlan.zhihu.com/p/22450818)
-
-![wavelet1](/assets/2022-12-12/wavelet1.png)
-![wavelet3](/assets/2022-12-12/wavelet3.png)
-
 
 |    bc   | prefetch dist | execution time <br> original | execution time <br> optimized | average<br> speedup | 
 | :----:        |    :----:							|   :----:			| :----: | :----: |  :----: |
@@ -55,7 +48,6 @@ The [explanation](https://stackoverflow.com/questions/22813512/continuous-wavele
 | Vertices:20000<br> Degree:100  |   467<br>456<br>506<br>443<br>483   |41.527720(467)<br>41.399529(456)<br>41.753334(506)<br>41.473342(443)<br>41.677791(483) | 72.221025(467)<br>71.523556(456)<br>71.569752(506)<br>71.800227(443)<br>71.644434(483)| -72.619% |
  | Vertices:20000<br> Degree:200  |  32   |86.797034(32)<br>85.867522(32)<br>86.136966(32)<br>86.431068(32)<br>86.942206(32) | 121.898140(32)<br>122.466065(32)<br>133.931805(32)<br>124.171229(32)<br>124.245491(32)| -45.014% |
 | Vertices:10000<br> Degree:500  |   371<br>466<br>415<br>443<br>450<br>32x2   | 50.337(371)<br>50.283521(466)<br>50.007282(415)<br>49.613216(443)<br>49.976438(450)<br>49.980702(32)<br>49.825(32) | 89.602(371)<br>88.117181(466)<br>89.360649(415)<br>91.218368(443)<br>89.325455(450)<br>73.102367(32)<br>72.573(32) |  -78.893%(400)<br>-45.959%(32) |
-| Vertices:10000<br> Degree:1000  |  278<br>279<br>293  | 102.086(313)<br>102.650(299) |  174.034(313)<br>171.788(299)   |
 
 
 
@@ -65,7 +57,62 @@ The [explanation](https://stackoverflow.com/questions/22813512/continuous-wavele
 | Vertices:40000<br> Degree:10   | 33<br>54<br>35<br>26<br>25   | 47.536527(33)<br>48.172714(54)<br>48.193499(35)<br>47.393341(26)<br>48.094007(25) | 42.006900(33)<br>42.505089(54)<br>42.386368(35)<br>42.382934(26)<br>42.372335(25) | 11.586% |
 | Vertices:20000<br> Degree:50  |  32x5  | 24.164577(32)<br>24.156307(32)<br> 23.994197(32)<br>24.028512(32)<br>24.178678(32) | 23.113299(32)<br>23.135452(32)<br>22.974000(32)<br>23.073816(32)<br>23.149340(32) | 4.212% |
 | Vertices:20000<br> Degree:100   | 56x2<br>29<br>37<br>40  | 41.554468(56)<br>41.645862(56)<br>41.904368(29)<br>41.718709(37)<br>41.679466(40) | 58.572714(56)<br>58.507013(56)<br>58.417819(29)<br>59.457964(37)<br>58.599904(40) | -40.792% |
-| Vertices:20000<br> Degree:200   |  60<br>23<br>34 | 49.495485(60)<br>49.846660(23)<br>50.012467(34) | 76.172428(60)<br>73.571933(23)<br> (34) |
-| Vertices:10000<br> Degree:500   |   |  |  | 
-| Vertices:10000<br> Degree:1000   |    |  |     |
+| Vertices:20000<br> Degree:200   | 48<br>59<br>53<br>49<br>55 | 85.913432(48)<br>85.879287(59)<br>87.107990(53)<br>86.693179(49)<br>86.048864(55) | 122.520239(48)<br>123.929993(59)<br>125.185121(53)<br>125.157707(49)<br>139.384437(55) | -47.385% |
+| Vertices:10000<br> Degree:500   | 60<br>23<br>34<br>46<br>26 | 49.495485(60)<br>49.846660(23)<br>50.012467(34)<br>49.527609(46)<br>49.618710(26) | 76.172428(60)<br>73.571933(23)<br>74.295782(34)<br>74.428727(46)<br>74.210733(26) | -49.971% |
 
+
+
+
+The [explanation](https://stackoverflow.com/questions/22813512/continuous-wavelet-transform-with-scipy-signal-python-what-is-parameter-widt) of the `widths` of [scipy.signal.find_peaks_cw](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks_cwt.html)
+
+[Continuous Wavelet Transformation](https://zhuanlan.zhihu.com/p/22450818)
+
+![wavelet1](/assets/2022-12-12/wavelet1.png)
+![wavelet3](/assets/2022-12-12/wavelet3.png)
+
+Discrete Wavelet Transformation
+![dwt](/assets/2022-12-12/dwt.png)
+
+From APT-GET paper
+![dwt](/assets/2022-12-12/peaks.png)
+
+
+
+|    dfs   |  prefetch dist | deliquent load PCs<br> for each function| prefetch dist | average<br> speedup |
+| :----:        |    :----:	 |   :----:			| :----: | :----: |
+| Vertices:800000<br> Degree:100  |   32x5   | 0.670312(32)<br>0.662219(32)<br>0.667725(32)<br>0.661414(32)<br>0.664425(32) | 0.651666(32)<br>0.646888(32)<br>0.632942(32)<br>0.641196(32)<br>0.642334(32) | 3.339% |
+| Vertices:800000<br> Degree:200  |   32x3<br>12<br>   | 1.191269(32)<br>1.189988(32)<br>1.195605(12)<br>1.198609(32)<br>1.200585(32) | 1.151985(32)<br>1.160511(32)<br>1.158976(12)<br>1.160440(32)<br>1.148973(32) | 3.268% |
+| Vertices:800000<br> Degree:300  |   32x2<br>149<br>74   | 1.750412(32)<br>1.682633(32)<br>1.691402(149)<br>1.734797(74)<br>1.698091 | 1.662303(32)<br>1.676280(32)<br>1.672162(149)<br>1.650064(74)| 
+| Vertices:900000<br> Degree:400  | 7<br>2<br>32   | 2.485635(7)<br>2.485459(2)<br>2.534866(32)<br>2.457122(32)<br>2.527765(32) | 2.464855(7)<br>2.496771(2)<br>2.511351(32)<br>2.436775(32)<br>2.409498(32)|
+| Vertices:800000<br> Degree:600  |   32x2<br>113<br>1x2 | 3.186280(32)<br>3.177909(113)<br>3.287914(32)<br>3.220125(1)<br>3.151090(1) | 3.164332(32)<br>3.199197(113)<br>3.231159(32)<br>3.252298(1)<br>3.239628(1) |
+| Vertices:800000<br> Degree:800  |  32x2<br>18<br>6x2  | 4.205640(32)<br>4.229977(32)<br>4.270656(18)<br>4.158642(6)<br>4.273497(6) | 4.178431(32)<br>4.130079(32)<br>4.231113(18)<br>4.201545(6)<br>4.164172(6)| 
+
+
+|    dfs<br>([20:][5,15])   |  prefetch dist | deliquent load PCs<br> for each function| prefetch dist |  average<br> speedup |
+| :----:        |    :----:	 |   :----:	| :----: | :----: |
+| Vertices:800000<br> Degree:100  |  32x5  | 0.661456(32)<br>0.654152(32)<br>0.659255(32)<br>0.659236(32)<br>0.671851(32) | 0.647240(32)<br>0.637867(32)<br>0.641951(32)<br>0.635575(32)<br>0.656555(32) | 2.627% |
+| Vertices:800000<br> Degree:200  |  32x4<br>7  | 1.171763(32)<br>1.208786(32)<br>1.193877(32)<br>1.187718(32)<br>1.179665(7) | 1.186156(32)<br>1.166284(32)<br>1.151305(32)<br>1.159139(32)<br>1.144882(7) | 2.084%(32)<br> |
+| Vertices:800000<br> Degree:300  |  78<br>91<br>100<br>202<br>32  | 1.716003(78)<br>1.690596(91)<br>1.688770(100)<br>1.733055(202)<br>1.690054(32) | 1.662640(78)<br>1.635395(91)<br>1.691547(100)<br>1.667986(202)<br>1.671149(32) | 2.228% |
+| Vertices:900000<br> Degree:400  |  32  | 2.540885(32)<br>2.506985(32)<br>2.547449(32)<br>2.552819(32)<br>2.545685(32)<br> | 2.451819(32)<br>2.413134(32)<br>2.506080(32)<br>2.504202(32)<br>2.461221(32) | 2.815% |
+| Vertices:800000<br> Degree:600  |  14<br>85<br>11<br>84<br>29  | 3.234607(14)<br>3.283659(85)<br>3.275415(11)<br>3.235414(84)<br>3.204884(29) | 3.192117(14)<br>3.181158(85)<br>3.240198(11)<br>3.115396(84)<br>3.232037(29) | 1.706% |
+| Vertices:800000<br> Degree:800  |  12<br>85<br>100<br>96<br>7  | 4.206723(12)<br>4.187963(85)<br>4.114985(100)<br>4.123739(96)<br>4.189272(7) | 4.165144(12)<br>4.182292(85)<br>4.077857(100)<br>4.087644(96)<br>4.221745(7) | 0.423% |
+
+The execution time for producing an optimized binary (`perf record` time (20s) is included):
+- Web-Google:
+    + real	2m54.268s
+    + user	3m3.977s
+    + sys	2m50.486s
+- Web-BerkStan:
+
+- Web-Stanford: 
+
+- Web-NotreDame:
+
+- RoadNet-CA:
+    + real	3m12.144s
+    + user	3m25.617s
+    + sys	2m46.940s
+- RoadNet-PA:
+    + real	2m33.099s
+    + user	2m49.840s
+    + sys	2m49.104s
