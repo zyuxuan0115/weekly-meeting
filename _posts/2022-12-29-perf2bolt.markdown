@@ -1,8 +1,111 @@
 ---
 layout: post
-title:  "2022-12-19 perf2bolt"
-date:   2022-12-19 10:53:46 -0500
+title:  "2022-12-29 perf2bolt"
+date:   2022-12-29 10:53:46 -0500
 categories: cont-opt 
 ---
+
+### the problem for using the C1 round perf.data directly
+- not as efficient as the offline BOLT
+	+ Directly using profile collected from C1 round to build an optimized mysqld and then run this mysqld.
+		* The tput is <strong>8293.24 per sec</strong>.
+```
+[ 175s ] thds: 4 tps: 8276.81 qps: 99318.69 (r/w/o: 82765.07/0.00/16553.61) lat (ms,95%): 0.50 err/s: 0.00 reconn/s: 0.00
+[ 176s ] thds: 4 tps: 8370.55 qps: 100452.66 (r/w/o: 83711.55/0.00/16741.11) lat (ms,95%): 0.49 err/s: 0.00 reconn/s: 0.00
+[ 177s ] thds: 4 tps: 8377.05 qps: 100522.57 (r/w/o: 83768.47/0.00/16754.10) lat (ms,95%): 0.50 err/s: 0.00 reconn/s: 0.00
+[ 178s ] thds: 4 tps: 8234.68 qps: 98831.15 (r/w/o: 82361.79/0.00/16469.36) lat (ms,95%): 0.50 err/s: 0.00 reconn/s: 0.00
+[ 179s ] thds: 4 tps: 8248.70 qps: 98981.42 (r/w/o: 82484.02/0.00/16497.40) lat (ms,95%): 0.50 err/s: 0.00 reconn/s: 0.00
+SQL statistics:
+    queries performed:
+        read:                            14928600
+        write:                           0
+        other:                           2985720
+        total:                           17914320
+    transactions:                        1492860 (8293.24 per sec.)
+    queries:                             17914320 (99518.93 per sec.)
+```
+	+ However for the offline BOLTed binary
+		*  the throughput is <strong> 9267.79 per sec </strong>.
+```
+[ 175s ] thds: 4 tps: 9119.03 qps: 109432.36 (r/w/o: 91192.30/0.00/18240.06) lat (ms,95%): 0.49 err/s: 0.00 reconn/s: 0.00
+[ 176s ] thds: 4 tps: 9363.93 qps: 112382.18 (r/w/o: 93654.32/0.00/18727.86) lat (ms,95%): 0.44 err/s: 0.00 reconn/s: 0.00
+[ 177s ] thds: 4 tps: 9242.96 qps: 110898.58 (r/w/o: 92413.65/0.00/18484.93) lat (ms,95%): 0.45 err/s: 0.00 reconn/s: 0.00
+[ 178s ] thds: 4 tps: 9361.03 qps: 112351.31 (r/w/o: 93628.26/0.00/18723.05) lat (ms,95%): 0.44 err/s: 0.00 reconn/s: 0.00
+[ 179s ] thds: 4 tps: 9259.09 qps: 111106.06 (r/w/o: 92587.88/0.00/18518.18) lat (ms,95%): 0.45 err/s: 0.00 reconn/s: 0.00
+SQL statistics:
+    queries performed:
+        read:                            16682910
+        write:                           0
+        other:                           3336582
+        total:                           20019492
+    transactions:                        1668291 (9267.79 per sec.)
+    queries:                             20019492 (111213.45 per sec.)
+```
+
+### The reason why profile data collected from C1 round is worse
+- `perf2bolt` discard LBR records 
+	+ because the mismatch between the profile collected from C1 round and the offline BOLTed binary
+
+
+### The way to fix C1 round profile data
+- We need to add those LBR records that are discarded by `perf2bolt` 
+
+
+We need a reverse BAT. 
+- a reversed BAT has `original address -> BOLTed address`
+
+What we need to do with the reversed BAT and the map table
+- construct a `reversed BAT`  when the `BAT` is constructed.
+- store the `reversed BAT` into the BOLTed binary
+- when perform `perf2bolt` on the BOLTed binary and the Cx round perf.data, also read the `reversed BAT`
+- use the `reversed BAT` to get the BOLTed address of an address
+
+in `BAT.h` 
+
+
+Recall the output of `BAT dump`
+```
+Function Address: 0x4800200
+BB mappings:
+0x0 -> 0x0
+0x24 -> 0x24 (branch)
+0x26 -> 0x26
+0x31 -> 0x31 (branch)
+0x33 -> 0x70
+0x3c -> 0x79 (branch)
+0x3d -> 0x33
+0x44 -> 0x3a
+0x56 -> 0x4c (branch)
+0x57 -> 0x50
+0x61 -> 0x5a (branch)
+0x63 -> 0x5c
+0x75 -> 0x6e (branch)
+
+Function Address: 0x4800280
+BB mappings:
+0x0 -> 0x0
+0x8 -> 0x8 (branch)
+0xa -> 0x10
+0x11 -> 0x17 (branch)
+0x13 -> 0x21
+0x16 -> 0x24 (branch)
+0x18 -> 0xa
+0x1a -> 0xc (branch)
+0x1b -> 0x19
+0x21 -> 0x1f (branch)
+0x25 -> 0x26
+0x29 -> 0x2a (branch)
+
+...
+```
+
+According [BAT.h](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/include/bolt/Profile/BoltAddressTranslation.h), `BAT` is stored in [std::map<uint64_t, MapTy> Maps;](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/include/bolt/Profile/BoltAddressTranslation.h#L121)
+- the key of `Maps` is the starting address of a BOLTed function
+- the value of the `Maps` is another `std::map<uint64_t, uint64_t>`, whose key is the offset of the BOLTed insn and value is the offset of the original insn
+
+This is a back up for fast lookup of [BAT.cpp](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/BoltAddressTranslation.cpp)
+
+ 
+
 
 
