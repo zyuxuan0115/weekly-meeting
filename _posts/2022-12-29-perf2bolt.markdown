@@ -10,6 +10,7 @@ categories: cont-opt
 	+ Directly using profile collected from C1 round to build an optimized mysqld and then run this mysqld.
 		* The tput is <strong>8293.24 per sec</strong>.
 ```
+...
 [ 175s ] thds: 4 tps: 8276.81 qps: 99318.69 (r/w/o: 82765.07/0.00/16553.61) lat (ms,95%): 0.50 err/s: 0.00 reconn/s: 0.00
 [ 176s ] thds: 4 tps: 8370.55 qps: 100452.66 (r/w/o: 83711.55/0.00/16741.11) lat (ms,95%): 0.49 err/s: 0.00 reconn/s: 0.00
 [ 177s ] thds: 4 tps: 8377.05 qps: 100522.57 (r/w/o: 83768.47/0.00/16754.10) lat (ms,95%): 0.50 err/s: 0.00 reconn/s: 0.00
@@ -27,6 +28,7 @@ SQL statistics:
 	+ However for the offline BOLTed binary
 		*  the throughput is <strong> 9267.79 per sec </strong>.
 ```
+...
 [ 175s ] thds: 4 tps: 9119.03 qps: 109432.36 (r/w/o: 91192.30/0.00/18240.06) lat (ms,95%): 0.49 err/s: 0.00 reconn/s: 0.00
 [ 176s ] thds: 4 tps: 9363.93 qps: 112382.18 (r/w/o: 93654.32/0.00/18727.86) lat (ms,95%): 0.44 err/s: 0.00 reconn/s: 0.00
 [ 177s ] thds: 4 tps: 9242.96 qps: 110898.58 (r/w/o: 92413.65/0.00/18484.93) lat (ms,95%): 0.45 err/s: 0.00 reconn/s: 0.00
@@ -48,19 +50,18 @@ SQL statistics:
 
 
 ### The way to fix C1 round profile data
-- We need to add those LBR records that are discarded by `perf2bolt` 
-
-
-We need a reverse BAT. 
-- a reversed BAT has `original address -> BOLTed address`
-
-What we need to do with the reversed BAT and the map table
-- construct a `reversed BAT`  when the `BAT` is constructed.
-- store the `reversed BAT` into the BOLTed binary
-- when perform `perf2bolt` on the BOLTed binary and the Cx round perf.data, also read the `reversed BAT`
-- use the `reversed BAT` to get the BOLTed address of an address
-
-in `BAT.h` 
+- We need to recover those LBR records that are discarded by `perf2bolt` 
+- How to recover?
+	+ if the addresses read from LBR is in the holes of the BOLTed text section
+		* change the addresses in the holes of the BOLTed text section to be the "fake addresses"
+		* "fake addresses" are the BOTLed addresses of the corresponding original instructions 
+	+ to change addresses to be the "fake addresses", we need a reversed BAT. 
+		* a reversed BAT has the `original address -> BOLTed address` mapping
+	+ what we need to do with the reversed BAT
+		* construct a `reversed BAT`  when the `BAT` is constructed.
+		* store the `reversed BAT` into the BOLTed binary when the BOLTed binary is produced by `llvm-bolt`
+		* when running `perf2bolt` with the offline BOLTed binary and the C1 round perf.data, also read the `reversed BAT` from the BOLTed binary
+		* use the `reversed BAT` to get the BOLTed address of the given address in the original text section
 
 
 Recall the output of `BAT dump`
@@ -80,32 +81,26 @@ BB mappings:
 0x61 -> 0x5a (branch)
 0x63 -> 0x5c
 0x75 -> 0x6e (branch)
-
-Function Address: 0x4800280
-BB mappings:
-0x0 -> 0x0
-0x8 -> 0x8 (branch)
-0xa -> 0x10
-0x11 -> 0x17 (branch)
-0x13 -> 0x21
-0x16 -> 0x24 (branch)
-0x18 -> 0xa
-0x1a -> 0xc (branch)
-0x1b -> 0x19
-0x21 -> 0x1f (branch)
-0x25 -> 0x26
-0x29 -> 0x2a (branch)
-
 ...
 ```
 
 According [BAT.h](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/include/bolt/Profile/BoltAddressTranslation.h), `BAT` is stored in [std::map<uint64_t, MapTy> Maps;](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/include/bolt/Profile/BoltAddressTranslation.h#L121)
 - the key of `Maps` is the starting address of a BOLTed function
-- the value of the `Maps` is another `std::map<uint64_t, uint64_t>`, whose key is the offset of the BOLTed insn and value is the offset of the original insn
+- the value of the `Maps` is another `std::map<uint64_t, uint64_t>` (aka. `MapTy`), whose key is the offset of the BOLTed insn and value is the offset of the original insn
 
-This is a back up for fast lookup of [BAT.cpp](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/BoltAddressTranslation.cpp)
-
- 
+However, what we need is `original address -> BOLTed address`, so we need to reconstruction a BAT.
+- In `llvm-bolt`'s rewriteInstance class, it has the following 2 functions to write BAT into the BOLTed binary
+	+ [RewriteInstance::addBATSection()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Rewrite/RewriteInstance.cpp#L4217)
+	+ [RewriteInstance::encodeBATSection()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Rewrite/RewriteInstance.cpp#L4233)
+		* in `encodeBATSection()`, [BAT->write(*BC, DescOS)](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Rewrite/RewriteInstance.cpp#L4237) extract data to BAT's private member `Maps`.
+		* this `write()` function is in [BAT.cpp](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/BoltAddressTranslation.cpp)
+- To also write the reversed BAT to the BOLTed binary, I added 2 functions
+	+ [RewriteInstance::addReversedBATSection()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Rewrite/RewriteInstance.cpp#L4224)
+		* to register the reversed BAT to the BOLTed binary's note section, the first argument passed to `BC->registerOrUpdateNoteSection` becomes `BoltAddressTranslation::SECTION_NAME_REVERSED_BAT`.
+		
+	+ [RewriteInstance::encodeReversedBATSection()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Rewrite/RewriteInstance.cpp#L4250)
+		* instead of extracting BAT and write BAT to the output stream by [BAT->write()]()
+		* to encode ELF note of reversed BAT, 
 
 
 
