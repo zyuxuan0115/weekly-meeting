@@ -96,11 +96,52 @@ However, what we need is `original address -> BOLTed address`, so we need to rec
 		* this `write()` function is in [BAT.cpp](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/BoltAddressTranslation.cpp)
 - To also write the reversed BAT to the BOLTed binary, I added 2 functions
 	+ [RewriteInstance::addReversedBATSection()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Rewrite/RewriteInstance.cpp#L4224)
-		* to register the reversed BAT to the BOLTed binary's note section, the first argument passed to `BC->registerOrUpdateNoteSection` becomes `BoltAddressTranslation::SECTION_NAME_REVERSED_BAT`.
+		* to register the reversed BAT to the BOLTed binary's note section, the first argument passed to `BC->registerOrUpdateNoteSection` becomes to `BoltAddressTranslation::SECTION_NAME_REVERSED_BAT`.
 		
 	+ [RewriteInstance::encodeReversedBATSection()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Rewrite/RewriteInstance.cpp#L4250)
-		* instead of extracting BAT and write BAT to the output stream by [BAT->write()]()
-		* to encode ELF note of reversed BAT, 
+		* instead of extracting BAT and write BAT to the output stream by [BAT->write()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/BoltAddressTranslation.cpp#L117), I wrote another function [BAT->writeReverse()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/BoltAddressTranslation.cpp#L185) in [BAT.cpp](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/BoltAddressTranslation.cpp).
+		* the reason is to do this change is because
+			- BAT->write() returns `address -> [address -> address]` 
+			- This is `BOLTed func starting addr -> [BOLTed insn offset -> original insn offset] `
+			- BAT->writeReverse() returns `address -> address` 
+			- `original insn address -> BOLTed insn address`
+			
+		* to encode ELF note of reversed BAT, the first argument passed to `BinarySection::encodeELFNote()` becomes to `BinarySection::NT_BOLT_REVERSED_BAT`. 
+			- this requires to add `NT_BOLT_REVERSED_BAT` to `BinarySection`'s [enum](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/include/bolt/Core/BinarySection.h#L485)
+- After adding these changes, `llvm-bolt` can add `reversed BAT` into the note section of the BOLTed binary.
+	+ after the command 
+	+ `llvm-bolt mysqld -o mysqld.bolt --enable-bat -data=perf.fdata -reorder-blocks=cache+ -reorder-functions=hfsort` 
+	+ is run, <strong>llvm-bolt</strong> has the following output:
+```
+BOLT-WARNING: '-reorder-blocks=cache+' is deprecated, please use '-reorder-blocks=ext-tsp' instead
+BOLT-INFO: Target architecture: x86_64
+BOLT-INFO: BOLT version: 24b54c4b0a751a93df3f3b58056cc4c52ab56b89
+BOLT-INFO: first alloc address is 0x200000
+BOLT-INFO: creating new program header table at address 0x4400000, offset 0x4200000
+BOLT-WARNING: debug info will be stripped from the binary. Use -update-debug-sections to keep it.
+BOLT-INFO: enabling relocation mode
+BOLT-INFO: enabling lite mode
+BOLT-WARNING: split function detected on input : _ZL28delete_dictionary_tablespacev.cold/1. The support is limited in relocation mode
+BOLT-WARNING: disabling lite mode (-lite) when split functions are present
+BOLT-INFO: pre-processing profile using branch profile reader
+BOLT-INFO: 1195 out of 67428 functions in the binary (1.8%) have non-empty execution profile
+BOLT-INFO: 10 functions with profile could not be optimized
+BOLT-INFO: profile for 1 objects was ignored
+BOLT-INFO: the input contains 6915 (dynamic count : 309258) opportunities for macro-fusion optimization. Will fix instances on a hot path.
+BOLT-INFO: 477257 instructions were shortened
+BOLT-INFO: removed 175126 empty blocks
+BOLT-INFO: basic block reordering modified layout of 748 functions (62.59% of profiled, 1.10% of total)
+BOLT-INFO: UCE removed 1 blocks and 10 bytes of code.
+BOLT-INFO: 25 Functions were reordered by LoopInversionPass
+BOLT-INFO: SCTC: patched 2956 tail calls (2937 forward) tail calls (19 backward) from a total of 2956 while removing 30 double jumps and removing 2818 basic blocks totalling 14051 bytes of code. CTCs total execution count is 115003 and the number of times CTCs are taken is 20342.
+BOLT-INFO: setting __hot_start to 0x4600000
+BOLT-INFO: setting __hot_end to 0x4700ce4
+BOLT-INFO: patched build-id (flipped last bit)
+BOLT-INFO: Wrote 67427 BAT maps
+BOLT-INFO: Wrote 0 BAT cold-to-hot entries
+BOLT-INFO: Wrote 2430290 Reversed BAT maps
+```
+
 
 
 
