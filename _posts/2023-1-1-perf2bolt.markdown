@@ -53,4 +53,5 @@ categories: cont-opt
         * the `LBREntry` will be pushed to [PerfBranchSample](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/include/bolt/Profile/DataAggregator.h#L83)
         * then the `PerfBranchSample` as the return value will be passed to `parseBranchEvents()`
     + In `parseBranchEvents()`, it will discard some of the abnormal/illegal samples (such as our case where profile collected from C1 round)
-        * it's good to add
+        * it's good to add `BAT->readReversedBATSections()` at the beginning of this `parseBranchEvents()`, in order to get the reversed BAT from Binary Context.
+        * then in `parseLBREntry()`'s updating of `LBREntry`, we are able to change the original address into the BOLTed address according to reversed BAT.
