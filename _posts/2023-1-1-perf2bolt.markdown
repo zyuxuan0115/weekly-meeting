@@ -20,4 +20,9 @@ categories: cont-opt
 - The next question is how to run this `BAT->parseReverse()`.
     + [RewriteInstance::readSpecialSections()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Rewrite/RewriteInstance.cpp#L1593) uses [BAT->parse()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Rewrite/RewriteInstance.cpp#L1642). 
     + [dumpBATFor()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/tools/bat-dump/bat-dump.cpp#L81) also uses [BAT.parse()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/tools/bat-dump/bat-dump.cpp#L112)
-    + These 2 examples can be considered when we use BAT->parseReverse(), in `perf2bolt`'s [DataAggregator](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp)
+        * These 2 examples can be considered when we use `BAT->parseReverse()`, in `perf2bolt`'s [DataAggregator](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp)
+        * Because in `DataAggregator`, `BinaryContext BC` already exists, I choose to use [RewriteInstance::readSpecialSections()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Rewrite/RewriteInstance.cpp#L1593)'s way to run `BAT->parseReverse()`.
+    + add [readReversedBATSections()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L665) to `DataAggregator`
+        * This `readReversedBATSections()` will get the reversed BAT from BOLTed binary's note section.
+        * And then will store the reversed BAT into [ReversedMap](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/include/bolt/Profile/BoltAddressTranslation.h#L132)
+- Now with the `reversed BAT`, we can modify the LBR profile collected from <strong>C1</strong> round 
