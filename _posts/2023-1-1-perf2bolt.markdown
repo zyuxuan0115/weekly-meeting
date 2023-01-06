@@ -25,4 +25,32 @@ categories: cont-opt
     + add [readReversedBATSections()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L665) to `DataAggregator`
         * This `readReversedBATSections()` will get the reversed BAT from BOLTed binary's note section.
         * And then will store the reversed BAT into [ReversedMap](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/include/bolt/Profile/BoltAddressTranslation.h#L132)
-- Now with the `reversed BAT`, we can modify the LBR profile collected from <strong>C1</strong> round 
+
+### With <strong>reversed BAT</strong>, modify LBR profile collected from <strong>C1</strong> round
+```
+2833111           46021c0 
+0x206bd10/0x4601f44/P/-/-/1  
+0x206bc3b/0x206bd10/P/-/-/90  
+0x37a904c/0x206bc1d/P/-/-/8  
+0x37a9064/0x37a904a/P/-/-/3  
+...
+```
+
+- On 12-12-2022's post, we know that in [parseBranchEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1425), it calls [parseBranchSample()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1095)
+    + `parseBranchSample()` will first extract PID from the `perf script`'s output
+        * compare this PID with the PID stored in `BinaryMMapInfo`
+    + `parseBranchSample()` will then extract IP (instruction) pointer from the `perf script`'s output       
+    + After getting the `PID` and `Address` of the branch, `parseBranchSample()` calls [parseLBREntry()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1012)
+    + In `parseLBREntry()`, it parses the string by `/`, and then records:
+        * the first address to `Res.From`
+        * the second address to `Res.To`
+        * the third element into `Res.Mispred`
+- How the data is recorded
+    + In `parseLBREntry()` 
+        * the addresses from LBR sample will be recorded into [LBREntry](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/include/bolt/Profile/DataReader.h#L34)
+        * then the `LBREntry` as the return value will be passed to `parseBranchSample()`
+    + In `parseBranchSample()`
+        * the `LBREntry` will be pushed to [PerfBranchSample](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/include/bolt/Profile/DataAggregator.h#L83)
+        * then the `PerfBranchSample` as the return value will be passed to `parseBranchEvents()`
+    + In `parseBranchEvents()`, it will discard some of the abnormal/illegal samples (such as our case where profile collected from C1 round)
+        * it's good to add
