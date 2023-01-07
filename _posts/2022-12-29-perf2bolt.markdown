@@ -86,7 +86,7 @@ BB mappings:
 
 According [BAT.h](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/include/bolt/Profile/BoltAddressTranslation.h), `BAT` is stored in [std::map<uint64_t, MapTy> Maps;](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/include/bolt/Profile/BoltAddressTranslation.h#L121)
 - the key of `Maps` is the starting address of a BOLTed function
-- the value of the `Maps` is another `std::map<uint64_t, uint64_t>` (aka. `MapTy`), whose key is the offset of the BOLTed insn and value is the offset of the original insn
+- the value of the `Maps` is another `std::map<uint32_t, uint32_t>` (aka. `MapTy`), whose key is the offset of the BOLTed insn and value is the offset of the original insn
 
 However, what we need is `original address -> BOLTed address`, so we need to reconstruction a BAT.
 - In `llvm-bolt`'s rewriteInstance class, it has the following 2 functions to write BAT into the BOLTed binary
@@ -101,9 +101,9 @@ However, what we need is `original address -> BOLTed address`, so we need to rec
 	+ [RewriteInstance::encodeReversedBATSection()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Rewrite/RewriteInstance.cpp#L4250)
 		* instead of extracting BAT and write BAT to the output stream by [BAT->write()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/BoltAddressTranslation.cpp#L117), I wrote another function [BAT->writeReverse()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/BoltAddressTranslation.cpp#L185) in [BAT.cpp](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/BoltAddressTranslation.cpp).
 		* the reason is to do this change is because
-			- BAT->write() returns `address -> [address -> address]` 
+			- [BAT->write()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/BoltAddressTranslation.cpp#L117) returns `address -> [address -> address]` 
 			- This is `BOLTed func starting addr -> [BOLTed insn offset -> original insn offset] `
-			- BAT->writeReverse() returns `address -> address` 
+			- [BAT->writeReverse()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/BoltAddressTranslation.cpp#L185) returns `address -> address` 
 			- `original insn address -> BOLTed insn address`
 			
 		* to encode ELF note of reversed BAT, the first argument passed to `BinarySection::encodeELFNote()` becomes to `BinarySection::NT_BOLT_REVERSED_BAT`. 
@@ -141,7 +141,104 @@ BOLT-INFO: Wrote 67427 BAT maps
 BOLT-INFO: Wrote 0 BAT cold-to-hot entries
 BOLT-INFO: Wrote 2430290 Reversed BAT maps
 ```
-
-
-
+	+ And if we run `readelf -S mysqld.bolt`, we get
+```
+There are 44 section headers, starting at offset 0xab0ae00:
+Section Headers:
+  [Nr] Name              Type             Address           Offset
+       Size              EntSize          Flags  Link  Info  Align
+  [ 0]                   NULL             0000000000000000  00000000
+       0000000000000000  0000000000000000           0     0     0
+  [ 1] .interp           PROGBITS         0000000000200350  00000350
+       000000000000001c  0000000000000000   A       0     0     1
+  [ 2] .note.ABI-tag     NOTE             000000000020036c  0000036c
+       0000000000000020  0000000000000000   A       0     0     4
+  [ 3] .note.gnu.build-i NOTE             000000000020038c  0000038c
+       0000000000000018  0000000000000000   A       0     0     4
+  [ 4] .note.gnu.propert NOTE             00000000002003a8  000003a8
+       0000000000000020  0000000000000000   A       0     0     8
+  [ 5] .dynsym           DYNSYM           00000000002003c8  000003c8
+       00000000001b5628  0000000000000018   A       9     1     8
+  [ 6] .gnu.version      VERSYM           00000000003b59f0  001b59f0
+       000000000002472e  0000000000000002   A       5     0     2
+  [ 7] .gnu.version_r    VERNEED          00000000003da120  001da120
+       0000000000000390  0000000000000000   A       9     9     4
+  [ 8] .gnu.hash         GNU_HASH         00000000003da4b0  001da4b0
+       000000000007a15c  0000000000000000   A       5     0     8
+  [ 9] .dynstr           STRTAB           000000000045460c  0025460c
+       0000000000656da5  0000000000000000   A       0     0     1
+  [10] .rela.dyn         RELA             0000000000aab3b8  008ab3b8
+       000000000002d3d8  0000000000000018   A       5     0     8
+  [11] .rela.plt         RELA             0000000000ad8790  008d8790
+       0000000000004620  0000000000000018  AI       5    30     8
+  [12] .rodata           PROGBITS         0000000000adcdc0  008dcdc0
+       0000000000cba0fc  0000000000000000 AMS       0     0     32
+  [13] .bolt.org.eh_fram PROGBITS         0000000001796ec0  01596ec0
+       0000000000280a7c  0000000000000000   A       0     0     8
+  [14] .bolt.org.gcc_exc PROGBITS         0000000001a1793c  0181793c
+       0000000000086729  0000000000000000   A       0     0     4
+  [15] .bolt.org.eh_fram PROGBITS         0000000001a9e068  0189e068
+       0000000000083af4  0000000000000000   A       0     0     4
+  [16] .bolt.org.text    PROGBITS         0000000001b22b80  01921b80
+       0000000001da2275  0000000000000000  AX       0     0     64
+  [17] .init             PROGBITS         00000000038c4df8  036c3df8
+       000000000000001b  0000000000000000  AX       0     0     4
+  [18] .fini             PROGBITS         00000000038c4e14  036c3e14
+       000000000000000d  0000000000000000  AX       0     0     4
+  [19] .plt              PROGBITS         00000000038c4e30  036c3e30
+       0000000000002ed0  0000000000000000  AX       0     0     16
+  [20] .plt.sec          PROGBITS         00000000038c7d00  036c6d00
+       0000000000002ec0  0000000000000000  AX       0     0     16
+  [21] .tdata            PROGBITS         00000000038cbbc0  036c9bc0
+       0000000000000008  0000000000000000 WAT       0     0     8
+  [22] .tbss             NOBITS           00000000038cbbc8  036c9bc8
+       00000000000000b0  0000000000000000 WAT       0     0     8
+  [23] .fini_array       FINI_ARRAY       00000000038cbbc8  036c9bc8
+       0000000000000008  0000000000000008  WA       0     0     8
+  [24] .init_array       INIT_ARRAY       00000000038cbbd0  036c9bd0
+       0000000000001508  0000000000000008  WA       0     0     8
+  [25] .data.rel.ro      PROGBITS         00000000038cd0e0  036cb0e0
+       0000000000171ce8  0000000000000000  WA       0     0     32
+  [26] .dynamic          DYNAMIC          0000000003a3edc8  0383cdc8
+       0000000000000220  0000000000000010  WA       9     0     8
+  [27] .got              PROGBITS         0000000003a3efe8  0383cfe8
+       0000000000000420  0000000000000000  WA       0     0     8
+  [28] .data             PROGBITS         0000000003a40420  0383d420
+       00000000003884b8  0000000000000000  WA       0     0     32
+  [29] .tm_clone_table   PROGBITS         0000000003dc88d8  03bc58d8
+       0000000000000000  0000000000000000  WA       0     0     8
+  [30] .got.plt          PROGBITS         0000000003dc88d8  03bc58d8
+       0000000000001778  0000000000000000  WA       0     0     8
+  [31] .bss              NOBITS           0000000003dca080  03bc7050
+       0000000000532129  0000000000000000  WA       0     0     64
+  [32] .text             PROGBITS         0000000004600000  04400000
+       0000000000108f64  0000000000000000  AX       0     0     2097152
+  [33] .text.cold        PROGBITS         0000000004708f80  04508f80
+       0000000001ba880d  0000000000000000  AX       0     0     64
+  [34] .eh_frame         PROGBITS         00000000062b1790  060b1790
+       00000000004f13cc  0000000000000000   A       0     0     8
+  [35] .gcc_except_table PROGBITS         00000000067a2b5c  065a2b5c
+       0000000000130091  0000000000000000   A       0     0     4
+  [36] .eh_frame_hdr     PROGBITS         00000000068d2bf0  066d2bf0
+       00000000001075dc  0000000000000000   A       0     0     1
+  [37] .comment          PROGBITS         0000000000000000  067da1cc
+       000000000000003f  0000000000000001  MS       0     0     1
+  [38] .symtab           SYMTAB           0000000000000000  067da210
+       00000000002ed7a8  0000000000000018          40   53263     8
+  [39] .shstrtab         STRTAB           0000000000000000  06ac79b8
+       000000000000027d  0000000000000000           0     0     1
+  [40] .strtab           STRTAB           0000000000000000  06ac7c35
+       00000000007de4f8  0000000000000000           0     0     1
+  [41] .note.bolt_info   NOTE             0000000000000000  072a612d
+       0000000000000160  0000000000000000           0     0     1
+  [42] .note.bolt_bat    NOTE             0000000000000000  072a628d
+       000000000134f628  0000000000000000           0     0     1
+  [43] .note.bolt_revers NOTE             0000000000000000  085f58b5
+       000000000251553c  0000000000000000           0     0     1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  l (large), p (processor specific)
+```
 

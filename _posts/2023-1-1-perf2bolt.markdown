@@ -59,3 +59,66 @@ categories: cont-opt
     + 
     + store the reversed BAT into a hash map in order to perform lookup easily
     + in [parseLBREntry()](), change the address if the address of the instruction occurs in the reversed BAT
+
+### Problem needs to be fixed
+After switching to our modified version of `llvm-bolt`, I got the following <strong>mmap()</strong> error when OCOLOS inserted code to mysqld's text section:
+```
+[tracee (lib)] target addr = 0x62b1680, len=13
+[tracee (lib)] mmap failed
+[tracee (lib)] error: File exists
+```
+
+To check why mmap() has such an error, I  
+- The address space of the <strong>BOLTed binary</strong> which `has reversed BAT` in its address space. 
+```
+  1 00200000-01b22000 r--p 00000000 09:00 126364470        /usr/local/mysql/bin/mysqld.bolt
+  2 01b22000-038cb000 r-xp 01921000 09:00 126364470        /usr/local/mysql/bin/mysqld.bolt
+  3 038cb000-03a40000 r--p 036c9000 09:00 126364470        /usr/local/mysql/bin/mysqld.bolt
+  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364470        /usr/local/mysql/bin/mysqld.bolt
+  5 03dcb000-042fd000 rw-p 00000000 00:00 0
+  6 04400000-069db000 r-xp 04200000 09:00 126364470        /usr/local/mysql/bin/mysqld.bolt
+  7 071a0000-09ac8000 rw-p 00000000 00:00 0                [heap]
+```
+- The address space of the <strong>original binary</strong> which is waiting for `OCOLOS`'s code replacement
+```
+  1 00200000-01b22000 r--p 00000000 09:00 126354168        /usr/local/mysql/bin/mysqld
+  2 01b22000-038cb000 r-xp 01921000 09:00 126354168        /usr/local/mysql/bin/mysqld
+  3 038cb000-03a40000 r--p 036c9000 09:00 126354168        /usr/local/mysql/bin/mysqld
+  4 03a40000-03dcb000 rw-p 0383d000 09:00 126354168        /usr/local/mysql/bin/mysqld
+  5 03dcb000-042fd000 rw-p 00000000 00:00 0
+  6 0471b000-07043000 rw-p 00000000 00:00 0                [heap]
+```
+- The address space of the <strong>BOLTed binary</strong> which `has NO reversed BAT` in its address space.
+```
+  1 00200000-01b22000 r--p 00000000 09:00 126364470       /usr/local/mysql/bin/mysqld.bolt
+  2 01b22000-038cb000 r-xp 01921000 09:00 126364470       /usr/local/mysql/bin/mysqld.bolt
+  3 038cb000-03a40000 r--p 036c9000 09:00 126364470       /usr/local/mysql/bin/mysqld.bolt
+  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364470       /usr/local/mysql/bin/mysqld.bolt
+  5 03dcb000-042fd000 rw-p 00000000 00:00 0
+  6 04400000-04b1b000 r-xp 04200000 09:00 126364470       /usr/local/mysql/bin/mysqld.bolt
+  7 0649e000-08dc6000 rw-p 00000000 00:00 0               [heap]
+```
+
+- Does BOLT (my modified version) really place the BOLTed functions at 0x
+    + Yes, it does.
+    + This is the result from `nm -S mysqld.bolt`
+```
+0000000004b2e080 T _Z17is_sqlstate_validPK16MYSQL_LEX_STRING
+0000000004c8b0c0 T _Z17is_updatable_viewP3THDP10TABLE_LIST
+0000000004728e1a T _Z17is_valid_log_namePKcm
+0000000005a7e340 T _Z17lf_dynarray_valueP11LF_DYNARRAYj
+0000000005a7df48 T _Z17lf_pinbox_destroyP9LF_PINBOX
+00000000061e7e8a T _Z17localtime_to_TIMEP10MYSQL_TIMEPK2tm
+0000000005e11184 T _Z17lock_get_mode_strPK9ib_lock_t
+0000000005e110c4 t _Z17lock_get_mode_strPK9ib_lock_t.cold
+0000000005e03e88 T _Z17lock_get_table_idPK9ib_lock_t
+0000000005e03e56 T _Z17lock_get_type_strPK9ib_lock_t
+0000000004bc8a50 T _Z17lock_plugin_mutexv
+0000000005e03840 T _Z17lock_rec_get_prevPK9ib_lock_tm
+0000000005e0369c T _Z17lock_rec_trx_waitP9ib_lock_tmm
+0000000005e30b80 T _Z17log_buffer_resizeR5log_tm
+000000000618c280 T _Z17log_builtins_exitv
+000000000618d61e T _Z17log_builtins_initv
+000000000618d600 t _Z17log_builtins_initv.cold
+```
+    
