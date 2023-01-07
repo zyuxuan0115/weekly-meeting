@@ -39,7 +39,7 @@ categories: cont-opt
 - On 12-12-2022's post, we know that in [parseBranchEvents()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1425), it calls [parseBranchSample()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1095)
     + `parseBranchSample()` will first extract PID from the `perf script`'s output
         * compare this PID with the PID stored in `BinaryMMapInfo`
-    + `parseBranchSample()` will then extract IP (instruction) pointer from the `perf script`'s output       
+    + `parseBranchSample()` will then extract IP (instruction pointer） from the `perf script`'s output       
     + After getting the `PID` and `Address` of the branch, `parseBranchSample()` calls [parseLBREntry()](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1012)
     + In `parseLBREntry()`, it parses the string by `/`, and then records:
         * the first address to `Res.From`
@@ -53,5 +53,9 @@ categories: cont-opt
         * the `LBREntry` will be pushed to [PerfBranchSample](https://github.com/zyuxuan0115/llvm-project/blob/main/bolt/include/bolt/Profile/DataAggregator.h#L83)
         * then the `PerfBranchSample` as the return value will be passed to `parseBranchEvents()`
     + In `parseBranchEvents()`, it will discard some of the abnormal/illegal samples (such as our case where profile collected from C1 round)
-        * it's good to add `BAT->readReversedBATSections()` at the beginning of this `parseBranchEvents()`, in order to get the reversed BAT from Binary Context.
+        * it's good to add `DataAggregator::readReversedBATSections()` at the beginning of this `parseBranchEvents()`, in order to get the reversed BAT from Binary Context.
         * then in `parseLBREntry()`'s updating of `LBREntry`, we are able to change the original address into the BOLTed address according to reversed BAT.
+- The code added to change the LBR record
+    + 
+    + store the reversed BAT into a hash map in order to perform lookup easily
+    + in [parseLBREntry()](), change the address if the address of the instruction occurs in the reversed BAT
