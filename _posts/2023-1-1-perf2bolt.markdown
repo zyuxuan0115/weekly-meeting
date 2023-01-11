@@ -63,43 +63,23 @@ categories: cont-opt
 ### Problem needs to be fixed
 After switching to our modified version of `llvm-bolt`, I got the following <strong>mmap()</strong> error when OCOLOS inserted code to mysqld's text section:
 ```
-[tracee (lib)] target addr = 0x62b1680, len=13
+[tracee (lib)] target addr = 0x62b1700, len=13
 [tracee (lib)] mmap failed
 [tracee (lib)] error: File exists
 ```
 
-To check why mmap() has such an error, I  
-- The address space of the <strong>BOLTed binary</strong> which `has reversed BAT` in its address space. 
-```
-  1 00200000-01b22000 r--p 00000000 09:00 126364470        /usr/local/mysql/bin/mysqld.bolt
-  2 01b22000-038cb000 r-xp 01921000 09:00 126364470        /usr/local/mysql/bin/mysqld.bolt
-  3 038cb000-03a40000 r--p 036c9000 09:00 126364470        /usr/local/mysql/bin/mysqld.bolt
-  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364470        /usr/local/mysql/bin/mysqld.bolt
-  5 03dcb000-042fd000 rw-p 00000000 00:00 0
-  6 04400000-069db000 r-xp 04200000 09:00 126364470        /usr/local/mysql/bin/mysqld.bolt
-  7 071a0000-09ac8000 rw-p 00000000 00:00 0                [heap]
-```
-- The address space of the <strong>original binary</strong> which is waiting for `OCOLOS`'s code replacement
-```
-  1 00200000-01b22000 r--p 00000000 09:00 126354168        /usr/local/mysql/bin/mysqld
-  2 01b22000-038cb000 r-xp 01921000 09:00 126354168        /usr/local/mysql/bin/mysqld
-  3 038cb000-03a40000 r--p 036c9000 09:00 126354168        /usr/local/mysql/bin/mysqld
-  4 03a40000-03dcb000 rw-p 0383d000 09:00 126354168        /usr/local/mysql/bin/mysqld
-  5 03dcb000-042fd000 rw-p 00000000 00:00 0
-  6 0471b000-07043000 rw-p 00000000 00:00 0                [heap]
-```
-- The address space of the <strong>BOLTed binary</strong> which `has NO reversed BAT` in its address space.
-```
-  1 00200000-01b22000 r--p 00000000 09:00 126364470       /usr/local/mysql/bin/mysqld.bolt
-  2 01b22000-038cb000 r-xp 01921000 09:00 126364470       /usr/local/mysql/bin/mysqld.bolt
-  3 038cb000-03a40000 r--p 036c9000 09:00 126364470       /usr/local/mysql/bin/mysqld.bolt
-  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364470       /usr/local/mysql/bin/mysqld.bolt
-  5 03dcb000-042fd000 rw-p 00000000 00:00 0
-  6 04400000-04b1b000 r-xp 04200000 09:00 126364470       /usr/local/mysql/bin/mysqld.bolt
-  7 0649e000-08dc6000 rw-p 00000000 00:00 0               [heap]
-```
+To check why mmap() has such an error, I first used `gdb` to disassemble the BOLTed function at `0x62b1700`, and found there is a function at the address.
+```gdb
+(gdb) disas 0x62b1700
+Dump of assembler code for function _fini:
+   0x00000000062b1700 <+0>:	endbr64
+   0x00000000062b1704 <+4>:	sub    $0x8,%rsp
+   0x00000000062b1708 <+8>:	add    $0x8,%rsp
+   0x00000000062b170c <+12>:	retq
+End of assembler dump.
+``` 
 
-- Does BOLT (my modified version) really place the BOLTed functions at 0x
+- Does BOLT (my modified version) really place the BOLTed functions at the address that is higher than 0x60000000?
     + Yes, it does.
     + This is the result from `nm -S mysqld.bolt`
 ```
@@ -121,4 +101,46 @@ To check why mmap() has such an error, I
 000000000618d61e T _Z17log_builtins_initv
 000000000618d600 t _Z17log_builtins_initv.cold
 ```
+
+- The address space of the <strong>original binary</strong> which is waiting for `OCOLOS`'s code replacement
+```
+  1 00200000-01b22000 r--p 00000000 09:00 126354168        /usr/local/mysql/bin/mysqld
+  2 01b22000-038cb000 r-xp 01921000 09:00 126354168        /usr/local/mysql/bin/mysqld
+  3 038cb000-03a40000 r--p 036c9000 09:00 126354168        /usr/local/mysql/bin/mysqld
+  4 03a40000-03dcb000 rw-p 0383d000 09:00 126354168        /usr/local/mysql/bin/mysqld
+  5 03dcb000-042fd000 rw-p 00000000 00:00 0
+  6 0471b000-07043000 rw-p 00000000 00:00 0                [heap]
+```
+- The address space of the <strong>BOLTed binary</strong> which `has reversed BAT` & `BAT` in its address space. 
+```
+  1 00200000-01b22000 r--p 00000000 09:00 126364470        /usr/local/mysql/bin/mysqld.bolt
+  2 01b22000-038cb000 r-xp 01921000 09:00 126364470        /usr/local/mysql/bin/mysqld.bolt
+  3 038cb000-03a40000 r--p 036c9000 09:00 126364470        /usr/local/mysql/bin/mysqld.bolt
+  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364470        /usr/local/mysql/bin/mysqld.bolt
+  5 03dcb000-042fd000 rw-p 00000000 00:00 0
+  6 04400000-069db000 r-xp 04200000 09:00 126364470        /usr/local/mysql/bin/mysqld.bolt
+  7 071a0000-09ac8000 rw-p 00000000 00:00 0                [heap]
+```
+- The address space of the <strong>BOLTed binary</strong> which `has NO reversed BAT` but `has BAT` in its address space.
+```
+  1 00200000-01b22000 r--p 00000000 09:00 126364470       /usr/local/mysql/bin/mysqld.bolt
+  2 01b22000-038cb000 r-xp 01921000 09:00 126364470       /usr/local/mysql/bin/mysqld.bolt
+  3 038cb000-03a40000 r--p 036c9000 09:00 126364470       /usr/local/mysql/bin/mysqld.bolt
+  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364470       /usr/local/mysql/bin/mysqld.bolt
+  5 03dcb000-042fd000 rw-p 00000000 00:00 0
+  6 04400000-04b1b000 r-xp 04200000 09:00 126364470       /usr/local/mysql/bin/mysqld.bolt
+  7 0649e000-08dc6000 rw-p 00000000 00:00 0               [heap]
+```
+- The address space of the <strong>BOLTed binary</strong> which has neither `reversed BAT` nor `BAT` in its address space
+```
+  1 00200000-01b22000 r--p 00000000 09:00 126364470       /usr/local/mysql/bin/mysqld.bolt
+  2 01b22000-038cb000 r-xp 01921000 09:00 126364470       /usr/local/mysql/bin/mysqld.bolt
+  3 038cb000-03a40000 r--p 036c9000 09:00 126364470       /usr/local/mysql/bin/mysqld.bolt
+  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364470       /usr/local/mysql/bin/mysqld.bolt
+  5 03dcb000-042fd000 rw-p 00000000 00:00 0
+  6 04400000-04b1b000 r-xp 04200000 09:00 126364470       /usr/local/mysql/bin/mysqld.bolt
+  7 05ede000-08806000 rw-p 00000000 00:00 0               [heap]
+```
+
+
     

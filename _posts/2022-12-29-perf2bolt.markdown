@@ -47,6 +47,7 @@ SQL statistics:
 ### The reason why profile data collected from C1 round is worse
 - `perf2bolt` discard LBR records 
 	+ because the mismatch between the profile collected from C1 round and the offline BOLTed binary
+	+ ![pic](/assets/2022-12-12/code_layout.png)
 
 
 ### The way to fix C1 round profile data
