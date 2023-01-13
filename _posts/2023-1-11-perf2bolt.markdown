@@ -4,5 +4,84 @@ title:  "2022-1-11 extracting reversed BAT"
 date:   2023-1-11 10:53:46 -0500
 categories: cont-opt 
 ---
+### Change the Reversed BAT into Func Map Table
 
-   
+- `mysqld.bolt` produced by [my modified llvm github repo](https://github.com/zyuxuan0115/llvm-project)'s BOLT <strong>with</strong> `--enable-bat` <strong>but without</strong> `--enable-func-map-table`
+```
+  1 00200000-01b22000 r--p 00000000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  2 01b22000-038cb000 r-xp 01921000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  3 038cb000-03a40000 r--p 036c9000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  5 03dcb000-042fd000 rw-p 00000000 00:00 0
+  6 04400000-069db000 r-xp 04200000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  7 06c60000-09588000 rw-p 00000000 00:00 0                  [heap]
+``` 
+- `mysqld.bolt` produced by [my modified llvm github repo](https://github.com/zyuxuan0115/llvm-project)'s BOLT <strong>without</strong> `--enable-bat` & `--enable-func-map-table`
+```
+  1 00200000-01b22000 r--p 00000000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+  2 01b22000-038cb000 r-xp 01921000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+  3 038cb000-03a40000 r--p 036c9000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+  5 03dcb000-042fd000 rw-p 00000000 00:00 0
+  6 04400000-069db000 r-xp 04200000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+  7 080a5000-0a9cc000 rw-p 00000000 00:00 0                  [heap]
+```
+- `mysqld.bolt` produced by [my modified llvm github repo](https://github.com/zyuxuan0115/llvm-project)'s BOLT <strong>with</strong> `--enable-bat` & `--enable-func-map-table`
+```
+  1 00200000-01b22000 r--p 00000000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  2 01b22000-038cb000 r-xp 01921000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  3 038cb000-03a40000 r--p 036c9000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  5 03dcb000-042fd000 rw-p 00000000 00:00 0
+  6 04400000-069db000 r-xp 04200000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  7 08657000-0af7e000 rw-p 00000000 00:00 0                  [heap]
+```
+<br/><br/>
+***
+<br/><br/>
+- `mysqld.bolt` produced by [Facebook's BOLT github repo](https://github.com/zyuxuan0115/llvm-project) with `--enable-bat` git hash = `88c70afe9d388ad430cc150cc158641701397f70`
+```
+  1 00200000-01b22000 r--p 00000000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  2 01b22000-038cb000 r-xp 01921000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  3 038cb000-03a40000 r--p 036c9000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  5 03dcb000-042fd000 rw-p 00000000 00:00 0
+  6 04400000-04b1b000 r-xp 04200000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  7 06487000-08dae000 rw-p 00000000 00:00 0                  [heap]
+```
+- `mysqld.bolt` produced by [Facebook's BOLT github repo](https://github.com/zyuxuan0115/llvm-project) without `--enable-bat` git hash = `88c70afe9d388ad430cc150cc158641701397f70`
+```
+  1 00200000-01b22000 r--p 00000000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+  2 01b22000-038cb000 r-xp 01921000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+  3 038cb000-03a40000 r--p 036c9000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+  5 03dcb000-042fd000 rw-p 00000000 00:00 0
+  6 04400000-04b1b000 r-xp 04200000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+  7 05c93000-085ba000 rw-p 00000000 00:00 0                  [heap]
+```
+<br/><br/>
+***
+<br/><br/>
+- `mysqld.bolt` produced by [the newest llvm's BOLT github repo](https://github.com/llvm/llvm-project) <strong>with</strong> `--enable-bat` git hash = `d86f1a982e8423a2ae5a424906f6960576c35606`
+```
+  1 00200000-01b22000 r--p 00000000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  2 01b22000-038cb000 r-xp 01921000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  3 038cb000-03a40000 r--p 036c9000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  5 03dcb000-042fd000 rw-p 00000000 00:00 0
+  6 04400000-069db000 r-xp 04200000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  7 08969000-0b291000 rw-p 00000000 00:00 0                  [heap]
+```
+- `mysqld.bolt` produced by [the newest llvm's BOLT github repo](https://github.com/llvm/llvm-project) <strong>without</strong> `--enable-bat` git hash = `d86f1a982e8423a2ae5a424906f6960576c35606`
+```
+  1 00200000-01b22000 r--p 00000000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+  2 01b22000-038cb000 r-xp 01921000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+  3 038cb000-03a40000 r--p 036c9000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+  5 03dcb000-042fd000 rw-p 00000000 00:00 0
+  6 04400000-069db000 r-xp 04200000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+  7 07208000-09b30000 rw-p 00000000 00:00 0                  [heap]
+```
+<br/><br/>
+***
+<br/><br/>
