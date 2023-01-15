@@ -85,3 +85,33 @@ categories: cont-opt
 <br/><br/>
 ***
 <br/><br/>
+
+```
+  1 00200000-01b22000 r--p 00000000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+  2 01b22000-038cb000 r-xp 01921000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+  3 038cb000-03a40000 r--p 036c9000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+  5 03dcb000-042fd000 rw-p 00000000 00:00 0
+  6 04400000-04b1b000 r-xp 04200000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+  7 06081000-089a8000 rw-p 00000000 00:00 0                  [heap]
+```
+
+```
+  1 00200000-01b22000 r--p 00000000 09:00 126364472                          /usr/local/mysql/bin/mysqld.bolt
+  2 01b22000-038cb000 r-xp 01921000 09:00 126364472                          /usr/local/mysql/bin/mysqld.bolt
+  3 038cb000-03a40000 r--p 036c9000 09:00 126364472                          /usr/local/mysql/bin/mysqld.bolt
+  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364472                          /usr/local/mysql/bin/mysqld.bolt
+  5 03dcb000-042fd000 rw-p 00000000 00:00 0
+  6 04400000-04b1b000 r-xp 04200000 09:00 126364472                          /usr/local/mysql/bin/mysqld.bolt
+  7 051a6000-07acd000 rw-p 00000000 00:00 0                                  [heap]
+```
+
+### The performance of OCOLOS on cascade52
+|   | original | Ocolos | offline BOLT | 
+| :----: |:----:|   :----:| :----: | 
+| 1 | | 7734.36 | 2m40.915s | 
+| 2 | 3m12.146s | 9008.29 | 9199.31 |
+| 3 | 2m43.879s | 3m0.540s | 2m43.761s |
+| 4 | 3m8.183s | 3m11.062s | 2m51.289s |
+| 5 | 3m31.861s | 3m47.807s | 2m41.504s |
+| 6 | 3m43.796s | 3m58.652s | 2m42.920s |
