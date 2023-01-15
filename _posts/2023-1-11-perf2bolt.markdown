@@ -107,6 +107,7 @@ categories: cont-opt
 ```
 
 ### The performance of OCOLOS on cascade52
+
 |   | original | Ocolos | offline BOLT | 
 | :----: |:----:|   :----:| :----: | 
 | 1 | | 7734.36 | 9205.93 | 
