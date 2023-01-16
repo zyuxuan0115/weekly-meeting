@@ -6,7 +6,9 @@ categories: cont-opt
 ---
 ### Change the Reversed BAT into Func Map Table
 
-- `mysqld.bolt` produced by [my modified llvm github repo](https://github.com/zyuxuan0115/llvm-project)'s BOLT <strong>with</strong> `--enable-bat` <strong>but without</strong> `--enable-func-map-table`
+- `mysqld.bolt` produced by [my modified llvm github repo](https://github.com/zyuxuan0115/llvm-project)'s BOLT  
+  + <strong>with</strong> `--enable-bat` 
+  + <strong>without</strong> `--enable-func-map-table`
 ```
   1 00200000-01b22000 r--p 00000000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
   2 01b22000-038cb000 r-xp 01921000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
@@ -16,7 +18,9 @@ categories: cont-opt
   6 04400000-069db000 r-xp 04200000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
   7 06c60000-09588000 rw-p 00000000 00:00 0                  [heap]
 ``` 
-- `mysqld.bolt` produced by [my modified llvm github repo](https://github.com/zyuxuan0115/llvm-project)'s BOLT <strong>without</strong> `--enable-bat` & `--enable-func-map-table`
+- `mysqld.bolt` produced by [my modified llvm github repo](https://github.com/zyuxuan0115/llvm-project)'s BOLT
+  + <strong>without</strong> `--enable-bat` 
+  + <strong>without</strong> `--enable-func-map-table`
 ```
   1 00200000-01b22000 r--p 00000000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
   2 01b22000-038cb000 r-xp 01921000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
@@ -26,7 +30,9 @@ categories: cont-opt
   6 04400000-069db000 r-xp 04200000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
   7 080a5000-0a9cc000 rw-p 00000000 00:00 0                  [heap]
 ```
-- `mysqld.bolt` produced by [my modified llvm github repo](https://github.com/zyuxuan0115/llvm-project)'s BOLT <strong>with</strong> `--enable-bat` & `--enable-func-map-table`
+- `mysqld.bolt` produced by [my modified llvm github repo](https://github.com/zyuxuan0115/llvm-project)'s BOLT  
+  + <strong>with</strong> `--enable-bat` 
+  + <strong>with</strong> `--enable-func-map-table`
 ```
   1 00200000-01b22000 r--p 00000000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
   2 01b22000-038cb000 r-xp 01921000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
@@ -37,9 +43,14 @@ categories: cont-opt
   7 08657000-0af7e000 rw-p 00000000 00:00 0                  [heap]
 ```
 <br/><br/>
+
 ***
+
 <br/><br/>
-- `mysqld.bolt` produced by [Facebook's BOLT github repo](https://github.com/zyuxuan0115/llvm-project) with `--enable-bat` git hash = `88c70afe9d388ad430cc150cc158641701397f70`
+- `mysqld.bolt` produced by [Facebook's BOLT github repo](https://github.com/facebookincubator/BOLT) 
+  + <strong>with</strong> `--enable-bat` 
+  + git hash = `88c70afe9d388ad430cc150cc158641701397f70` 
+  + This version is used by OCOLOS
 ```
   1 00200000-01b22000 r--p 00000000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
   2 01b22000-038cb000 r-xp 01921000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
@@ -49,7 +60,10 @@ categories: cont-opt
   6 04400000-04b1b000 r-xp 04200000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
   7 06487000-08dae000 rw-p 00000000 00:00 0                  [heap]
 ```
-- `mysqld.bolt` produced by [Facebook's BOLT github repo](https://github.com/zyuxuan0115/llvm-project) without `--enable-bat` git hash = `88c70afe9d388ad430cc150cc158641701397f70`
+- `mysqld.bolt` produced by [Facebook's BOLT github repo](https://github.com/facebookincubator/BOLT) 
+  + <strong>without</strong> `--enable-bat` 
+  + git hash = `88c70afe9d388ad430cc150cc158641701397f70` 
+  + This version is used by OCOLOS
 ```
   1 00200000-01b22000 r--p 00000000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
   2 01b22000-038cb000 r-xp 01921000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
@@ -60,9 +74,13 @@ categories: cont-opt
   7 05c93000-085ba000 rw-p 00000000 00:00 0                  [heap]
 ```
 <br/><br/>
+
 ***
+
 <br/><br/>
-- `mysqld.bolt` produced by [the newest llvm's BOLT github repo](https://github.com/llvm/llvm-project) <strong>with</strong> `--enable-bat` git hash = `d86f1a982e8423a2ae5a424906f6960576c35606`
+- `mysqld.bolt` produced by [the latest update of llvm's BOLT github repo](https://github.com/llvm/llvm-project)  
+  + <strong>with</strong> `--enable-bat` 
+  + git hash = `d86f1a982e8423a2ae5a424906f6960576c35606`
 ```
   1 00200000-01b22000 r--p 00000000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
   2 01b22000-038cb000 r-xp 01921000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
@@ -72,7 +90,9 @@ categories: cont-opt
   6 04400000-069db000 r-xp 04200000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
   7 08969000-0b291000 rw-p 00000000 00:00 0                  [heap]
 ```
-- `mysqld.bolt` produced by [the newest llvm's BOLT github repo](https://github.com/llvm/llvm-project) <strong>without</strong> `--enable-bat` git hash = `d86f1a982e8423a2ae5a424906f6960576c35606`
+- `mysqld.bolt` produced by [the latest update of llvm's BOLT github repo](https://github.com/llvm/llvm-project)
+  + <strong>without</strong> `--enable-bat` 
+  + git hash = `d86f1a982e8423a2ae5a424906f6960576c35606`
 ```
   1 00200000-01b22000 r--p 00000000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
   2 01b22000-038cb000 r-xp 01921000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
@@ -83,9 +103,13 @@ categories: cont-opt
   7 07208000-09b30000 rw-p 00000000 00:00 0                  [heap]
 ```
 <br/><br/>
-***
-<br/><br/>
 
+***
+
+<br/><br/>
+- `mysqld.bolt` produced by [the latest update of Facebook's BOLT github repo](https://github.com/facebookincubator/BOLT) 
+  + <strong>with</strong> `--enable-bat` 
+  + git hash = `56ff67ccd90702d87a44c7e60abe3c4986855493`
 ```
   1 00200000-01b22000 r--p 00000000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
   2 01b22000-038cb000 r-xp 01921000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
@@ -95,24 +119,38 @@ categories: cont-opt
   6 04400000-04b1b000 r-xp 04200000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
   7 06081000-089a8000 rw-p 00000000 00:00 0                  [heap]
 ```
-
+- `mysqld.bolt` produced by [the latest update of Facebook's BOLT github repo](https://github.com/facebookincubator/BOLT) 
+  + <strong>without</strong> `--enable-bat` 
+  + git hash = `56ff67ccd90702d87a44c7e60abe3c4986855493`
 ```
-  1 00200000-01b22000 r--p 00000000 09:00 126364472                          /usr/local/mysql/bin/mysqld.bolt
-  2 01b22000-038cb000 r-xp 01921000 09:00 126364472                          /usr/local/mysql/bin/mysqld.bolt
-  3 038cb000-03a40000 r--p 036c9000 09:00 126364472                          /usr/local/mysql/bin/mysqld.bolt
-  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364472                          /usr/local/mysql/bin/mysqld.bolt
+  1 00200000-01b22000 r--p 00000000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  2 01b22000-038cb000 r-xp 01921000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  3 038cb000-03a40000 r--p 036c9000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
   5 03dcb000-042fd000 rw-p 00000000 00:00 0
-  6 04400000-04b1b000 r-xp 04200000 09:00 126364472                          /usr/local/mysql/bin/mysqld.bolt
-  7 051a6000-07acd000 rw-p 00000000 00:00 0                                  [heap]
+  6 04400000-04b1b000 r-xp 04200000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+  7 051a6000-07acd000 rw-p 00000000 00:00 0                  [heap]
 ```
+
+### Why there is a 
+
+
+### 
+![before](/assets/2023-01-15/before.png)
+![after](/assets/2023-01-15/after.png)
 
 ### The performance of OCOLOS on cascade52
+- Throughput (transactions/sec) reported by `sysbench` 
 
 |   | original | Ocolos | offline BOLT | 
 | :----: |:----:|   :----:| :----: | 
-| 1 | | 7734.36 | 9205.93 | 
+| 1 | 5581.39 | 7734.36 | 9205.93 | 
 | 2 | 5527.57 | 9008.29 | 9199.31 |
-| 3 | 2m43.879s | 3m0.540s | 2m43.761s |
-| 4 | 3m8.183s | 3m11.062s | 2m51.289s |
-| 5 | 3m31.861s | 3m47.807s | 2m41.504s |
-| 6 | 3m43.796s | 3m58.652s | 2m42.920s |
+| 3 | 5559.51 | 7715.76 | 8989.01 |
+| 4 | 5555.36 | 7780.07 | 9195.17 |
+| 5 | 5625.01 | 7652.45 | 9115.19 |
+| 6 | 5603.49 | 8226.59 | 8942.93 |
+| 7 | 5626.44 | 7807.37 | 9191.91 |
+| 8 | 5626.28 | 7730.24 | 9212.42 |
+| 9 | 5615.61 | 7556.94 | 9153.43 |
+| 10 | 5517.51 | 8141.70 | 9192.65 |
