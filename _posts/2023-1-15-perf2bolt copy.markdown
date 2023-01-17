@@ -7,3 +7,5 @@ categories: cont-opt
 
 - In [RewriteInstance::preprocessProfileData()](https://github.com/upenn-acg/BOLT/blob/main/bolt/lib/Rewrite/RewriteInstance.cpp#L2616) 
     + the function calls [ProfileReader->setBAT(&*BAT);](https://github.com/upenn-acg/BOLT/blob/main/bolt/lib/Rewrite/RewriteInstance.cpp#L2629)
+- In [BoltAddressTranslation.h]
+    + there is a function called [translate()](https://github.com/upenn-acg/BOLT/blob/main/bolt/include/bolt/Profile/BoltAddressTranslation.h#L95)
