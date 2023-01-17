@@ -101,64 +101,64 @@ categories: cont-opt
   + <strong>the previous version</strong> is the code after BOLT is merged into <strong>llvm project</strong>.
     * it's built from the code [llvm project's github repo](https://github.com/llvm/llvm-project)
     * it's still being updated now
+    * let's call it "<strong>llvm BOLT</strong>"
   + <strong>this version</strong> is the code before BOLT is merged into <strong>llvm project</strong>.
     * it's built from the code [Facebook BOLT's github repo](https://github.com/facebookincubator/BOLT)
     * its update is stopped since May, 2022.
+    * let's call it "<strong>Facebook BOLT</strong>"
 
 ### The further explanation
-- To understand 
-  * if different version of BOLT really have
-  * why
-- `mysqld.bolt` produced by [the latest update of llvm's BOLT github repo](https://github.com/llvm/llvm-project)  
-  + <strong>with</strong> `--enable-bat` 
-  + git hash = `d86f1a982e8423a2ae5a424906f6960576c35606`
+- To answer the following 2 questions, I also test the latest version of <strong>Facebook BOLT</strong> and the latest version of <strong>llvm BOLT</strong>
+  * Does different versions of BOLT really have different BOLTed text section?
+  * Why does different versions of BOLT have different size of the BOLTed text section?
+- Here are the results:
+  + `mysqld.bolt` produced by [the latest version of llvm BOLT](https://github.com/llvm/llvm-project)  
+    * <strong>with</strong> `--enable-bat` 
+    * git hash = `d86f1a982e8423a2ae5a424906f6960576c35606`
 ```
-  1 00200000-01b22000 r--p 00000000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
-  2 01b22000-038cb000 r-xp 01921000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
-  3 038cb000-03a40000 r--p 036c9000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
-  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
-  5 03dcb000-042fd000 rw-p 00000000 00:00 0
-  6 04400000-069db000 r-xp 04200000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
-  7 08969000-0b291000 rw-p 00000000 00:00 0                  [heap]
+1 00200000-01b22000 r--p 00000000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+2 01b22000-038cb000 r-xp 01921000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+3 038cb000-03a40000 r--p 036c9000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+4 03a40000-03dcb000 rw-p 0383d000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+5 03dcb000-042fd000 rw-p 00000000 00:00 0
+6 04400000-069db000 r-xp 04200000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+7 08969000-0b291000 rw-p 00000000 00:00 0                  [heap]
 ```
-- `mysqld.bolt` produced by [the latest update of llvm's BOLT github repo](https://github.com/llvm/llvm-project)
-  + <strong>without</strong> `--enable-bat` 
-  + git hash = `d86f1a982e8423a2ae5a424906f6960576c35606`
+  + `mysqld.bolt` produced by [the latest version of llvm BOLT](https://github.com/llvm/llvm-project)
+    * <strong>without</strong> `--enable-bat` 
+    * git hash = `d86f1a982e8423a2ae5a424906f6960576c35606`
 ```
-  1 00200000-01b22000 r--p 00000000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
-  2 01b22000-038cb000 r-xp 01921000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
-  3 038cb000-03a40000 r--p 036c9000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
-  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
-  5 03dcb000-042fd000 rw-p 00000000 00:00 0
-  6 04400000-069db000 r-xp 04200000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
-  7 07208000-09b30000 rw-p 00000000 00:00 0                  [heap]
+1 00200000-01b22000 r--p 00000000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+2 01b22000-038cb000 r-xp 01921000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+3 038cb000-03a40000 r--p 036c9000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+4 03a40000-03dcb000 rw-p 0383d000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+5 03dcb000-042fd000 rw-p 00000000 00:00 0
+6 04400000-069db000 r-xp 04200000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+7 07208000-09b30000 rw-p 00000000 00:00 0                  [heap]
 ```
-<br/><br/>
-
-***
-
-<br/><br/>
-- `mysqld.bolt` produced by [the latest update of Facebook's BOLT github repo](https://github.com/facebookincubator/BOLT) 
-  + <strong>with</strong> `--enable-bat` 
-  + git hash = `56ff67ccd90702d87a44c7e60abe3c4986855493`
+  + `mysqld.bolt` produced by [the latest version of Facebook BOLT](https://github.com/facebookincubator/BOLT) 
+    * <strong>with</strong> `--enable-bat` 
+    * git hash = `56ff67ccd90702d87a44c7e60abe3c4986855493`
 ```
-  1 00200000-01b22000 r--p 00000000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
-  2 01b22000-038cb000 r-xp 01921000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
-  3 038cb000-03a40000 r--p 036c9000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
-  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
-  5 03dcb000-042fd000 rw-p 00000000 00:00 0
-  6 04400000-04b1b000 r-xp 04200000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
-  7 06081000-089a8000 rw-p 00000000 00:00 0                  [heap]
+1 00200000-01b22000 r--p 00000000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+2 01b22000-038cb000 r-xp 01921000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+3 038cb000-03a40000 r--p 036c9000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+4 03a40000-03dcb000 rw-p 0383d000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+5 03dcb000-042fd000 rw-p 00000000 00:00 0
+6 04400000-04b1b000 r-xp 04200000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+7 06081000-089a8000 rw-p 00000000 00:00 0                  [heap]
 ```
-- `mysqld.bolt` produced by [the latest update of Facebook's BOLT github repo](https://github.com/facebookincubator/BOLT) 
-  + <strong>without</strong> `--enable-bat` 
-  + git hash = `56ff67ccd90702d87a44c7e60abe3c4986855493`
+  + `mysqld.bolt` produced by [the latest version of Facebook BOLT](https://github.com/facebookincubator/BOLT) 
+    * <strong>without</strong> `--enable-bat` 
+    * git hash = `56ff67ccd90702d87a44c7e60abe3c4986855493`
 ```
-  1 00200000-01b22000 r--p 00000000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
-  2 01b22000-038cb000 r-xp 01921000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
-  3 038cb000-03a40000 r--p 036c9000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
-  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
-  5 03dcb000-042fd000 rw-p 00000000 00:00 0
-  6 04400000-04b1b000 r-xp 04200000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
-  7 051a6000-07acd000 rw-p 00000000 00:00 0                  [heap]
+1 00200000-01b22000 r--p 00000000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+2 01b22000-038cb000 r-xp 01921000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+3 038cb000-03a40000 r--p 036c9000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+4 03a40000-03dcb000 rw-p 0383d000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+5 03dcb000-042fd000 rw-p 00000000 00:00 0
+6 04400000-04b1b000 r-xp 04200000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+7 051a6000-07acd000 rw-p 00000000 00:00 0                  [heap]
 ```
+  + The results show that at some point of <strong>llvm BOLT</strong>'s update, they changed some part of the code and that results in a larger BOLTed text section.
+    * 
