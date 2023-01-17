@@ -105,11 +105,10 @@ categories: cont-opt
     * it's built from the code [Facebook BOLT's github repo](https://github.com/facebookincubator/BOLT)
     * its update is stopped since May, 2022.
 
-<br/><br/>
-
-***
-
-<br/><br/>
+### The further explanation
+- To understand 
+  * if different version of BOLT really have
+  * why
 - `mysqld.bolt` produced by [the latest update of llvm's BOLT github repo](https://github.com/llvm/llvm-project)  
   + <strong>with</strong> `--enable-bat` 
   + git hash = `d86f1a982e8423a2ae5a424906f6960576c35606`
@@ -164,7 +163,7 @@ categories: cont-opt
   7 051a6000-07acd000 rw-p 00000000 00:00 0                  [heap]
 ```
 
-### The further explanation
+
 
 
 ### 

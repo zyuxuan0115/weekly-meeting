@@ -4,8 +4,18 @@ title:  "2022-1-17 Other issues related to Ocolos on cascade52"
 date:   2023-1-17 10:53:46 -0500
 categories: cont-opt 
 ---
+### The performance of OCOLOS on cascade52
+- Throughput (transactions/sec) reported by `sysbench` 
 
-- In [RewriteInstance::preprocessProfileData()](https://github.com/upenn-acg/BOLT/blob/main/bolt/lib/Rewrite/RewriteInstance.cpp#L2616) 
-    + the function calls [ProfileReader->setBAT(&*BAT);](https://github.com/upenn-acg/BOLT/blob/main/bolt/lib/Rewrite/RewriteInstance.cpp#L2629)
-- In [BoltAddressTranslation.h]
-    + there is a function called [translate()](https://github.com/upenn-acg/BOLT/blob/main/bolt/include/bolt/Profile/BoltAddressTranslation.h#L95)
+|   | original | Ocolos | offline BOLT | 
+| :----: |:----:|   :----:| :----: | 
+| 1 | 5581.39 | 7734.36 | 9205.93 | 
+| 2 | 5527.57 | 9008.29 | 9199.31 |
+| 3 | 5559.51 | 7715.76 | 8989.01 |
+| 4 | 5555.36 | 7780.07 | 9195.17 |
+| 5 | 5625.01 | 7652.45 | 9115.19 |
+| 6 | 5603.49 | 8226.59 | 8942.93 |
+| 7 | 5626.44 | 7807.37 | 9191.91 |
+| 8 | 5626.28 | 7730.24 | 9212.42 |
+| 9 | 5615.61 | 7556.94 | 9153.43 |
+| 10 | 5517.51 | 8141.70 | 9192.65 |
