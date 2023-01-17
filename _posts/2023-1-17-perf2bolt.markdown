@@ -1,0 +1,11 @@
+---
+layout: post
+title:  "2022-1-17 Other issues related to Ocolos on cascade52"
+date:   2023-1-17 10:53:46 -0500
+categories: cont-opt 
+---
+
+- In [RewriteInstance::preprocessProfileData()](https://github.com/upenn-acg/BOLT/blob/main/bolt/lib/Rewrite/RewriteInstance.cpp#L2616) 
+    + the function calls [ProfileReader->setBAT(&*BAT);](https://github.com/upenn-acg/BOLT/blob/main/bolt/lib/Rewrite/RewriteInstance.cpp#L2629)
+- In [BoltAddressTranslation.h]
+    + there is a function called [translate()](https://github.com/upenn-acg/BOLT/blob/main/bolt/include/bolt/Profile/BoltAddressTranslation.h#L95)

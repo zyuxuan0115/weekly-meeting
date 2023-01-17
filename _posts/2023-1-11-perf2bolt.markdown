@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "2022-1-11 extracting reversed BAT"
+title:  "2022-1-11 Reversed BAT is too large?"
 date:   2023-1-11 10:53:46 -0500
 categories: cont-opt 
 ---
@@ -67,32 +67,44 @@ categories: cont-opt
 ```
 
 ### Why is this the case?
-- `mysqld.bolt` produced by [Facebook's BOLT github repo](https://github.com/facebookincubator/BOLT) 
-  + <strong>with</strong> `--enable-bat` 
-  + git hash = `88c70afe9d388ad430cc150cc158641701397f70` 
-  + This version is used by OCOLOS
+- I noticed that compared with the `mysqld.bolt` produced from another version of BOLT has a different layout of the text section, and here is its output from `cat /proc/PID/maps`
+  + `mysqld.bolt` produced by [Facebook's BOLT github repo](https://github.com/facebookincubator/BOLT) 
+    * <strong>with</strong> `--enable-bat` 
+    * git hash = `88c70afe9d388ad430cc150cc158641701397f70` 
+    * This version is used by OCOLOS
 ```
-  1 00200000-01b22000 r--p 00000000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
-  2 01b22000-038cb000 r-xp 01921000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
-  3 038cb000-03a40000 r--p 036c9000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
-  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
-  5 03dcb000-042fd000 rw-p 00000000 00:00 0
-  6 04400000-04b1b000 r-xp 04200000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
-  7 06487000-08dae000 rw-p 00000000 00:00 0                  [heap]
+1 00200000-01b22000 r--p 00000000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+2 01b22000-038cb000 r-xp 01921000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+3 038cb000-03a40000 r--p 036c9000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+4 03a40000-03dcb000 rw-p 0383d000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+5 03dcb000-042fd000 rw-p 00000000 00:00 0
+6 04400000-04b1b000 r-xp 04200000 09:00 126364472          /usr/local/mysql/bin/mysqld.bolt
+7 06487000-08dae000 rw-p 00000000 00:00 0                  [heap]
 ```
-- `mysqld.bolt` produced by [Facebook's BOLT github repo](https://github.com/facebookincubator/BOLT) 
-  + <strong>without</strong> `--enable-bat` 
-  + git hash = `88c70afe9d388ad430cc150cc158641701397f70` 
-  + This version is used by OCOLOS
+  + `mysqld.bolt` produced by [Facebook's BOLT github repo](https://github.com/facebookincubator/BOLT) 
+    * <strong>without</strong> `--enable-bat` 
+    * git hash = `88c70afe9d388ad430cc150cc158641701397f70` 
+    * This version is used by OCOLOS
 ```
-  1 00200000-01b22000 r--p 00000000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
-  2 01b22000-038cb000 r-xp 01921000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
-  3 038cb000-03a40000 r--p 036c9000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
-  4 03a40000-03dcb000 rw-p 0383d000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
-  5 03dcb000-042fd000 rw-p 00000000 00:00 0
-  6 04400000-04b1b000 r-xp 04200000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
-  7 05c93000-085ba000 rw-p 00000000 00:00 0                  [heap]
+1 00200000-01b22000 r--p 00000000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+2 01b22000-038cb000 r-xp 01921000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+3 038cb000-03a40000 r--p 036c9000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+4 03a40000-03dcb000 rw-p 0383d000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+5 03dcb000-042fd000 rw-p 00000000 00:00 0
+6 04400000-04b1b000 r-xp 04200000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+7 05c93000-085ba000 rw-p 00000000 00:00 0                  [heap]
 ```
+- For this version of BOLT, no matter whether BAT is enabled, the BOLTed text section is the same. 
+  + Previously, <strong>Ocolos</strong> uses the `mysqld.bolt` produced by this version of BOLT.
+  + So we were safe.
+- The difference between <strong>the previous version</strong> and <strong>this version of BOLT</strong> is
+  + <strong>the previous version</strong> is the code after BOLT is merged into <strong>llvm project</strong>.
+    * it's built from the code [llvm project's github repo](https://github.com/llvm/llvm-project)
+    * it's still being updated now
+  + <strong>this version</strong> is the code before BOLT is merged into <strong>llvm project</strong>.
+    * it's built from the code [Facebook BOLT's github repo](https://github.com/facebookincubator/BOLT)
+    * its update is stopped since May, 2022.
+
 <br/><br/>
 
 ***
