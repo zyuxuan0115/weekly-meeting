@@ -1,14 +1,40 @@
 ---
 layout: post
-title:  "2022-1-15 FuncMapTable & Reversed BAT are not enough!"
+title:  "2022-1-15 FuncMapTable & Reversed BAT? Not enough!"
 date:   2023-1-15 10:53:46 -0500
 categories: cont-opt 
 ---
 ### Building FuncMapTable and reversed BAT in the Facebook BOLT
-![before](/assets/2023-01-15/before.png)
-![after](/assets/2023-01-15/after.png)
+- The reason we need to add <strong>FuncMapTable</strong> to perf2bolt
+    + the profile we collected from C1 has some illegal LBR records
+        * BOLT will discard an address if that address is from the hole of a BOLTed binary
+        ![code_layout](/assets/2022-12-12/code_layout.png)
+        * we need to convert all addresses in the holes to be the BOLTed address
+        * so we need an address translation table [<strong>original addr</strong> -> <strong>BOLTed addr</strong>] when we run `perf2bolt` to process the profile data!
+    + however, without a reversed BAT, there are 2 things that prevents us from converting <strong>original addr</strong> to <strong>BOLTed addr</strong>
+        * the command to run perf2bolt: `perf2bolt --ignore-build-id -p perf2.data -o perf2.fdata mysqld.bolt`
+        * the argument `mysqld.bolt` in the command has the BAT table which stores only the BOLTed function's starting address + BOLTed offset + original offset
+        ![BAT](/assets/2023-01-15/BAT.png)
+    + neither of them contains the information of function's starting address in the original binary.
+        * we need to pass this information via a table like <strong>BAT</strong>
+            - <strong>BAT</strong> is inserted by the command 
+            - `llvm-bolt mysqld -o mysqld.bolt --enable-bat -data=perf.fdata -reorder-blocks=cache+ -reorder-functions=hfsort` from the previous C0 round.
+            - in this command, BOLT has the information of the original binary and the BOLTed binary.
+        * since <strong>FuncMapTable</strong> contains no redundant information like <strong>Reversed BAT</strong>, I still decide to pass the <strong>FuncMapTable</strong>.
+        * and then, with Both <strong>BAT</strong> and <strong>FuncMapTable</strong>, we can contruct <strong>reversed BAT</strong> in `perf2bolt` in the following format.
+        ![BAT](/assets/2023-01-15/reversedBAT.png)
 
-- In [RewriteInstance::preprocessProfileData()](https://github.com/upenn-acg/BOLT/blob/main/bolt/lib/Rewrite/RewriteInstance.cpp#L2616) 
-    + the function calls [ProfileReader->setBAT(&*BAT);](https://github.com/upenn-acg/BOLT/blob/main/bolt/lib/Rewrite/RewriteInstance.cpp#L2629)
+### After we add FuncMapTable into BOLTed binary and construct reversed BAT in perf2bolt
+- I changed the illegal addresses in the profile by using <strong>reversed BAT</strong> during perf2bolt is running, and see whether it can convert most of the illegal traces into legal traces.
+    + The profile before changing has <strong>43%</strong> illegal traces
+![after](/assets/2023-01-15/after.png)
+    + The profile after changing has <strong>37.5%</strong> illegal traces
+![before](/assets/2023-01-15/before.png)
+- This result shows that we are only able to change 5.5% of the illegal trace! Too bad!
+
+### What can I do to solve this problem? 
+- After I calmed down, I noticed 2 things
+    + the 5.5% reduction means that my implementation works for some illegal addresses, but it doesn't work for all. Why?
+    + the offset in BAT are not contiguous (a.k.a. not all instructions' offsets are recorded in the BAT)
 - In [BoltAddressTranslation.h]
     + there is a function called [translate()](https://github.com/upenn-acg/BOLT/blob/main/bolt/include/bolt/Profile/BoltAddressTranslation.h#L95)
