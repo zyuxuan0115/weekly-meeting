@@ -30,11 +30,18 @@ categories: cont-opt
 ![after](/assets/2023-01-15/after.png)
     + The profile after changing has <strong>37.5%</strong> illegal traces
 ![before](/assets/2023-01-15/before.png)
-- This result shows that we are only able to change 5.5% of the illegal trace! Too bad!
+- This result shows that we can only change 5.5% of the illegal trace! Too bad!
 
 ### What can I do to solve this problem? 
 - After I calmed down, I noticed 2 things
-    + the 5.5% reduction means that my implementation works for some illegal addresses, but it doesn't work for all. Why?
-    + the offset in BAT are not contiguous (a.k.a. not all instructions' offsets are recorded in the BAT)
+    + the 5.5% reduction means that my implementation works for some illegal addresses, but it doesn't work for all. 
+        * It means at least I have successfully changed some of the illegal addresses. 
+        * But why can't I successfully change the rest of the addresses?
+        * Did I miss something?
+    + the offsets in BAT are not contiguous (a.k.a. not all instructions' offsets are recorded in the BAT).     
+        * Why doesn't BAT record all addresses? 
+        * How does it perform address translation without the addresses of all instructions?
+
+### Inspiration from BAT's translate() function
 - In [BoltAddressTranslation.h]
     + there is a function called [translate()](https://github.com/upenn-acg/BOLT/blob/main/bolt/include/bolt/Profile/BoltAddressTranslation.h#L95)
