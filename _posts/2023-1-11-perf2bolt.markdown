@@ -108,7 +108,7 @@ categories: cont-opt
     * let's call it "<strong>Facebook BOLT</strong>"
 
 ### The further explanation
-- To answer the following 2 questions, I also test the latest version of <strong>Facebook BOLT</strong> and the latest version of <strong>llvm BOLT</strong>
+- To answer the following 2 questions, I first test the latest version of <strong>Facebook BOLT</strong> and the latest version of <strong>llvm BOLT</strong>
   * Does different versions of BOLT really have different BOLTed text section?
   * Why does different versions of BOLT have different size of the BOLTed text section?
 - Here are the results:
@@ -162,3 +162,20 @@ categories: cont-opt
 ```
   + The results show that at some point of <strong>llvm BOLT</strong>'s update, they changed some part of the code and that results in a larger BOLTed text section.
     * 
+- I then check the number of functions that are moved by BOLT.
+  + from the following table, it's clear that the growing of the BOLTed text section is caused by the much larger number of functions (67427 vs. 1201) being moved by BOLT.
+  + however, I also tested the performance of the BOLTed binary. 
+    * the result shows that there is not too much performance difference between the `mysqld.bolt` produced by `llvm BOLT` and produced by `Facebook BOLT`.
+
+|   | llvm BOLT | Facebook BOLT | 
+| :----: |:----:|   :----:| 
+| # functions moved by BOLT |  67427 | 1201 | 
+| BOLTed binary's throughput <br> (transactions/second) | 9294.43 | 9152.68 | 
+
+- The conclusion here is: if we don't move the location of heap in the original mysqld binary, we can only use the `Facebook BOLT`.
+  + However, because `BAT-dump` is only in `llvm BOLT`, so I previously chose `llvm-bolt` as a starting point to build `reversed BAT`.
+    * But `BAT-dump` is just a tool. We don't have to use `BAT-dump`, what we need is BOLT supports BAT.
+  + I then checked the `Facebook BOLT` which is stopped being updated from May, 2022, and found it also supports BAT. So we can use also use `Facebook BOLT` to build the `reversed BAT` 
+  + There happens to be a older version of `Facebook BOLT` repo in our acggpu group's github.
+    * I updated that github repo to the newest version of `Facebook BOLT`. 
+    * Then I moved all the changes I've made this winter break from `llvm BOLT` to `Facebook BOLT`. 
