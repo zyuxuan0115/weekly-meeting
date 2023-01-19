@@ -1,0 +1,6 @@
+---
+layout: post
+title:  "2023-1-19 performance results"
+date:   2023-1-19 8:53:46 -0500
+categories: cont-opt 
+---
