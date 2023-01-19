@@ -4,3 +4,13 @@ title:  "2023-1-19 performance results"
 date:   2023-1-19 8:53:46 -0500
 categories: cont-opt 
 ---
+### Address Translation Caching
+- Produce significant performance improvement
+    + When running perf2bolt on a profile collected from a 60 seconds duration
+    + The command is `time perf2bolt --ignore-build-id --cont-opt -p perf2.data -o perf2.fdata mysqld.bolt`
+    + We have
+```
+real	0m23.765s
+user	0m27.446s
+sys	0m1.482s
+```
