@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "2022-1-11 Is Reversed BAT too large?"
+title:  "2023-1-11 Is Reversed BAT too large?"
 date:   2023-1-11 10:53:46 -0500
 categories: cont-opt 
 ---

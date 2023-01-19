@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "2022-1-15 FuncMapTable & Reversed BAT? Not enough!"
+title:  "2023-1-15 FuncMapTable & Reversed BAT? Not enough!"
 date:   2023-1-15 10:53:46 -0500
 categories: cont-opt 
 ---
@@ -14,7 +14,19 @@ categories: cont-opt
     + however, without a reversed BAT, there are 2 things that prevents us from converting <strong>original addr</strong> to <strong>BOLTed addr</strong>
         * the command to run perf2bolt: `perf2bolt --ignore-build-id -p perf2.data -o perf2.fdata mysqld.bolt`
         * the argument `mysqld.bolt` in the command has the BAT table which stores only the BOLTed function's starting address + BOLTed offset + original offset
-        ![BAT](/assets/2023-01-15/BAT.png)
+        ```
+    BOLTed starting address1
+                BOLTed offset 1 -> original offset 1
+                BOLTed offset 2 -> original offset 2
+                        ...
+                BOLTed offset n -> original offset n
+    BOLTed starting address 2
+                BOLTed offset 1 -> original offset 1
+                BOLTed offset 2 -> original offset 2
+                        ...
+                BOLTed offset m -> original offset m
+    ...
+    ```
     + neither of them contains the information of function's starting address in the original binary.
         * we need to pass this information via a table like <strong>BAT</strong>
             - <strong>BAT</strong> is inserted by the command 
@@ -22,7 +34,12 @@ categories: cont-opt
             - in this command, BOLT has the information of the original binary and the BOLTed binary.
         * since <strong>FuncMapTable</strong> contains no redundant information like <strong>Reversed BAT</strong>, I still decide to pass the <strong>FuncMapTable</strong>.
         * and then, with Both <strong>BAT</strong> and <strong>FuncMapTable</strong>, we can contruct <strong>reversed BAT</strong> in `perf2bolt` in the following format.
-        ![BAT](/assets/2023-01-15/reversedBAT.png)
+        ```
+        original absolute address 1 -> BOLTed absolute address 1
+        original absolute address 2 -> BOLTed absolute address 2
+                ...
+        original absolute address k -> BOLTed absolute address k
+        ```
 
 ### After we add FuncMapTable into BOLTed binary and construct reversed BAT in perf2bolt
 - I changed the illegal addresses in the profile by using <strong>reversed BAT</strong> during perf2bolt is running, and see whether it can convert most of the illegal traces into legal traces.
@@ -43,5 +60,73 @@ categories: cont-opt
         * How does it perform address translation without the addresses of all instructions?
 
 ### Inspiration from BAT's translate() function
-- In [BoltAddressTranslation.h]
+- to answer the question how <strong>BAT</strong> performs address translation without the addresses of all instructions?
     + there is a function called [translate()](https://github.com/upenn-acg/BOLT/blob/main/bolt/include/bolt/Profile/BoltAddressTranslation.h#L95)
+    + this is how BAT performs translation
+    ![translate](/assets/2023-01-15/translate.png)
+    + this means that the <strong>reversed BAT</strong> should be in the same format as the <strong>BAT</strong>, and we should use the same way to translate the address.
+    ```
+    original starting address 1
+                original offset 1 -> BOLTed offset 1
+                original offset 2 -> BOLTed offset 2
+                        ...
+                original offset n -> BOLTed offset n
+    original starting address 2
+                original offset 1 -> BOLTed offset 1
+                original offset 2 -> BOLTed offset 2
+                        ...
+                original offset m -> BOLTed offset m
+    ...
+    ```
+- with <strong>FuncMapTable</strong> and <strong>BAT</strong>, we can construct a new version of <strong>reversed BAT</strong>, but is this enough for the address translation? 
+    + by taking a look at [translate()](https://github.com/upenn-acg/BOLT/blob/main/bolt/include/bolt/Profile/BoltAddressTranslation.h#L95), we know that to perform address translation, we need 3 argument
+        * the <strong>starting address</strong> of the BOLTed function
+        * the <strong>offset</strong> of the instruction within the BOLTed function
+        * whether the instruction is a <strong>branch instruction</strong>
+    + it means to perform a reversed translation we need:
+        * the <strong>starting address</strong> of the original function
+        * the <strong>offset</strong> of the instruction within the original function
+        * whether the instruction is a <strong>branch instruction</strong>
+    
+    + however, we are under the `perf2bolt --ignore-build-id -p perf2.data -o perf2.fdata mysqld.bolt` setting, and we don't have any access to the original `mysqld` binary.
+        * 2 questions need to be anwsered:
+            - how do we know the starting address of the function from the address of an instruction
+            - how do we know whether it is a branch from an address of an instruction
+        * <strong>to answer the first question </strong>, we can take advantage of perf.data's LBR records
+        ```
+        2833111           46021c0 
+        0x206bd10/0x4601f44/P/-/-/1  
+        0x206bc3b/0x206bd10/P/-/-/90  
+        0x37a904c/0x206bc1d/P/-/-/8  
+        0x37a9064/0x37a904a/P/-/-/3  
+        0x37a9057/0x37a9061/P/-/-/8  
+        ```
+        ```
+        The brstack output includes branch related information with raw addresses using the
+	    /v/v/v/v/cycles syntax in the following order:
+	    FROM: branch source instruction
+	    TO  : branch target instruction
+        M/P/-: M=branch target mispredicted or branch direction was mispredicted, P=target predicted or direction predicted, -=not supported
+	    X/- : X=branch inside a transactional region, -=not in transaction region or not supported
+	    A/- : A=TSX abort entry, -=not aborted region or not supported
+	    cycles
+        ```
+        * <strong>to answer the second question</strong>, we must also pass the <strong>size</strong> of each original function by storing this information into the <strong>FuncMapTable</strong>
+        * so what we really stored in the FuncMapTable is in the following format
+        ```
+        BOLTed function's starting address 1 -> original function's starting address 1 -> size of the original function 1
+        BOLTed function's starting address 2 -> original function's starting address 2 -> size of the original function 2
+        ...
+        BOLTed function's starting address z -> original function's starting address z -> size of the original function z
+        ```
+        * and then, we need to build a <strong>map</strong> whose <strong>key</strong> is the ending address of each function, and <strong>value</strong> is the starting address of each function in the original binary
+        * use the `std::map`'s [upper_bound()](https://cplusplus.com/reference/map/map/upper_bound/) method to locate the starting address of the function, when the address of an instruction is given.
+        
+### With everything equiped, we are able to do the translation, but ...
+- After I have everything ready, I run perf2bolt on the profile collected from C1 round again 
+    + the result is:
+    + ![rew_result](/assets/2023-01-15/new_result.png)
+    + and compared with the origianl perf2bolt running on the same profile 
+    + ![old_result](/assets/2023-01-15/old_result.png)
+- the result shows that we can translate all illegal address into legal address
+- BUT! there is a serious problem!

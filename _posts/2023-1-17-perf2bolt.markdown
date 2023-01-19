@@ -1,10 +1,32 @@
 ---
 layout: post
-title:  "2022-1-17 Other issues related to Ocolos on cascade52"
+title:  "2023-1-17 Issues with Continuous Optimization on cascade52"
 date:   2023-1-17 10:53:46 -0500
 categories: cont-opt 
 ---
-### The performance of OCOLOS on cascade52
+### The performance of modified perf2bolt
+- The modified `perf2bolt` is tooooo slow.
+    + the result is for each LBR record it needs 4 lookup (binary search)!
+        * the 1st one is to get the starting address of function for a <strong>branch source</strong> instruction
+        * the 2nd one is to get the Basic Block for a  <strong>branch source</strong> instruction's offset
+        * the 3rd one is to get the starting address of function for a  <strong>branch target</strong> instruction
+        * the 4th one is to get the Basic Block for a  <strong>branch target</strong> instruction's offset
+    + we have tons of LBR records
+        * this is the number of LBR records when I ran perf record for just 3 seconds!
+        * ![rew_result](/assets/2023-01-15/new_result.png)
+    + my current solution to solve this problem 
+        * before performing the 4 binary searches, we first check if the address is less than `0x4400000`
+        ```
+1 00200000-01b22000 r--p 00000000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+2 01b22000-038cb000 r-xp 01921000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+3 038cb000-03a40000 r--p 036c9000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+4 03a40000-03dcb000 rw-p 0383d000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+5 03dcb000-042fd000 rw-p 00000000 00:00 0
+6 04400000-04b1b000 r-xp 04200000 09:00 126364470          /usr/local/mysql/bin/mysqld.bolt
+7 06081000-089a8000 rw-p 00000000 00:00 0                  [heap]
+        ```
+
+### The performance of Ocolos on cascade52
 - Throughput (transactions/sec) reported by `sysbench` 
 
 |   | original | Ocolos | offline BOLT | 
