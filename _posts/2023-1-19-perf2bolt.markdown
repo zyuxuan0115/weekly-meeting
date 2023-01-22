@@ -10,10 +10,20 @@ categories: cont-opt
     + The command is `time perf2bolt --ignore-build-id --cont-opt -p perf2.data -o perf2.fdata mysqld.bolt`
     + We have
 ```
-real	0m23.765s
-user	0m27.446s
-sys	0m1.482s
+real	0m22.207s
+user	0m25.955s
+sys	0m1.378s
 ```
+    + while the original `perf2bolt`'s execution time is
+```
+real	0m35.359s
+user	0m42.714s
+sys	6m15.832s
+```
+
+### Why LLVM BOLT has a much larger BOLTed text section than Facebook BOLT?
+- Because LLVM BOLT doesn't automatically enable `--lite` mode, while Facebook BOLT automatially enable `--lite` mode.
+
 
 ### The performance of mysqld.bolt built by a profiles collected from a previously BOLTed binary
 - <strong>case 1</strong>
@@ -39,14 +49,14 @@ sys	0m1.482s
     + then, offline build a new BOLTed binary <strong>B</strong> based on <strong>A</strong> and <strong>P</strong>
     + finally, measure `oltp_read_only`on <strong>B</strong>'s performance
 
-|   | orig | A | B | 
-| :----: |:----: |:----:|   :----:| 
-| 1 | 5552.14 | 7665.47 | 9119.24 | 
-| 2 | 5568.62 | 7600.20 | 9101.92 |
-| 3 | 5650.95 | 7631.04 | 9079.38 |
-| 4 | 5684.76 | 7605.14 | 8992.69 |
-| 5 | 5559.51 | 7435.04 | 9008.56 |
-| average | 5603.195 | 7587.378 | 9060.358 |  
+|   | orig | A | ocolos | B | 
+| :----: |:----: | :----:| :----:| :----:| 
+| 1 | 5552.14 | 7665.47 | 7734.36 | 9119.24 | 
+| 2 | 5568.62 | 7600.20 | 9008.29 | 9101.92 |
+| 3 | 5650.95 | 7631.04 | 7715.76 | 9079.38 |
+| 4 | 5684.76 | 7605.14 | 7780.07 | 8992.69 |
+| 5 | 5559.51 | 7435.04 | 7652.45 | 9008.56 |
+| average | 5603.195 | 7587.378 | 7978.186 | 9060.358 |  
 
 - <strong>case 3 (profile collected from ocolos C0 round)</strong>
     + first, in <strong>C0</strong> round, Ocolos builds a BOLTed binary <strong>A</strong> from original mysqld binary with `oltp_read_only` as input
@@ -55,15 +65,18 @@ sys	0m1.482s
     + then shutdown `Ocolos` + `mysqld`
     + then, offline produce a new BOLTed binary <strong>B</strong> based on <strong>A</strong> and <strong>P</strong>
     + finally, measure `oltp_read_only`on <strong>B</strong>'s performance
+    + There is also a comparison <strong>B'</strong> where perf2bolt's traces mismatching disassembled function contents is <strong>43%</strong> (a.k.a. we didn't change any address in the profile read by perf2bolt
+    + <strong>B</strong> & <strong>B'</strong> use the same profile
 
-|   | orig | A | B | 
-| :----: |:----:| :----: |:----:|  
-| 1 | 5552.14 | 9141.72 | 8597.98 | 
-| 2 | 5568.62 | 9187.38 | 8538.13 | 
-| 3 | 5650.95 | 9218.45 | 8355.74 | 
-| 4 | 5684.76 | 9227.68 | 8493.12 | 
-| 5 | 5559.51 | 9136.04 | 8398.40 | 
-| average | 5603.195 | 9182.254 | 8476.674 |
+
+|   | orig | A | B | B' |
+| :----: |:----:| :----: |:----:| :----:|  
+| 1 | 5552.14 | 9141.72 | 8486.93 | 8337.47 |
+| 2 | 5568.62 | 9187.38 | 8492.20 | 8331.71 |
+| 3 | 5650.95 | 9218.45 | 8548.13 | 8389.13 |
+| 4 | 5684.76 | 9227.68 | 8607.94 | 8361.84 |
+| 5 | 5559.51 | 9136.04 | 8655.47 | 8328.63 |
+| average | 5603.195 | 9182.254 | 8558.134 | 8349.756 |
 
 - <strong>case 4 (profile collected from ocolos C0 round)</strong>
     + first, in <strong>C0</strong> round, Ocolos builds a BOLTed binary <strong>A</strong> from original mysqld binary with `oltp_insert` as input
@@ -72,17 +85,119 @@ sys	0m1.482s
     + then shutdown `Ocolos` + `mysqld`
     + then, offline produce a new BOLTed binary <strong>B</strong> based on <strong>A</strong> and <strong>P</strong>
     + finally, measure `oltp_read_only`on <strong>B</strong>'s performance
+    + There is also a comparison <strong>B'</strong> where perf2bolt's traces mismatching disassembled function contents is <strong>43%</strong> (a.k.a. we didn't change any address in the profile read by perf2bolt
+    + <strong>B</strong> & <strong>B'</strong> use the same profile
 
-|   | orig | A | B | 
-| :----: |:----:| :----: |:----:|  
-| 1 | 5552.14 | 9141.72 | 8402.19 | 
-| 2 | 5568.62 | 9187.38 | 8474.19 | 
-| 3 | 5650.95 | 9218.45 | 8442.67 | 
-| 4 | 5684.76 | 9227.68 | 8604.11 | 
-| 5 | 5559.51 | 9136.04 | 8373.68 | 
-| average | 5603.195 | 9182.254 | 8459.368 |
+|   | orig | A | B | B' | 
+| :----: |:----:| :----: |:----:|  :----:| 
+| 1 | 5552.14 | 9141.72 | 8446.42 | 8349.08 | 
+| 2 | 5568.62 | 9187.38 | 8434.35 | 8370.41 |
+| 3 | 5650.95 | 9218.45 | 8405.30 | 8281.15 |
+| 4 | 5684.76 | 9227.68 | 8579.37 | 8378.15 |
+| 5 | 5559.51 | 9136.04 | 8546.18 | 8351.85 |
+| average | 5603.195 | 9182.254 | 8482.324 | 8346.128 |
 
-See Dec 29's post
 
-libunwind in C1 round cannot correctly print the content in the call stack
+### From BOLT's output, things to be noticed for our conitinuous optimization
+- original `perf2bolt`'s output 
+```
+PERF2BOLT: Starting data aggregation job for /home/zyuxuan/ocolos_data/perf.data
+PERF2BOLT: spawning perf job to read branch events
+PERF2BOLT: spawning perf job to read mem events
+PERF2BOLT: spawning perf job to read process events
+PERF2BOLT: spawning perf job to read task events
+BOLT-INFO: Target architecture: x86_64
+BOLT-INFO: BOLT version: 5feb060720e740d778c593a738188f6f9d228282
+BOLT-INFO: first alloc address is 0x200000
+BOLT-INFO: creating new program header table at address 0x4400000, offset 0x4200000
+BOLT-INFO: enabling relocation mode
+BOLT-INFO: enabling strict relocation mode for aggregation purposes
+BOLT-WARNING: split function detected on input : _ZL28delete_dictionary_tablespacev.cold/1. The support is limited in relocation mode.
+BOLT-INFO: pre-processing profile using perf data aggregator
+BOLT-INFO: binary build-id is:     26a5fa420741f269
+PERF2BOLT: spawning perf job to read buildid list
+PERF2BOLT: matched build-id and file name
+PERF2BOLT: waiting for perf mmap events collection to finish...
+PERF2BOLT: parsing perf-script mmap events output
+PERF2BOLT: waiting for perf task events collection to finish...
+PERF2BOLT: parsing perf-script task events output
+PERF2BOLT: input binary is associated with 1 PID(s)
+PERF2BOLT: waiting for perf events collection to finish...
+PERF2BOLT: parse branch events...
+PERF2BOLT: read 947352 samples and 30177185 LBR entries
+PERF2BOLT: 0 samples (0.0%) were ignored
+PERF2BOLT: traces mismatching disassembled function contents: 19680 (0.1%)
+PERF2BOLT: out of range traces involving unknown regions: 4679139 (16.0%)
+BOLT-WARNING: Ignored 0 functions due to cold fragments.
+PERF2BOLT: processing branch events...
+PERF2BOLT: wrote 13106 objects and 0 memory objects to perf.fdata
+```
+- modified `perf2bolt`'s output 
+```
+PERF2BOLT: Starting data aggregation job for /home/zyuxuan/ocolos_data/perf2.data
+PERF2BOLT: spawning perf job to read branch events
+PERF2BOLT: spawning perf job to read mem events
+PERF2BOLT: spawning perf job to read process events
+PERF2BOLT: spawning perf job to read task events
+BOLT-INFO: Target architecture: x86_64
+BOLT-INFO: BOLT version: 5feb060720e740d778c593a738188f6f9d228282
+BOLT-INFO: first alloc address is 0x200000
+BOLT-INFO: creating new program header table at address 0x4c00000, offset 0x4a00000
+BOLT-INFO: Parsed 68176 BAT entries
+BOLT-INFO: Parsed 0 BAT cold-to-hot entries
+BOLT-INFO: disabling -align-macro-fusion in non-relocation mode
+BOLT-INFO: enabling lite mode
+BOLT-INFO: pre-processing profile using perf data aggregator
+BOLT-INFO: profile collection done on a binary already processed by BOLT
+BOLT-INFO: binary build-id is:     26a5fa420741f268
+PERF2BOLT: spawning perf job to read buildid list
+PERF2BOLT-ERROR: failed to match build-id from perf output. This indicates the input binary supplied for data aggregation is not the same recorded by perf when collecting profiling data, or there were no samples recorded for the binary. Use -ignore-build-id option to override.
+PERF2BOLT: waiting for perf mmap events collection to finish...
+PERF2BOLT: parsing perf-script mmap events output
+PERF2BOLT: waiting for perf task events collection to finish...
+PERF2BOLT: parsing perf-script task events output
+PERF2BOLT: input binary is associated with 1 PID(s)
+PERF2BOLT: waiting for perf events collection to finish...
+PERF2BOLT: parse branch events...
+BOLT-INFO: Parsed 68176 BAT entries
+BOLT-INFO: Parsed 0 BAT cold-to-hot entries
+BOLT-INFO: Parsed 1204 Function Map Table entries
+PERF2BOLT-WARNING: using Intel Skylake bug workaround
+PERF2BOLT: read 947352 samples and 29238453 LBR entries
+PERF2BOLT: 0 samples (0.0%) were ignored
+PERF2BOLT: traces mismatching disassembled function contents: 593370 (2.2%)
+PERF2BOLT: out of range traces involving unknown regions: 5874203 (22.2%)
+PERF2BOLT: processing branch events...
+PERF2BOLT: wrote 22729 objects and 0 memory objects to perf2.fdata
+```
+- the first thing to be noticed is traces mismatching disassembled function contents 0.1% is much lower than 2.2%
+    + original
+```
+PERF2BOLT: traces mismatching disassembled function contents: 19680 (0.1%)
+```
+    + modified
+```
+PERF2BOLT: traces mismatching disassembled function contents: 593370 (2.2%)
+```
+    + why there is still 2.2%?
+![code_layout](/assets/2023-01-19/new_illegal.png)
+    + If function A's instruction `call B'` -> function B is recorded. Then this LBR entry will not be recognized by the code I added in `perf2bolt`.
+        * Because A is not moved, B is moved. So `call B'` -> function B is considered legal.
+        * However, in fact it's illegal.
+    + the problem I want to mention here is, to fix this kind of buggy LBR record, we need to pass the list of functions that were on the call stack when Ocolos paused mysqld to perform code replacement.
+- the second thing to be noticed is in `perf2bolt`, it has ready created the BOLTed text section?
+    + original
+```
+BOLT-INFO: first alloc address is 0x200000
+BOLT-INFO: creating new program header table at address 0x4400000, offset 0x4200000
+```
+    + modified
+```
+BOLT-INFO: first alloc address is 0x200000
+BOLT-INFO: creating new program header table at address 0x4c00000, offset 0x4a00000
+```
+    + Can BOLT create the new BOLTed text section at a new location that is not overlap with the old BOLTed text section?
+
+### Other issues with Continuous Optimization
+- libunwind in C1 round cannot correctly print the content in the call stack
     
