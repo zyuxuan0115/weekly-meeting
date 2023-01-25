@@ -1,0 +1,63 @@
+---
+layout: post
+title:  "2023-1-24 perf2bolt"
+date:   2023-1-24 8:53:46 -0500
+categories: cont-opt 
+---
+### turn LLVM version BOLT into lite mode?
+- When I add `--lite` to `llvm-bolt`, it reports the following warning and refuses to enable lite mode. :( 
+```
+BOLT-WARNING: split function detected on input : _ZL28delete_dictionary_tablespacev.cold/1. The support is limited in relocation mode
+BOLT-WARNING: disabling lite mode (-lite) when split functions are present
+[tracer] 67427 functions was moved (functions reordered) by BOLT
+[tracer(time)] llvm-bolt took 33.795486 seconds to execute
+```  
+- So BOLT spent 33.8 seconds moving 67427 functions, which is reported by Ocolos
+
+- However, for Facebook BOLT, the output shows that BOLT spent 6.805391 seconds moving 1202 functions.
+```
+BOLT-WARNING: split function detected on input : _ZL28delete_dictionary_tablespacev.cold/1. The support is limited in relocation mode.
+BOLT-WARNING: Ignored 0 functions due to cold fragments.
+[tracer] 1202 functions was moved (functions reordered) by BOLT
+[tracer(time)] llvm-bolt took 6.805391 seconds to execute
+```
+
+### Why there are still 2.2% traces mismatching disassembled function contents
+In function [DataAggregator::parseBranchEvents()](https://github.com/upenn-acg/BOLT/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1440), I added [code](https://github.com/upenn-acg/BOLT/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1492) to print the addresses that have traces mismatching disassembled function contents
+```
+Invalid trace starting in _Z18close_thread_tableP3THDPP5TABLE @ 461a28c and ending @ 461a31b
+Invalid trace starting in _Z20thd_connection_aliveP3THD @ 4600684 and ending @ 460069b
+Invalid trace starting in _ZN3THD22reset_for_next_commandEv @ 4608956 and ending @ 4608b20
+Invalid trace starting in _Z20dispatch_sql_commandP3THDP12Parser_state @ 4607ac6 and ending @ 4608114
+```
+
+I picked an address `0x4600684` and make `perf2bolt` print the corresponding address before our address translation. The format is the `translated address, original starting address, original offset`, we have
+```
+0x4600684, 0x37a8260, 0x0
+```
+
+- if we run `gdb ./mysqld` and disassemble the original address at `0x37a8260`, we have:
+```
+(gdb) disas 0x37a8260
+Dump of assembler code for function pfs_ssl_bio_callback_ex(bio_st*, int, char const*, unsigned long, int, long, int, unsigned long*):
+   0x00000000037a8260 <+0>:	endbr64
+   0x00000000037a8264 <+4>:	push   %rbp
+   0x00000000037a8265 <+5>:	mov    %rsp,%rbp
+   0x00000000037a8268 <+8>:	push   %r12
+   0x00000000037a826a <+10>:	push   %rbx
+   0x00000000037a826b <+11>:	cmp    $0x82,%esi
+```
+
+- if we disassemble this `pfs_ssl_bio_callback_ex` function, we have
+```
+(gdb) disas pfs_ssl_bio_callback_ex
+Dump of assembler code for function _Z23pfs_ssl_bio_callback_exP6bio_stiPKcmiliPm:
+   0x0000000004600688 <+0>:	endbr64
+   0x000000000460068c <+4>:	push   %rbp
+   0x000000000460068d <+5>:	mov    %rsp,%rbp
+   0x0000000004600690 <+8>:	push   %r12
+   0x0000000004600692 <+10>:	push   %rbx
+   0x0000000004600693 <+11>:	cmp    $0x82,%esi
+```
+- however, our translated address is `0x4600684`. 
+   + it means that our address translation is wrong
