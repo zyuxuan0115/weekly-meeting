@@ -72,15 +72,17 @@ categories: data-cache
 ```
 - So the final configuration is
 	+ 2 x 35MiB x 4 / 8 = 36700160 
-	+ the `STREAM_ARRAY_SIZE` is 40,000,000 
+	+ the smallest `STREAM_ARRAY_SIZE` is 36,700,160 
+     + I set the `STREAM_ARRAY_SIZE` to be `1e10`, and for 1 iteration it runs for 3.5 minutes.
+     + there is another parameter [NTIMES](https://github.com/jeffhammond/STREAM/blob/master/stream.c#L108), it can change the number of iterations. I set it to be 40.
 
 ### Result when running pagerank with STREAM
 ![web-stanford](/assets/2023-01-24/web-Stanford.png)
 ![web-berkstan](/assets/2023-01-24/web-Stanford.png)
 ![web-NotreDame](/assets/2023-01-24/web-NotreDame.png)
-![web-google](/assets/2023-01-24/web-Google.png)
+
 
 
 ### DMon
 - successfully built DMon's LLVM pass by using LLVM 7.0
-	+ what is the next step? since the [repository]() Tanvir gave me has no detailed information about how to use DMon.
+	+ what is the next step? since the [repository](https://github.com/efeslab/DMon-AE) Tanvir gave me has no detailed information about how to use DMon.

@@ -55,6 +55,17 @@ BOLT-INFO: creating new program header table at address 0x4400000, offset 0x4200
     + Can BOLT create the new BOLTed text section at a new location that is not overlap with the old BOLTed text section?
     + If we can move BOLTed text section to any location we want, discuss about how to perform continuous optimization
 - improve `Ocolos`'s performance on cascade52
-- check if there is a way to change the location of heap
-   + to debug `perf2bolt`, I moved ocolos to acggpu1. 
-   + on acggpu1 it also has the problem that the BOLTed text section overlap with the heap 
+
+|   | orig | A | ocolos | B | 
+| :----: |:----: | :----:| :----:| :----:| 
+| 1 | 5552.14 | 7665.47 | 7734.36 | 9119.24 | 
+| 2 | 5568.62 | 7600.20 | 9008.29 | 9101.92 |
+| 3 | 5650.95 | 7631.04 | 7715.76 | 9079.38 |
+| 4 | 5684.76 | 7605.14 | 7780.07 | 8992.69 |
+| 5 | 5559.51 | 7435.04 | 7652.45 | 9008.56 |
+| average | 5603.195 | 7587.378 | 7978.186 | 9060.358 | 
+
+- check if there is a way to change the location of <strong>heap</strong>
+   + to debug `perf2bolt`, I moved ocolos to `acggpu1`. 
+   + on `acggpu1` it also has the problem that the BOLTed text section overlap with the heap 
+- last time we discussed that you will assign me some new paper to write review
