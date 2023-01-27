@@ -40,3 +40,28 @@ categories: data-cache
 | Vertices:20000<br> Degree:100  |   467<br>456<br>506<br>443<br>483   |41.527720(467)<br>41.399529(456)<br>41.753334(506)<br>41.473342(443)<br>41.677791(483) | 72.221025(467)<br>71.523556(456)<br>71.569752(506)<br>71.800227(443)<br>71.644434(483)| -72.619% |
  | Vertices:20000<br> Degree:200  |  32   |86.797034(32)<br>85.867522(32)<br>86.136966(32)<br>86.431068(32)<br>86.942206(32) | 121.898140(32)<br>122.466065(32)<br>133.931805(32)<br>124.171229(32)<br>124.245491(32)| -45.014% |
 | Vertices:10000<br> Degree:500  |   371<br>466<br>415<br>443<br>450<br>32x2   | 50.337(371)<br>50.283521(466)<br>50.007282(415)<br>49.613216(443)<br>49.976438(450)<br>49.980702(32)<br>49.825(32) | 89.602(371)<br>88.117181(466)<br>89.360649(415)<br>91.218368(443)<br>89.325455(450)<br>73.102367(32)<br>72.573(32) |  -78.893%(400)<br>-45.959%(32) |
+
+### issues with building DMon
+- I used llvm version 16.0 to build DMon's `selective prefetch` pass
+```bash
+cp path/to/dmon/llvm-passes/selective-prefetch ../llvm/lib/Transforms
+vim ../llvm/lib/Transforms/CMakeLists.txt 
+```
+- at the end of the file, add 
+```
+add_subdirectory(selective-prefetch)
+```
+- but I got the following error
+![dmon-error](/assets/2023-01-21/dmon-error.png)
+
+- my guess is the version of llvm is wrong. 
+    + so which version of llvm you were using?
+
+- After building the selective prefetch pass ...
+    + how to use it?
+    ```
+    clang -emit-llvm -S test1.c
+    opt -load ../build/lib/selective-prefetch.so < test1.ll > /dev/null
+    ```
+
+

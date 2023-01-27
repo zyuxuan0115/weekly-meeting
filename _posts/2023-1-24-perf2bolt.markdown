@@ -22,42 +22,39 @@ BOLT-WARNING: Ignored 0 functions due to cold fragments.
 [tracer(time)] llvm-bolt took 6.805391 seconds to execute
 ```
 
-### Why there are still 2.2% traces mismatching disassembled function contents
-In function [DataAggregator::parseBranchEvents()](https://github.com/upenn-acg/BOLT/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1440), I added [code](https://github.com/upenn-acg/BOLT/blob/main/bolt/lib/Profile/DataAggregator.cpp#L1492) to print the addresses that have traces mismatching disassembled function contents
-```
-Invalid trace starting in _Z18close_thread_tableP3THDPP5TABLE @ 461a28c and ending @ 461a31b
-Invalid trace starting in _Z20thd_connection_aliveP3THD @ 4600684 and ending @ 460069b
-Invalid trace starting in _ZN3THD22reset_for_next_commandEv @ 4608956 and ending @ 4608b20
-Invalid trace starting in _Z20dispatch_sql_commandP3THDP12Parser_state @ 4607ac6 and ending @ 4608114
-```
+### Fix the 2.2% traces mismatching disassembled function contents issue
+![perf2bolt-output](/assets/2023-01-24/perf2bolt.png)
+- <strong>case 3 (profile collected from ocolos C0 round)</strong>
+    + first, in <strong>C0</strong> round, Ocolos builds a BOLTed binary <strong>A</strong> from original mysqld binary with `oltp_read_only` as input
+    + then, Ocolos performs code replacement and enters <strong>C1</strong> round
+    + then, Ocolos collects profile <strong>P</strong> of `oltp_read_only` with `mysqld` which has code layout replaced by Ocolos. 
+    + then shutdown `Ocolos` + `mysqld`
+    + then, offline produce a new BOLTed binary <strong>B</strong> based on <strong>A</strong> and <strong>P</strong>
+    + finally, measure `oltp_read_only`on <strong>B</strong>'s performance
+    + There is also a comparison <strong>B'</strong> where perf2bolt's traces mismatching disassembled function contents is <strong>43%</strong> (a.k.a. we didn't change any address in the profile read by perf2bolt
+    + <strong>B</strong> & <strong>B'</strong> use the same profile
 
-I picked an address `0x4600684` and make `perf2bolt` print the corresponding address before our address translation. The format is the `translated address, original starting address, original offset`, we have
-```
-0x4600684, 0x37a8260, 0x0
-```
+|   | orig | A | B | B' |
+| :----: |:----:| :----: |:----:| :----:|  
+| 1 | 5552.14 | 9141.72 | 8832.37 | 8337.47 |
+| 2 | 5568.62 | 9187.38 | 8806.93 | 8331.71 |
+| 3 | 5650.95 | 9218.45 | 8865.42 | 8389.13 |
+| 4 | 5684.76 | 9227.68 | 8843.36 | 8361.84 |
+| 5 | 5559.51 | 9136.04 | 8801.27 | 8328.63 |
+| average | 5603.195 | 9182.254 | <strong>8829.87</strong> | 8349.756 |
 
-- if we run `gdb ./mysqld` and disassemble the original address at `0x37a8260`, we have:
+### Next step 
+- fix the issue caused in this figure
+![code_layout](/assets/2023-01-19/new_illegal.png)
+- check if `perf2bolt` can create the BOLTed text section at any location
+   + 
 ```
-(gdb) disas 0x37a8260
-Dump of assembler code for function pfs_ssl_bio_callback_ex(bio_st*, int, char const*, unsigned long, int, long, int, unsigned long*):
-   0x00000000037a8260 <+0>:	endbr64
-   0x00000000037a8264 <+4>:	push   %rbp
-   0x00000000037a8265 <+5>:	mov    %rsp,%rbp
-   0x00000000037a8268 <+8>:	push   %r12
-   0x00000000037a826a <+10>:	push   %rbx
-   0x00000000037a826b <+11>:	cmp    $0x82,%esi
+BOLT-INFO: first alloc address is 0x200000
+BOLT-INFO: creating new program header table at address 0x4400000, offset 0x4200000
 ```
-
-- if we disassemble this `pfs_ssl_bio_callback_ex` function, we have
-```
-(gdb) disas pfs_ssl_bio_callback_ex
-Dump of assembler code for function _Z23pfs_ssl_bio_callback_exP6bio_stiPKcmiliPm:
-   0x0000000004600688 <+0>:	endbr64
-   0x000000000460068c <+4>:	push   %rbp
-   0x000000000460068d <+5>:	mov    %rsp,%rbp
-   0x0000000004600690 <+8>:	push   %r12
-   0x0000000004600692 <+10>:	push   %rbx
-   0x0000000004600693 <+11>:	cmp    $0x82,%esi
-```
-- however, our translated address is `0x4600684`. 
-   + it means that our address translation is wrong
+    + Can BOLT create the new BOLTed text section at a new location that is not overlap with the old BOLTed text section?
+    + If we can move BOLTed text section to any location we want, discuss about how to perform continuous optimization
+- improve `Ocolos`'s performance on cascade52
+- check if there is a way to change the location of heap
+   + to debug `perf2bolt`, I moved ocolos to acggpu1. 
+   + on acggpu1 it also has the problem that the BOLTed text section overlap with the heap 

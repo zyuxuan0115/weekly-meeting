@@ -4,6 +4,7 @@ title:  "2023-1-24 data cache"
 date:   2023-1-24 8:53:46 -0500
 categories: data-cache 
 ---
+### STREAM
 - According to [STREAM benchmark](https://github.com/jeffhammond/STREAM), we need to set `STREAM_ARRAY_SIZE` to be 4 times the size of the available cache memory
 - here is there [example](https://github.com/jeffhammond/STREAM/blob/master/stream.c#L58)
 - I run `sudo lshw -C memory` to get the size of L3 cache 
@@ -69,3 +70,17 @@ categories: data-cache
        configuration: latency=0
        resources: memory:9d210000-9d213fff
 ```
+- So the final configuration is
+	+ 2 x 35MiB x 4 / 8 = 36700160 
+	+ the `STREAM_ARRAY_SIZE` is 40,000,000 
+
+### Result when running pagerank with STREAM
+![web-stanford](/assets/2023-01-24/web-Stanford.png)
+![web-berkstan](/assets/2023-01-24/web-Stanford.png)
+![web-NotreDame](/assets/2023-01-24/web-NotreDame.png)
+![web-google](/assets/2023-01-24/web-Google.png)
+
+
+### DMon
+- successfully built DMon's LLVM pass by using LLVM 7.0
+	+ what is the next step? since the [repository]() Tanvir gave me has no detailed information about how to use DMon.
