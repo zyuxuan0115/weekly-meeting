@@ -10,22 +10,6 @@ categories: data-cache
 - I run `sudo lshw -C memory` to get the size of L3 cache 
 	+ seems like we have 2 L3 cache and each has a size of 35 MB.
 ```
-  *-cache:0
-       description: L1 cache
-       physical id: 50
-       slot: L1 Cache
-       size: 1664KiB
-       capacity: 1664KiB
-       capabilities: synchronous internal write-back instruction
-       configuration: level=1
-  *-cache:1
-       description: L2 cache
-       physical id: 51
-       slot: L2 Cache
-       size: 26MiB
-       capacity: 26MiB
-       capabilities: synchronous internal varies unified
-       configuration: level=2
   *-cache:2
        description: L3 cache
        physical id: 52
@@ -34,22 +18,6 @@ categories: data-cache
        capacity: 35MiB
        capabilities: synchronous internal varies unified
        configuration: level=3
-  *-cache:3
-       description: L1 cache
-       physical id: 54
-       slot: L1 Cache
-       size: 1664KiB
-       capacity: 1664KiB
-       capabilities: synchronous internal write-back instruction
-       configuration: level=1
-  *-cache:4
-       description: L2 cache
-       physical id: 55
-       slot: L2 Cache
-       size: 26MiB
-       capacity: 26MiB
-       capabilities: synchronous internal varies unified
-       configuration: level=2
   *-cache:5
        description: L3 cache
        physical id: 56
@@ -77,11 +45,51 @@ categories: data-cache
      + there is another parameter [NTIMES](https://github.com/jeffhammond/STREAM/blob/master/stream.c#L108), it can change the number of iterations. I set it to be 40.
 
 ### Result when running pagerank with STREAM
-![web-stanford](/assets/2023-01-24/web-Stanford.png)
+![web-stanford](/assets/2023-01-24/web-BerkStan.png)
 ![web-berkstan](/assets/2023-01-24/web-Stanford.png)
 ![web-NotreDame](/assets/2023-01-24/web-NotreDame.png)
 
 
+### intel-cmt-cat
+- We later on moved to [intel-cmt-cat](https://github.com/intel/intel-cmt-cat)'s `rdtset`
+- the command 
+- NOTES for building `rdtset`
+     + in the home directory 
+```bash
+> make
+> sudo make install
+> sudo rm /var/lock/libpqos
+> pqos -s
+> sudo chown -R {username} /sys/fs/resctrl/
+``` 
+- check the cache info `getconf -a | grep CACHE`
+```
+getconf -a | grep CACHE
+LEVEL1_ICACHE_SIZE                 32768
+LEVEL1_ICACHE_ASSOC                8
+LEVEL1_ICACHE_LINESIZE             64
+LEVEL1_DCACHE_SIZE                 32768
+LEVEL1_DCACHE_ASSOC                8
+LEVEL1_DCACHE_LINESIZE             64
+LEVEL2_CACHE_SIZE                  1048576
+LEVEL2_CACHE_ASSOC                 16
+LEVEL2_CACHE_LINESIZE              64
+LEVEL3_CACHE_SIZE                  37486592
+LEVEL3_CACHE_ASSOC                 11
+LEVEL3_CACHE_LINESIZE              64
+LEVEL4_CACHE_SIZE                  0
+LEVEL4_CACHE_ASSOC                 0
+LEVEL4_CACHE_LINESIZE              0 
+```
+- 
+Since L3 cache's associtivity is 11 ... 
+
+![web-stanford](/assets/2023-01-24/bw-web-BerkStan.png)
+![web-berkstan](/assets/2023-01-24/bw-web-Stanford.png)
+![web-NotreDame](/assets/2023-01-24/bw-web-NotreDame.png)
+![web-google](/assets/2023-01-24/bw-web-Google.png)
+![roadNet-PA](/assets/2023-01-24/bw-roadNet-PA.png)
+![roadNet-CA](/assets/2023-01-24/bw-roadNet-CA.png)
 
 ### DMon
 - successfully built DMon's LLVM pass by using LLVM 7.0

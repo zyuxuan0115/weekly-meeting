@@ -68,4 +68,9 @@ BOLT-INFO: creating new program header table at address 0x4400000, offset 0x4200
 - check if there is a way to change the location of <strong>heap</strong>
    + to debug `perf2bolt`, I moved ocolos to `acggpu1`. 
    + on `acggpu1` it also has the problem that the BOLTed text section overlap with the heap 
-- last time we discussed that you will assign me some new paper to write review
+
+### The last bug fix of perf2bolt
+Now, we can pass the `callstack_func.bin` we've got from
+```
+perf2bolt --ignore-build-id --cont-opt --call-stack-func={path/to/snapshot/data}/callstack_func.bin -p perf2.data -o perf2.fdata mysqld.bolt
+```
