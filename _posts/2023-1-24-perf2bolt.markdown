@@ -52,25 +52,38 @@ BOLT-WARNING: Ignored 0 functions due to cold fragments.
 BOLT-INFO: first alloc address is 0x200000
 BOLT-INFO: creating new program header table at address 0x4400000, offset 0x4200000
 ```
-    + Can BOLT create the new BOLTed text section at a new location that is not overlap with the old BOLTed text section?
-    + If we can move BOLTed text section to any location we want, discuss about how to perform continuous optimization
-- improve `Ocolos`'s performance on cascade52
-
-|   | orig | A | ocolos | B | 
-| :----: |:----: | :----:| :----:| :----:| 
-| 1 | 5552.14 | 7665.47 | 7734.36 | 9119.24 | 
-| 2 | 5568.62 | 7600.20 | 9008.29 | 9101.92 |
-| 3 | 5650.95 | 7631.04 | 7715.76 | 9079.38 |
-| 4 | 5684.76 | 7605.14 | 7780.07 | 8992.69 |
-| 5 | 5559.51 | 7435.04 | 7652.45 | 9008.56 |
-| average | 5603.195 | 7587.378 | 7978.186 | 9060.358 | 
-
+   + Can BOLT create the new BOLTed text section at a new location that is not overlap with the old BOLTed text section?
+   + If we can move BOLTed text section to any location we want, discuss about how to perform continuous optimization
 - check if there is a way to change the location of <strong>heap</strong>
    + to debug `perf2bolt`, I moved ocolos to `acggpu1`. 
    + on `acggpu1` it also has the problem that the BOLTed text section overlap with the heap 
 
 ### The last bug fix of perf2bolt
-Now, we can pass the `callstack_func.bin` we've got from
-```
-perf2bolt --ignore-build-id --cont-opt --call-stack-func={path/to/snapshot/data}/callstack_func.bin -p perf2.data -o perf2.fdata mysqld.bolt
-```
+- <strong>C0</strong>
+   + Before pausing the target process, `Ocolos` has produced `mysqld_0.bolt`
+   + During code replacement, `Ocolos` will produce a `callstack_func_0.bin` 
+- <strong>C1</strong>
+   + after code replacement, `Ocolos` enters the <strong>C1</strong> round, and it collects profile `perf_1.data` by invoking `perf record`
+   + with `perf_1.data` + `mysqld_0.bolt` + `callstack_func_0.bin`, `Ocolos` can produce `perf_1.fdata`
+   + with `perf_1.fdata` + original `mysqld`, `llvm-bolt` can produce `mysqld_1.bolt`
+   + `Ocolos` can then perform <strong>C1</strong>'s code replacement ... 
+
+- the command to run is 
+   + `perf2bolt --ignore-build-id --cont-opt --call-stack-func=callstack_func_0.bin -p perf_1.data -o perf_1.fdata mysqld.bolt`
+
+|   | orig | A | B | B' | B_new | ocolos |
+| :----: |:----:| :----: |:----:| :----:|  :----:|  
+| 1 | 5552.14 | 9141.72 | 8832.37 | 8337.47 | 8808.65 |
+| 2 | 5568.62 | 9187.38 | 8806.93 | 8331.71 | 8892.78 |
+| 3 | 5650.95 | 9218.45 | 8865.42 | 8389.13 | 8838.30 | 
+| 4 | 5684.76 | 9227.68 | 8843.36 | 8361.84 | 8946.12 | 
+| 5 | 5559.51 | 9136.04 | 8801.27 | 8328.63 |         |
+| AVG | 5603.195 | 9182.254 | <strong>8829.87</strong> | 8349.756 |
+
+- orig: original 
+- A: offline BOLTed 
+- B: Profile colleted from C1, without function on the call stack to be considered
+- B': Profile collected from C1, without fix the buggy addresses in the profile
+- B_new: Profile collected from C1, fix all buggy addresses
+- ocolos: performance after C0's code replacement
+

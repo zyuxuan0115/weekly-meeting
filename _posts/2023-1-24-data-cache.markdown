@@ -61,8 +61,15 @@ categories: data-cache
 > sudo rm /var/lock/libpqos
 > pqos -s
 > sudo chown -R {username} /sys/fs/resctrl/
-``` 
-- check the cache info `getconf -a | grep CACHE`
+```
+- The script to run a program with a reduced cache line and a limited bandwidth is
+```bash
+./pagerank_lock 1 1 {workload}.txt &
+PID=$!
+rdtset -t 'mba=10;l3=0x1' -p $PID
+```
+- Why `l3=0x1`? 
+     + I checked the cache info `getconf -a | grep CACHE`
 ```
 getconf -a | grep CACHE
 LEVEL1_ICACHE_SIZE                 32768
@@ -81,15 +88,34 @@ LEVEL4_CACHE_SIZE                  0
 LEVEL4_CACHE_ASSOC                 0
 LEVEL4_CACHE_LINESIZE              0 
 ```
-- 
-Since L3 cache's associtivity is 11 ... 
+     + It shows that  L3 cache's associtivity is 11.
+     + since we want cache capacity to be 1/16th, we need `-t l3=0x1` mask.
+     + however I got this error when I run the script
+![error](/assets/2023-01-24/err.png)
 
+- So finally I switch back to this script
+```bash
+./pagerank_lock 1 1 {workload}.txt &
+PID=$!
+rdtset -t 'mba=10' -p $PID
+```
+     + results are listed here:
 ![web-stanford](/assets/2023-01-24/bw-web-BerkStan.png)
 ![web-berkstan](/assets/2023-01-24/bw-web-Stanford.png)
 ![web-NotreDame](/assets/2023-01-24/bw-web-NotreDame.png)
 ![web-google](/assets/2023-01-24/bw-web-Google.png)
 ![roadNet-PA](/assets/2023-01-24/bw-roadNet-PA.png)
 ![roadNet-CA](/assets/2023-01-24/bw-roadNet-CA.png)
+
+### Synthetic workloads for pagerank
+![v200000d200](/assets/2023-01-24/v200000-d200.png)
+![v200000d20](/assets/2023-01-24/v200000-d20.png)
+- this result shows that Saba's solution may not suggest an optimal prefetch distance
+     + we need to use this new method to test all workloads again
+
+- a comparison
+ 
+![normailzed](/assets/2023-01-24/normalized.png)
 
 ### DMon
 - successfully built DMon's LLVM pass by using LLVM 7.0
