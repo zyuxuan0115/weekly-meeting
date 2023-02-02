@@ -107,16 +107,55 @@ rdtset -t 'mba=10' -p $PID
 ![roadNet-PA](/assets/2023-01-24/bw-roadNet-PA.png)
 ![roadNet-CA](/assets/2023-01-24/bw-roadNet-CA.png)
 
+- Move to haswellcat16 machine
+     + Joe wanted to see how cache capacity affects the performance
+     + haswellcat16 machine supports `CAT`
+     + we decide to run our workloads on cat16 machine
+     + here is the cache info
+```
+root@acghaswellcat16:/home/zyuxuan# getconf -a | grep CACHE
+LEVEL1_ICACHE_SIZE                 32768
+LEVEL1_ICACHE_ASSOC                8
+LEVEL1_ICACHE_LINESIZE             64
+LEVEL1_DCACHE_SIZE                 32768
+LEVEL1_DCACHE_ASSOC                8
+LEVEL1_DCACHE_LINESIZE             64
+LEVEL2_CACHE_SIZE                  262144
+LEVEL2_CACHE_ASSOC                 8
+LEVEL2_CACHE_LINESIZE              64
+LEVEL3_CACHE_SIZE                  20971520
+LEVEL3_CACHE_ASSOC                 20
+LEVEL3_CACHE_LINESIZE              64
+LEVEL4_CACHE_SIZE                  0
+LEVEL4_CACHE_ASSOC                 0
+LEVEL4_CACHE_LINESIZE              0
+```
+     + issues
+          * cat16 supports `rdtset -t 'l3=0x3' -p $PID`
+          * but it doesn't support
+               - (1) `rdtset -t 'l3=0x1' -p $PID`
+               - (2) `rdtset -t 'mba=10' -p $PID`
+               
+               ![err3](/assets/2023-01-24/err3.png)
+               
+               ![err2](/assets/2023-01-24/err2.png)
+
 ### Synthetic workloads for pagerank
 ![v200000d200](/assets/2023-01-24/v200000-d200.png)
 ![v200000d20](/assets/2023-01-24/v200000-d20.png)
-- this result shows that Saba's solution may not suggest an optimal prefetch distance
+- this result shows that the prefetch distance can be a range (or different ranges)
      + we need to use this new method to test all workloads again
+- I then changed the input size (# vertices) to see how the execution time changes
+![diff_vertices](/assets/2023-01-24/diff_v.png)
+![diff_vertices2](/assets/2023-01-24/diff_v2.png)
+- I then changed the degree of the graph to see how the execution time changes
+![diff_degree](/assets/2023-01-24/diff_d.png)
 
-- a comparison
- 
+
+- a comparison between real inputs and synthetic inputs
+
 ![normailzed](/assets/2023-01-24/normalized.png)
 
 ### DMon
 - successfully built DMon's LLVM pass by using LLVM 7.0
-	+ what is the next step? since the [repository](https://github.com/efeslab/DMon-AE) Tanvir gave me has no detailed information about how to use DMon.
+- the next step is to make DMon work for a simple [benchmark](https://github.com/efeslab/DMon-AE/blob/main/test-case/run.sh) 

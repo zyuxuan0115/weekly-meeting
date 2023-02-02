@@ -73,17 +73,17 @@ BOLT-INFO: creating new program header table at address 0x4400000, offset 0x4200
 
 |   | orig | A | B | B' | B_new | ocolos |
 | :----: |:----:| :----: |:----:| :----:|  :----:|  
-| 1 | 5552.14 | 9141.72 | 8832.37 | 8337.47 | 8808.65 |
-| 2 | 5568.62 | 9187.38 | 8806.93 | 8331.71 | 8892.78 |
-| 3 | 5650.95 | 9218.45 | 8865.42 | 8389.13 | 8838.30 | 
-| 4 | 5684.76 | 9227.68 | 8843.36 | 8361.84 | 8946.12 | 
-| 5 | 5559.51 | 9136.04 | 8801.27 | 8328.63 |         |
-| AVG | 5603.195 | 9182.254 | <strong>8829.87</strong> | 8349.756 |
+| 1 | 5552.14 | 9141.72 | 8832.37 | 8337.47 | 8808.65 | 8844.84 |
+| 2 | 5568.62 | 9187.38 | 8806.93 | 8331.71 | 8892.78 | 8915.71 |
+| 3 | 5650.95 | 9218.45 | 8865.42 | 8389.13 | 8838.30 | 8864.76 |
+| 4 | 5684.76 | 9227.68 | 8843.36 | 8361.84 | 8946.12 | 8928.08 |
+| 5 | 5559.51 | 9136.04 | 8801.27 | 8328.63 | 8858.88 | 8909.38 |
+| AVG | 5603.195 | 9182.254 | <strong>8829.87</strong> | 8349.756 | 8868.94 | 8886.554 |
 
 - orig: original 
 - A: offline BOLTed 
-- B: Profile colleted from C1, without function on the call stack to be considered
-- B': Profile collected from C1, without fix the buggy addresses in the profile
+- B: Profile colleted from C1, without fixing insn in functions on the call stack
+- B': Profile collected from C1, without fixing the buggy addresses in the profile
 - B_new: Profile collected from C1, fix all buggy addresses
 - ocolos: performance after C0's code replacement
 
