@@ -112,15 +112,15 @@ wait
 ![bw](/assets/2023-02-02/bandwidth.png)
 - The max bandwidth of our machine is <strong>131.13 GiB/s</strong>
     + 20/(131.13*1000) = 0.015% (of the max bandwidth)
-- I choose 20 MiB/s as the bandwidth limitation.
+- I choose <strong>20 MiB/s</strong> as the bandwidth limitation.
     + `rdtset` support [setting max bandwidth](https://github.com/intel/intel-cmt-cat/tree/master/rdtset)
         * b, mba_max for max allowable local memory B/W
         * `rdtsed -t 'mba_max=2000;cpu=1`
     + so the command I used is 
 ```bash
-taskset --cpu-list 1 ./bfs 1 1 loc-brightkite_edges.txt &
+./bfs 1 1 loc-brightkite_edges.txt &
 PID=$!
-rdtsed -t 'mba_max=20;cpu=1' -p ${PID}
+rdtsed -t 'mba_max=20' -p ${PID}
 wait
 ```
     + I got the following error message
@@ -129,6 +129,13 @@ Allocation: MBA CTRL requested but not enabled. Please enable MBA CTRL.
 Requested configuration is not valid!
 Allocation: Failed to configure allocation!
 ```
-    + how to change the enable MBA CTRL?
+    + how to enable MBA CTRL?
         * this webpage has some [info](https://github.com/intel/intel-cmt-cat/wiki/MBM-MBA-how-to-guide#mba---mbm---configure-mba-in-mbs)
         * the command to enable MBA CTRL is `sudo pqos -I -R mbaCtrl-on`
+        * the script to enable MBA CTRL
+        ```
+        > sudo rm /var/lock/libpqos 
+        > sudo pqos -s
+        > sudo pqos -I -R mbaCtrl-on
+        ```
+![bfs-bw](/assets/2023-02-02/bfs-bw.png)
