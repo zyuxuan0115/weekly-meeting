@@ -1,0 +1,27 @@
+---
+layout: post
+title:  "2023-2-25 CFG"
+date:   2023-2-25 7:53:46 -0500
+categories: data-cache 
+---
+### inject prefetch instructions at binary level
+![s7_hilight](/assets/2023-02-25/opt_highlight.png)<br><br>
+
+### the comparison between 2 CFGs
+- use graph algorithm to test [isomorphism](https://networkx.org/documentation/stable/reference/algorithms/isomorphism.html)
+    + result: false (of course)
+- use graph algorithm to test [similarity](https://networkx.org/documentation/stable/reference/algorithms/similarity.html)
+    + result: cannot finish running within 24 hours...
+- manually check
+    + use CFG tool to generate the control flow graph file
+    + then use `dot` to generate the real control flow graph 
+
+### get the control flow graph of the 2 binaries
+![s8](/assets/2023-02-25/orig.png)<br><br>
+
+### what's the difference?
+![s8](/assets/2023-02-25/s8.png)<br><br>
+![s7](/assets/2023-02-25/s7.png)<br><br>
+![s2](/assets/2023-02-25/s2.png)<br><br>
+![s5](/assets/2023-02-25/s5.png)<br><br>
+![s3](/assets/2023-02-25/s3.png)<br><br>
