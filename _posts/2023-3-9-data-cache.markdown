@@ -1,0 +1,10 @@
+---
+layout: post
+title:  "2023-3-9 BOLT's address relocation"
+date:   2023-3-9 7:53:46 -0500
+categories: data-cache 
+---
+### where does BOLT figure out the relocation address
+- [Here](https://github.com/upenn-acg/BOLT/blob/pg2/padding/bolt/lib/Rewrite/RewriteInstance.cpp#L532), BOLT prints the `BOLT-INFO: creating new program header table at address 0x4400000, offset 0x4200000`
+	+ one thing to be noticed is that it's `perf2bolt` not `llvm-bolt` that prints this info.
+- [Here](https://github.com/upenn-acg/BOLT/blob/pg2/padding/bolt/lib/Rewrite/RewriteInstance.cpp#L3498), BOLT also sets the starting address of the new text section.

@@ -6,15 +6,48 @@ categories: data-cache
 ---
 
 ### the perf results of pr
-![LLC](/assets/2023-03-17/LLC.png) 
+![v200000d200](/assets/2023-01-24/v200000-d200.png)
+
+||real orig | syn orig| real opt<br> pref-dist=6  | real opt <br>pref-dist=28 | syn opt<br> pref-dist=6 | 
+|:----: |:----: |:----: | :----: |:----: | :----: |
+| exe time(sec) | 6.685039| 6.551384 | 6.312855 |7.568303 |6.126617 |
 
 ![IPC](/assets/2023-03-17/IPC.png) 
+
+![LLC](/assets/2023-03-17/LLC.png) 
 
 ![sw-prefetch-PKI](/assets/2023-03-17/sw_prefetch_access.t0_PKI.png)
 
 ![l2-rqsts.pf-PKI](/assets/2023-03-17/l2_rqsts.pf_PKI.png)
 
 ![l2-rqsts.pf-hit-pct](/assets/2023-03-17/l2_rqsts.pf_hit_percentage.png)
+
+### VTune results of pr
+![L1](/assets/2023-03-17/L1_TopDown.png) 
+
+![L2](/assets/2023-03-17/L2_TopDown.png) 
+
+![L3](/assets/2023-03-17/L3_TopDown.png) 
+
+### the perf results of bc
+![bc-exe-time](/assets/2023-02-02/bc-syn.png)
+
+|exe time(sec)|real orig | syn orig | real opt   |  
+|:----: |:----: |:----: | :----: |:----: | :----: |
+| v=20  | 6.216578 | 6.055222 | 5.845230 |
+| v=20,000 d=500 | 244.544965 | 252.476411 | 262.926401 |
+
+![bc-IPC](/assets/2023-03-17/bc-IPC.png)
+
+![LLC-bc1](/assets/2023-03-17/bc-LLC-load-MPKI-50.png) 
+
+![LLC-bc2](/assets/2023-03-17/bc-LLC-load-MPKI-500.png) 
+
+![LLC-bc3](/assets/2023-03-17/bc-LLC-store-MPKI-50.png) 
+
+![LLC-bc4](/assets/2023-03-17/bc-LLC-store-MPKI-500.png) 
+
+
 
 ### DMon related
 - successfully get DMon registered to opt.
@@ -102,3 +135,7 @@ for.end:                                          ; preds = %for.cond
   ret i32 0
 }
 ```
+
+- so I need to check why this `skipFunction()` function skip that main function.
+	+ the header that declares this function is in `llvm/include/llvm/Pass.h`
+	+ the body of the function is in `llvm/lib/IR/Pass.cpp`
