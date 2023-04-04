@@ -4,8 +4,10 @@ title:  "2023-3-27 pg^2+perf stat"
 date:   2023-3-27 7:53:46 -0500
 categories: data-cache 
 ---
+### How pg^2 works
+![d1.png](/assets/2023-03-27/d1.png)
 
-### the perf results of pr (perf stat time = 500 ms)
+### The perf results of pr (perf stat time = 500 ms)
 
 ![IPC2](/assets/2023-03-27/pr-pref-dist-exe.png) 
 
@@ -13,7 +15,7 @@ categories: data-cache
 
 ![IPC1](/assets/2023-03-27/pr-IPC-exe.png) 
 
-### make pg^2 work for pr
+### Make pg^2 work for pagerank
 - scan through all prefetch distances from 5 to 100 with a stride of 5 at runtime
 - then pick the prefetch distance that has the highest IPC
 - the execution time of `pg2-pagerank` is the same as the optimal solution
@@ -48,6 +50,19 @@ categories: data-cache
 
 ![ipc-exe-2](/assets/2023-03-27/pr-IPC-exe-0.1ms.png)
 
+![0.01](/assets/2023-03-27/0.01.png)
+
+![0.02](/assets/2023-03-27/0.02.png)
+
+![0.05](/assets/2023-03-27/0.05.png)
+
+![0.1](/assets/2023-03-27/0.1.png)
+
+![0.2](/assets/2023-03-27/0.2.png)
+
+![0.3](/assets/2023-03-27/0.3.png)
+
+![0.5](/assets/2023-03-27/0.5.png)
 
 - what if `perf stat` time is 5 ms?
 
