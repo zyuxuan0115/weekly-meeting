@@ -4,25 +4,43 @@ title:  "2023-3-27 pg^2+perf stat"
 date:   2023-3-27 7:53:46 -0500
 categories: data-cache 
 ---
-### How pg^2 works
+## How pg^2 works
+### Before execution
 ![d1.png](/assets/2023-03-27/d1.png)
 
+### During execution
+![d2.png](/assets/2023-03-27/d2.png)
+
+### After we scan through all prefetch distances
+- We pick the highest IPC  
+- And use the corresponding prefetch dist as the optimal prefetch dist
+- inject prefetch again
+
+
+## Why IPC as the metric for performance?
 ### The perf results of pr (perf stat time = 500 ms)
+![IPC3](/assets/2023-03-27/pr-pref-dist-IPC.png)
 
 ![IPC2](/assets/2023-03-27/pr-pref-dist-exe.png) 
 
-![IPC3](/assets/2023-03-27/pr-pref-dist-IPC.png)
-
 ![IPC1](/assets/2023-03-27/pr-IPC-exe.png) 
 
-### Make pg^2 work for pagerank
+
+## Performance & pg^2's overhead
+### performance
+- only test pagerank + syn v=200,000 d=200
 - scan through all prefetch distances from 5 to 100 with a stride of 5 at runtime
 - then pick the prefetch distance that has the highest IPC
-- the execution time of `pg2-pagerank` is the same as the optimal solution
-- the overall time for scanning and prefetch injestion is 0.62 seconds.
+- the execution time of `pg2-pagerank` is <strong>the same as</strong> the optimal solution (execution time: ~63 seconds)
+
+### overhead
+- pagerank + syn v=200,000 d=200; `perf stat` time is set to be <strong>0.01 sec</strong>
+- runtime scan through all prefetch distances from 5 to 100 with a stride of 5
+	+ the overall time for prefetch injection & IPC measurement is 0.62 seconds.
 	+ time spends on different parts
-		* perf stat time 0.01 × 20 = 0.2 seconds
+		* overall `perf stat` time 0.01 × 20 = 0.2 seconds
 		* ptrace system call time 0.0035 × 20 = 0.068 seconds
+		* the rest is the time spending on prefetch injection
 	+ is this correct?
 		* No. Although `perf stat` attached to `pagerank` for just 0.01 second (10 ms)
 		* the time spends on `perf stat` is <strong>25</strong> ms
@@ -35,9 +53,10 @@ categories: data-cache
 ![time1](/assets/2023-03-27/Time1.png)
 
 
-### A shorter perf stat time? 
+## A shorter perf stat time? 
 - what if `perf stat` time is 0.1 ms?
 	+ `perf stat ... -- sleep 0.0001`
+		* even if we told perf to run 0.1 ms, perf actually ran for <strong>1.6</strong> ms!
 	+ ![s1](/assets/2023-03-27/Screenshot1.png)
 	+ compared with `perf stat ... -- sleep 0.01`
 	+ ![s2](/assets/2023-03-27/screenshot2.png)
@@ -48,7 +67,11 @@ categories: data-cache
 
 ![time2](/assets/2023-03-27/Time2.png)
 
-![ipc-exe-2](/assets/2023-03-27/pr-IPC-exe-0.1ms.png)
+### conclusion
+- We need at least attach perf for <strong>10 ms</strong>!
+
+## Does perf stat for 10 ms reflect the real performance?
+### pagerank with real input (still roadNet-PA)
 
 ![0.01](/assets/2023-03-27/0.01.png)
 
@@ -64,22 +87,42 @@ categories: data-cache
 
 ![0.5](/assets/2023-03-27/0.5.png)
 
-- what if `perf stat` time is 5 ms?
 
-| | perf stat |	ptrace | insert prefetch | change <br>prefecth dist| overall<br>(20 rounds) |
-|:---:|:---:|:---:|:---:|:---:|:---:|
-| time (ms) | 19 | 3.5| 1.3| 1.2|	400 | 
+### pagerank with synthetic input (still v=200,000 d=200)
 
-![time3](/assets/2023-03-27/Time3.png)
+![v200000d200](/assets/2023-01-24/v200000-d200.png)
 
-![ipc-exe-3](/assets/2023-03-27/pr-IPC-exe-5ms.png)
+![syn-time](/assets/2023-03-27/pr-syn-time.png)
+
+![syn-IPC](/assets/2023-03-27/pr-syn-IPC.png)
+
+![0.001](/assets/2023-03-27/syn-0.001.png)
+
+![0.01](/assets/2023-03-27/syn-0.01.png)
+
+![0.05](/assets/2023-03-27/syn-0.05.png)
+
+![0.3](/assets/2023-03-27/syn-0.3.png)
+
+![pr-syn-time-comparison](/assets/2023-03-27/pr-syn-time-comparison.png)
 
 ### How to decide when to stop profiling
-![v200000d200](/assets/2023-01-24/v200000-d200.png)
 
 ![normailzed](/assets/2023-01-24/normalized.png)
 
- 
+![syn-IPC](/assets/2023-03-27/pr-syn-IPC.png)
+
+![IPC3](/assets/2023-03-27/pr-pref-dist-IPC.png)
+
+- consider the slope k of two consecutive points
+	+ if k > 0: keep on profiling and injecting
+	+ if k <= 0: stop profiling and injecting
+		* pick the highest IPC with its corresponding prefetch distance
+
+![when2stop](/assets/2023-03-27/when2stop.png)
+
+![when2stop2](/assets/2023-03-27/when2stop2.png)
+
 ### DMon related
 - successfully get DMon registered to opt.
 	+ can print the error msg we embeded to the pass
