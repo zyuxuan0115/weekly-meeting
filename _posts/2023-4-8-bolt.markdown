@@ -4,7 +4,121 @@ title:  "2023-4-8 BOLT's address relocation"
 date:   2023-4-8 7:53:46 -0500
 categories: cont-opt 
 ---
+### Binary Loop
+- BOLT has a [BinaryLoop class](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryLoop.h)
+- BOLT also has a [LoopInversion pass](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Passes/LoopInversionPass.cpp)
+- Our static optimization tools:
+	+ [apt-get's pass](https://github.com/upenn-acg/floar/blob/master/apt-get/SWPrefetchingLLVMPass/SWPrefetchingLLVMPass.cpp)
+	+ [DMon's pass](https://github.com/upenn-acg/floar/blob/master/dmon/llvm-passes/selective-prefetch/Prefetch.cpp)
+	+ [LoopDataPrefetch's pass](https://llvm.org/doxygen/LoopDataPrefetch_8cpp_source.html)
+- [CFG of pagerank](/data-cache/2023/02/25/CFG.html)
+
+
+
+### Check when BinaryFunction's outputAddress is updated
+- the `OutputAddress` of a Binary Function is declared [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryFunction.h#L226)
+	+ The value of `OutputAddress` is updated [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L4077)
+	+ In this [line](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L4089) of `BinaryFunction::updateOutputValues()`
+		* `if (BC.HasRelocations || isInjected())`
+		* we know that if the function is injected, the `OutputAddress` will be set by `setOutputAddress(BaseAddress + StartOffset);`
+		* where `BaseAddress = getCodeSection()->getOutputAddress();`
+		* and `StartOffset = Layout.getSymbolOffset(*getSymbol());`
+	+ The <strong>callers</strong> of `BinaryFunction::updateOutputValues()` should have all information about the moved functions:
+		* In `RewriteInstance.cpp`, it calls this `Function->updateOutputAddress()` [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L3680)
+			- All functions in BC is passed to `Function->updateOutputAddress()`, but only ~1200 functions have their `OutputAddress` updated
+				+ We still need to go back to the [BinaryFunction::updateOutputValues()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L4077)
+				+ In the first line of this function, it checks whether the functions `isEmitted()`
+			- Only If a Binary Function's `isEmitted` is true, its `OutputAddress` has a high chance to be updated
+			- When will a Binary Function be set `Emitted`?
+				+ In the [BinaryEmitter class](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryEmitter.cpp#L254), a Binary Function is set to be `Emitted`
+				+ [Emitted = emitFunction(*Function, /*EmitColdPart=*/false);](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryEmitter.cpp#L244)
+				+ [if(!BC.shouldEmit(*Function))](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryEmitter.cpp#L230)
+				+ In [BinaryContext::shouldEmit()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryContext.cpp#L1527), [if(Function.isIgnored())](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryContext.cpp#L1531)
+				+ In [BinaryFunction::disassemble()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L1027), multiple locations that call `setIgnored()`. In [BinaryFunction::postProcessEntryPoints()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L1639) one location is set to be ignored.
+		* Also in `RewriteInstance.cpp`, it updates output addresses based on the new section map and layout. Only do this for the object created by BOLT. [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L2971)
+	+ We need to know 
+		* How `BaseAddress` is updated.
+		* How `Layout` is formed.
+
+- How `BaseAddress` is updated
+	+ [BaseAddress = getCodeSection()->getOutputAddress();](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L4085)
+		* Namely, it uses the starting address of the code section.
+		* Need to see where the starting address of the code section is updated.
+	+ [Section->setOutputAddress(Address);](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L3438)
+		* the starting address is set at this location
+		* `Address` is the argument of function [AllocateAt](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L3459)
+		* The real value passed to `AllocateAt` to update address is [NextAvailableAddress](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L3475)
+	+ `NextAvailableAddress` is a member of `RewriteInstance` class, and is updated [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L455)	
+	```cpp
+455   NextAvailableAddress = 0;
+456   uint64_t NextAvailableOffset = 0;
+457   ELF64LE::PhdrRange PHs =
+458       cantFail(Obj.program_headers(), "program_headers() failed");
+459   for (const ELF64LE::Phdr &Phdr : PHs) {
+460     switch (Phdr.p_type) {
+461     case ELF::PT_LOAD:
+462       BC->FirstAllocAddress = std::min(BC->FirstAllocAddress,
+463                                        static_cast<uint64_t>(Phdr.p_vaddr     ));
+464       NextAvailableAddress = std::max(NextAvailableAddress,
+465                                       Phdr.p_vaddr + Phdr.p_memsz);
+469       llvm::outs()<<"@@@ "<<utohexstr(NextAvailableAddress)<<"\n";
+471       BC->SegmentMapInfo[Phdr.p_vaddr] = SegmentInfo{Phdr.p_vaddr,
+472                                                      Phdr.p_memsz,
+473                                                      Phdr.p_offset,
+474                                                      Phdr.p_filesz,
+475                                                      Phdr.p_align};
+476       break;
+477     case ELF::PT_INTERP:
+478       BC->HasInterpHeader = true;
+479       break;
+480     }
+481   }
+	```
+	+ The output is 
+	```
+	@@@ 1B22230
+	@@@ 38CCD60
+	@@@ 3A415B8
+	@@@ 42FE3A9
+	```
+	+ and after [NextAvailableAddress = alignTo(NextAvailableAddress, BC->PageAlign);](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L510), the `NextAvailableAddress` is set to be `0x4400000`
+
+
+- what is a `injected function`?
+	+ In BOLT's code, they called "functions that are moved by BOLT" [injected functions](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryContext.h#L181)
+	+ The new injected function is created [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryContext.cpp#L1925)
+	+ In [RewriteInstance::mapCodeSections()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L3394), it contains [BC->getInjectedBinaryFunctions()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L3402)
+		* `BC->getInjectedBinaryFunctions()` returns [InjectedBinaryFunctions](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryContext.h#L182)
+	+ In [RewriteInstance::updateELFSymbolTable()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L4259)'s line [4539](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L4539), BOLT adds the symbols of these `injected functions` to the ELFSymbolTable.
+- What is `codeSection`
+	+ [getHotTextMoverSectionName](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryContext.h#L816)
+	+ [getInjectedCodeSectionName](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryContext.h#L818)
+
+
 ### where does BOLT figure out the relocation address
-- [Here](https://github.com/upenn-acg/BOLT/blob/pg2/padding/bolt/lib/Rewrite/RewriteInstance.cpp#L532), BOLT prints the `BOLT-INFO: creating new program header table at address 0x4400000, offset 0x4200000`
+- [Here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L532), BOLT prints the 
+```
+BOLT-INFO: first alloc address is 0x200000
+BOLT-INFO: creating new program header table at address 0x4400000, offset 0x4200000
+```
 	+ one thing to be noticed is that it's `perf2bolt` not `llvm-bolt` that prints this info.
-- [Here](https://github.com/upenn-acg/BOLT/blob/pg2/padding/bolt/lib/Rewrite/RewriteInstance.cpp#L3498), BOLT also sets the starting address of the new text section.
+	+ The <strong>BOLTed Starting Address</strong> is set at [BC->LayoutStartAddress](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L554)
+	+ BC also has old text section address stored at [BC->OldTextSectionAddress](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L558)
+		* it's updated [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L484)
+
+- [Here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L3498), BOLT also sets the starting address of the new text section.
+	+ `BC->HasRelocations` is defined at [this line](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L1511)
+		* it depends on [HasTextRelocations](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L1477)
+		* `HasTextRelocations` checks if the binary contains the `.rela.text` section
+		* `.rela.text` related: `.rela.text` holds relocation data which says how the address should be modified when the final executable is linked.
+
+- In the [Passes/LongJump.cpp](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Passes/LongJmp.cpp) 's [LongJmpPass::tentativeLayout()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Passes/LongJmp.cpp#L372)
+	+ in `tentativeLayoutRelocMode(BC, SortedFunctions, DotAddress);`, BC, BOLTed functions(?) and the new location is passed to the `tentativeLayoutRelocMode()` function.
+	+ in `tentativeLayoutRelocMode()`, the new starting address of each function is updated in [this line](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Passes/LongJmp.cpp#L355)
+		* `HotAddresses[Func] = DotAddress;`
+		* `HotAddresses` is declared [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Passes/LongJmp.h#L54)
+	+ and later on, in [LongJmpPass::getSymbolAddress()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Passes/LongJmp.cpp#L415), if the function symbol is passed to `getSymbolAddress()`, the BOLTed starting address will be returned by `getSymbolAddress()`
+
+### Relocation
+- In `RewriteInstance.cpp`'s [RewriteInstance::processRelocations()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L1841)
+
