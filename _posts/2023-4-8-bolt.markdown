@@ -11,6 +11,15 @@ categories: cont-opt
 	+ [apt-get's pass](https://github.com/upenn-acg/floar/blob/master/apt-get/SWPrefetchingLLVMPass/SWPrefetchingLLVMPass.cpp)
 	+ [DMon's pass](https://github.com/upenn-acg/floar/blob/master/dmon/llvm-passes/selective-prefetch/Prefetch.cpp)
 	+ [LoopDataPrefetch's pass](https://llvm.org/doxygen/LoopDataPrefetch_8cpp_source.html)
+- Things in APT-GET that might not be supported at Binary Level
+	+ [Loop->makeLoopInvariant()](https://github.com/upenn-acg/floar/blob/master/apt-get/SWPrefetchingLLVMPass/SWPrefetchingLLVMPass.cpp#L270): several locations (I just listed one)
+	+ PhiNode: a lot of locations (I just listed some of them)
+		* [PHINode* getCanonicalishInductionVariable(Loop* L);](https://github.com/upenn-acg/floar/blob/master/apt-get/SWPrefetchingLLVMPass/SWPrefetchingLLVMPass.cpp#L47)
+		* `if(PHINode* CurOpIsPhiNode=dyn_cast<PHINode>(op->get()))` [here](https://github.com/upenn-acg/floar/blob/master/apt-get/SWPrefetchingLLVMPass/SWPrefetchingLLVMPass.cpp#L118)
+		* `PHINode *PN = cast<PHINode>(I);` [here](https://github.com/upenn-acg/floar/blob/master/apt-get/SWPrefetchingLLVMPass/SWPrefetchingLLVMPass.cpp#L361)
+- Things in DMon that might not be supported at Binary Level
+	+ [Loop->isLoopInvariant()](https://github.com/upenn-acg/floar/blob/master/dmon/llvm-passes/selective-prefetch/Prefetch.cpp#L286)
+	+ [SCEV related](https://github.com/upenn-acg/floar/blob/master/dmon/llvm-passes/selective-prefetch/Prefetch.cpp#L291)
 - [CFG of pagerank](/data-cache/2023/02/25/CFG.html)
 
 
@@ -82,6 +91,17 @@ categories: cont-opt
 	@@@ 42FE3A9
 	```
 	+ and after [NextAvailableAddress = alignTo(NextAvailableAddress, BC->PageAlign);](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L510), the `NextAvailableAddress` is set to be `0x4400000`
+
+
+
+
+### BinaryFunction::disassemble()
+The description of `BinaryFunction::disassemble()` is [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryFunction.h#L2092)
+
+
+
+
+
 
 
 - what is a `injected function`?
