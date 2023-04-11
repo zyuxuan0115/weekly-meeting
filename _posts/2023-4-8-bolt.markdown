@@ -43,7 +43,6 @@ categories: cont-opt
 				+ [Emitted = emitFunction(*Function, /*EmitColdPart=*/false);](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryEmitter.cpp#L244)
 				+ [if(!BC.shouldEmit(*Function))](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryEmitter.cpp#L230)
 				+ In [BinaryContext::shouldEmit()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryContext.cpp#L1527), [if(Function.isIgnored())](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryContext.cpp#L1531)
-				+ In [BinaryFunction::disassemble()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L1027), multiple locations that call `setIgnored()`. In [BinaryFunction::postProcessEntryPoints()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L1639) one location is set to be ignored.
 		* Also in `RewriteInstance.cpp`, it updates output addresses based on the new section map and layout. Only do this for the object created by BOLT. [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L2971)
 	+ We need to know 
 		* How `BaseAddress` is updated.
@@ -93,52 +92,49 @@ categories: cont-opt
 	+ and after [NextAvailableAddress = alignTo(NextAvailableAddress, BC->PageAlign);](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L510), the `NextAvailableAddress` is set to be `0x4400000`
 
 
+### The order of execution
+- first functions got disassembled 
+- then functions got emitted
+- after functions are emitted, the output address of each function will be updated
 
 
 ### BinaryFunction::disassemble()
-The description of `BinaryFunction::disassemble()` is [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryFunction.h#L2092)
+- The description of `BinaryFunction::disassemble()` is [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryFunction.h#L2092). 
+- In the function, several closures are included: 
+	+ [handleExternalReference()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L1097)
+	+ [handleIndirectBranch()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L1140)
+	+ [handleAArch64IndirectCall()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L1182)
+	+ How `BinaryFunction::disassemble()` disassembles call/branch is [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L1313)
+- only `BinaryFunction::disassemble()` is called only ~1200 times. Why?
+	+ need to see its caller function
+- The caller of `BinaryFunction::disassemble()` is [RewriteInstance::disassembleFunctions()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L2674)
+	+ iterating on all functions, only ~1200 functions calls `BinaryFunction::disassemble()`, because most of the functions cannot pass [if (!shouldDisassemble(Function))](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L2698)
+	+ in [RewriteInstance->shouldDisassemble()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L430)
+		* if a BinaryFunction's `isIgnored` is false, `RewriteInstance->shouldDisassemble()` returns ture
+		* we need to see how a BinaryFunction's `isIgnored` is set
+	+ in `BinaryFunction` class, there is a [setIgnored()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryFunction.h#L1811) function
+		* (1) the caller of this function is [RewriteInstance::selectFunctionsToProcess()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L2491) 
+			- the [shouldProcess](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L2546) closure, if BOLT is in lite mode, then only function that has profile will have `shouldProcess` returns true.
+			```cpp
+if (opts::Lite) 
+	if (ProfileReader && !ProfileReader->mayHaveProfileData(Function))
+		return false;
+			```
+			- this means <strong>if a function doesn't have profile, it won't be disassembled.</strong>
+		* (2) the caller of this function can also be [RewriteInstance::disassembleFunctions()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L2715)
+			- but the `setIgnored()` happens after `if (!shouldDisassemble(Function))`
+		* (3) the caller of this function can also be [BinaryContext::skipMarkedFragments()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryContext.cpp#L688)
+			- but this line is never executed since `FragmentsToSkip.size()` is 0
+		* (4) the caller of this function can also be [BinaryContext::adjustCodePadding()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryContext.cpp#L919)
+			- but this line is never executed since (tested to print something but nothing is printed)
+
+### BinaryEmitter::emitFunction()
+
+
+[MCSymbol *BinaryContext::registerNameAtAddress()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryContext.cpp#L939)
 
 
 
 
 
-
-
-- what is a `injected function`?
-	+ In BOLT's code, they called "functions that are moved by BOLT" [injected functions](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryContext.h#L181)
-	+ The new injected function is created [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryContext.cpp#L1925)
-	+ In [RewriteInstance::mapCodeSections()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L3394), it contains [BC->getInjectedBinaryFunctions()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L3402)
-		* `BC->getInjectedBinaryFunctions()` returns [InjectedBinaryFunctions](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryContext.h#L182)
-	+ In [RewriteInstance::updateELFSymbolTable()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L4259)'s line [4539](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L4539), BOLT adds the symbols of these `injected functions` to the ELFSymbolTable.
-- What is `codeSection`
-	+ [getHotTextMoverSectionName](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryContext.h#L816)
-	+ [getInjectedCodeSectionName](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryContext.h#L818)
-
-
-### where does BOLT figure out the relocation address
-- [Here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L532), BOLT prints the 
-```
-BOLT-INFO: first alloc address is 0x200000
-BOLT-INFO: creating new program header table at address 0x4400000, offset 0x4200000
-```
-	+ one thing to be noticed is that it's `perf2bolt` not `llvm-bolt` that prints this info.
-	+ The <strong>BOLTed Starting Address</strong> is set at [BC->LayoutStartAddress](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L554)
-	+ BC also has old text section address stored at [BC->OldTextSectionAddress](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L558)
-		* it's updated [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L484)
-
-- [Here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L3498), BOLT also sets the starting address of the new text section.
-	+ `BC->HasRelocations` is defined at [this line](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L1511)
-		* it depends on [HasTextRelocations](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L1477)
-		* `HasTextRelocations` checks if the binary contains the `.rela.text` section
-		* `.rela.text` related: `.rela.text` holds relocation data which says how the address should be modified when the final executable is linked.
-
-- In the [Passes/LongJump.cpp](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Passes/LongJmp.cpp) 's [LongJmpPass::tentativeLayout()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Passes/LongJmp.cpp#L372)
-	+ in `tentativeLayoutRelocMode(BC, SortedFunctions, DotAddress);`, BC, BOLTed functions(?) and the new location is passed to the `tentativeLayoutRelocMode()` function.
-	+ in `tentativeLayoutRelocMode()`, the new starting address of each function is updated in [this line](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Passes/LongJmp.cpp#L355)
-		* `HotAddresses[Func] = DotAddress;`
-		* `HotAddresses` is declared [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Passes/LongJmp.h#L54)
-	+ and later on, in [LongJmpPass::getSymbolAddress()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Passes/LongJmp.cpp#L415), if the function symbol is passed to `getSymbolAddress()`, the BOLTed starting address will be returned by `getSymbolAddress()`
-
-### Relocation
-- In `RewriteInstance.cpp`'s [RewriteInstance::processRelocations()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L1841)
 
