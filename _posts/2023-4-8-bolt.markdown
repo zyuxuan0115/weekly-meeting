@@ -1,29 +1,9 @@
 ---
 layout: post
-title:  "2023-4-8 BOLT's address relocation"
+title:  "2023-4-8 BOLT's function relocation"
 date:   2023-4-8 7:53:46 -0500
 categories: cont-opt 
 ---
-### Binary Loop
-- BOLT has a [BinaryLoop class](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryLoop.h)
-- BOLT also has a [LoopInversion pass](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Passes/LoopInversionPass.cpp)
-- Our static optimization tools:
-	+ [apt-get's pass](https://github.com/upenn-acg/floar/blob/master/apt-get/SWPrefetchingLLVMPass/SWPrefetchingLLVMPass.cpp)
-	+ [DMon's pass](https://github.com/upenn-acg/floar/blob/master/dmon/llvm-passes/selective-prefetch/Prefetch.cpp)
-	+ [LoopDataPrefetch's pass](https://llvm.org/doxygen/LoopDataPrefetch_8cpp_source.html)
-- Things in APT-GET that might not be supported at Binary Level
-	+ [Loop->makeLoopInvariant()](https://github.com/upenn-acg/floar/blob/master/apt-get/SWPrefetchingLLVMPass/SWPrefetchingLLVMPass.cpp#L270): several locations (I just listed one)
-	+ PhiNode: a lot of locations (I just listed some of them)
-		* [PHINode* getCanonicalishInductionVariable(Loop* L);](https://github.com/upenn-acg/floar/blob/master/apt-get/SWPrefetchingLLVMPass/SWPrefetchingLLVMPass.cpp#L47)
-		* `if(PHINode* CurOpIsPhiNode=dyn_cast<PHINode>(op->get()))` [here](https://github.com/upenn-acg/floar/blob/master/apt-get/SWPrefetchingLLVMPass/SWPrefetchingLLVMPass.cpp#L118)
-		* `PHINode *PN = cast<PHINode>(I);` [here](https://github.com/upenn-acg/floar/blob/master/apt-get/SWPrefetchingLLVMPass/SWPrefetchingLLVMPass.cpp#L361)
-- Things in DMon that might not be supported at Binary Level
-	+ [Loop->isLoopInvariant()](https://github.com/upenn-acg/floar/blob/master/dmon/llvm-passes/selective-prefetch/Prefetch.cpp#L286)
-	+ [SCEV related](https://github.com/upenn-acg/floar/blob/master/dmon/llvm-passes/selective-prefetch/Prefetch.cpp#L291)
-- [CFG of pagerank](/data-cache/2023/02/25/CFG.html)
-
-
-
 ### Check when BinaryFunction's outputAddress is updated
 - the `OutputAddress` of a Binary Function is declared [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryFunction.h#L226)
 	+ The value of `OutputAddress` is updated [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L4077)
