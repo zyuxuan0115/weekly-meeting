@@ -1,0 +1,102 @@
+---
+layout: post
+title:  "2023-4-11 BOLT's function relocation"
+date:   2023-4-11 7:53:46 -0500
+categories: cont-opt 
+---
+### On stack replacement
+- If we don't use the synthetic original binary at the beginning of pg^2's execution...
+	+ For the first round of code replacement, we need to replace the original `do_work` with the optimizaed `do_work`
+		* when pg^2 performs the code replacement, the `do_work` function <strong>is executing</strong>!
+		* so this `do_work` function must be <strong>on the call stack</strong>
+		* we are doing on stack replacement.
+	+ this is tricky because the CFG of 2 `do_work` functions are different
+		* ![cfg](/assets/2023-04-11/cfg.png)
+		* this means that the values of the original `do_work` function stored on the call stack will not match the optimized `do_work` function
+	+ So we need to
+		* move the optimized `do_work` function to a new location
+			- especailly when the size of the optimized `do_work` is larger than the original `do_work`
+		* make the optimized `do_work`'s CFG close to the original CFG
+		* move the program counter and update the call stack
+![diagram](/assets/2023-04-11/diagram.png)
+- But for the <strong>2nd, 3rd, 4th</strong> ... round of code replacement
+	* we already have the prefetch instruction injected
+	* we only need to change the prefetch distance of that prefetch instruction
+
+
+### Binary Loop
+- BOLT has a [BinaryLoop class](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryLoop.h)
+- BOLT also has a [LoopInversion pass](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Passes/LoopInversionPass.cpp)
+- Our static optimization tools:
+	+ [apt-get's pass](https://github.com/upenn-acg/floar/blob/master/apt-get/SWPrefetchingLLVMPass/SWPrefetchingLLVMPass.cpp)
+	+ [DMon's pass](https://github.com/upenn-acg/floar/blob/master/dmon/llvm-passes/selective-prefetch/Prefetch.cpp)
+	+ [LoopDataPrefetch's pass](https://llvm.org/doxygen/LoopDataPrefetch_8cpp_source.html)
+- Things in APT-GET that might not be supported at Binary Level
+	+ [Loop->makeLoopInvariant()](https://github.com/upenn-acg/floar/blob/master/apt-get/SWPrefetchingLLVMPass/SWPrefetchingLLVMPass.cpp#L270): several locations (I just listed one)
+	+ PhiNode: a lot of locations (I just listed some of them)
+		* [PHINode* getCanonicalishInductionVariable(Loop* L);](https://github.com/upenn-acg/floar/blob/master/apt-get/SWPrefetchingLLVMPass/SWPrefetchingLLVMPass.cpp#L47)
+		* `if(PHINode* CurOpIsPhiNode=dyn_cast<PHINode>(op->get()))` [here](https://github.com/upenn-acg/floar/blob/master/apt-get/SWPrefetchingLLVMPass/SWPrefetchingLLVMPass.cpp#L118)
+		* `PHINode *PN = cast<PHINode>(I);` [here](https://github.com/upenn-acg/floar/blob/master/apt-get/SWPrefetchingLLVMPass/SWPrefetchingLLVMPass.cpp#L361)
+	+ [Builder.CreateInBoundsGEP](https://github.com/upenn-acg/floar/blob/master/apt-get/SWPrefetchingLLVMPass/SWPrefetchingLLVMPass.cpp#L525): I found it in llvm's code [here](https://llvm.org/doxygen/classllvm_1_1IRBuilderBase.html#a64b6c97b8faad5ec83f37d906fca7bc4)
+		* this will create IR level instructions like 
+		* `%3 = getelementptr inbounds [10 x i32], [10 x i32]* %2, i64 0, i64 0`
+		* I don't think at Machine code level, they have instructions like this.
+- Things in DMon that might not be supported at Binary Level
+	+ [Loop->isLoopInvariant()](https://github.com/upenn-acg/floar/blob/master/dmon/llvm-passes/selective-prefetch/Prefetch.cpp#L286)
+	+ [Scalar Evaluation](https://github.com/upenn-acg/floar/blob/master/dmon/llvm-passes/selective-prefetch/Prefetch.cpp#L229) & [SCEV related](https://github.com/upenn-acg/floar/blob/master/dmon/llvm-passes/selective-prefetch/Prefetch.cpp#L291)
+	+ [code metric](https://github.com/upenn-acg/floar/blob/master/dmon/llvm-passes/selective-prefetch/Prefetch.cpp#L229)
+- [CFG of pagerank](/data-cache/2023/02/25/CFG.html)
+
+
+
+
+### BOLT: moving a function to a new location
+- the original code layout of pagerank from `nm -n pagerank`
+```
+0000000000401000 T _init
+00000000004011c0 T _start
+00000000004011f0 T _dl_relocate_static_pie
+0000000000401200 t deregister_tm_clones
+0000000000401230 t register_tm_clones
+0000000000401270 t __do_global_dtors_aux
+00000000004012a0 t frame_dummy
+00000000004012b0 T _Z7do_workPv
+00000000004016d0 T main
+0000000000402980 T _Z12init_weightsiiPPdPPi
+0000000000402c50 T _Z24initialize_single_sourcePdiid
+0000000000402de0 T __libc_csu_init
+0000000000402e50 T __libc_csu_fini
+0000000000402e58 T _fini
+```
+- BOLT's output by `llvm-bolt pagerank -o pagerank.bolt && nm -n pagerank.bolt`
+```
+0000000000401000 T _init
+00000000004011c0 T _start
+00000000004011f0 T _dl_relocate_static_pie
+0000000000401200 t deregister_tm_clones
+0000000000401230 t register_tm_clones
+0000000000401270 t __do_global_dtors_aux
+00000000004012a0 t frame_dummy
+00000000004016d0 T main
+0000000000402980 T _Z12init_weightsiiPPdPPi
+0000000000402c50 T _Z24initialize_single_sourcePdiid
+0000000000402de0 T __libc_csu_init
+0000000000402e50 T __libc_csu_fini
+0000000000402e58 T _fini
+0000000000800000 T _Z7do_workPv
+```
+- How to do this?
+In `RewriteInstance::selectFunctionsToProcess()`'s [shouldProcess closure](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/RewriteInstance.cpp#L2546), I added the following code
+```cpp
+if (Function.getOneName()=="_Z7do_workPv")
+	return true;  
+else
+	return false;
+```
+- The problem that need to resolved
+	+ BOLT still reoredered basic blocks in `_Z7do_workPv`
+	+ I used `objdump` to print assembly code of `do_work` in both binaries
+
+![screenshot1](/assets/2023-04-11/s1.png)
+
+![screenshot2](/assets/2023-04-11/s2.png)
