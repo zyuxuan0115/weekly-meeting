@@ -4,4 +4,19 @@ title:  "2023-4-12 turn off BOLT's optimizations"
 date:   2023-4-12 7:53:46 -0500
 categories: cont-opt 
 ---
+### Conclusion from vimdiff 2 do_work's assembly code
+- ![screenshot3](/assets/2023-04-12/s3.png)
+- The version that have `do_work` moved by BOLT doesn't reorder BB
+    + It just deletes `NOP`s
+    + In BOLT's paper, they also mentioned such feature in BOLT's optimization pass
+    + ![screenshot1](/assets/2023-04-12/s1.png)
+- I discovered that there is a pass called [RemoveNops::runOnFunction(BinaryFunction &BF)](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Passes/BinaryPasses.cpp#L1828)
+    + to disable this pass, we need to comment out `Manager.registerPass(std::make_unique<RemoveNops>(NeverPrint));` [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/BinaryPassManager.cpp#L340) in `Rewrite/BinaryPassManager.cpp` 
+    + however, it doesn't work! `NOP`s are still deleted by BOLT!
+    + so I disable all registered passes.
 
+
+
+- [BinaryContext::hasValidCodePadding()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryContext.cpp#L836) has a closure [skipZeros](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryContext.cpp#L869)
+
+- [if(BC.MIB->isNoop(Instruction))](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L1411)
