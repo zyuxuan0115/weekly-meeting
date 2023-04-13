@@ -19,4 +19,11 @@ categories: cont-opt
 
 - [BinaryContext::hasValidCodePadding()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryContext.cpp#L836) has a closure [skipZeros](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryContext.cpp#L869)
 
-- [if(BC.MIB->isNoop(Instruction))](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L1411)
+- In [if(BC.MIB->isNoop(Instruction))](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L1411), it says
+```
+NOTE: disassembly loses the correct size information for noops.
+       E.g. nopw 0x0(%rax,%rax,1) is 9 bytes, but re-encoded it's only
+       5 bytes. Preserve the size info using annotations.
+```
+
+- [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L1202) is how BOLT reads binary instrucitons from a given binary 
