@@ -73,5 +73,6 @@ NOTE: disassembly loses the correct size information for noops.
     - inject the new prefetch distance to the target process
 
 ### Add prefetch to CFG without changing the CFG
+![s7_hilight](/assets/2023-02-25/opt_highlight.png)
 
-
+In pagerank, the line that causes most LLC miss is [here](https://github.com/upenn-acg/floar/blob/master/apt-get/CRONO/apps/pagerank/pagerank_lock.cc#L117)
