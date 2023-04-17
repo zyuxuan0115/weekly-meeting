@@ -13,17 +13,65 @@ categories: cont-opt
 - I discovered that there is a pass called [RemoveNops::runOnFunction(BinaryFunction &BF)](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Passes/BinaryPasses.cpp#L1828)
     + to disable this pass, we need to comment out `Manager.registerPass(std::make_unique<RemoveNops>(NeverPrint));` [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Rewrite/BinaryPassManager.cpp#L340) in `Rewrite/BinaryPassManager.cpp` 
     + however, it doesn't work! `NOP`s are still deleted by BOLT!
-    + so I disable all registered passes.
+    + so I disable all registered passes. And after I disabled all registered passes
+    + the vimdiff of original and the `do_work` function that is optimized by `APT-GET`
+    + ![screenshot2](/assets/2023-04-12/s2.png)
 
-
-
-- [BinaryContext::hasValidCodePadding()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryContext.cpp#L836) has a closure [skipZeros](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryContext.cpp#L869)
-
+### Even if we disable all optimization passes, BOLT still change the length of NOPs, Why?
 - In [if(BC.MIB->isNoop(Instruction))](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L1411), it says
 ```
 NOTE: disassembly loses the correct size information for noops.
        E.g. nopw 0x0(%rax,%rax,1) is 9 bytes, but re-encoded it's only
        5 bytes. Preserve the size info using annotations.
 ```
+    + [MIB](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryContext.h#L535), whose fullname is `MCBuild`. See its [class](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/MCPlusBuilder.h)
+- To understand the meaning of this comment. I checked how BOLT disassemble machine code from 
+    + [BinaryFunction::disassemble](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L1202) is how BOLT reads binary instrucitons from a given binary and convert it into `MCInst`
+        * in this function, I print the size of instruction after this [if(BC.MIB->isNoop(Instruction))](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L1411) line
+    + In [BinaryEmitter::emitFunctionBody](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryEmitter.cpp#L398), Instructions will be converted from `MCInst` into machine code.
+        * in [Streamer.emitInstruction(Instr);](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryEmitter.cpp#L478) the instruction is emitted
+        * before `Streamer.emitInstruction(Instr)`, I print the size of each `NOP` instruction
+        * The size of `NOP`s have the same size as `NOP`s disassembled from from `BinaryFunction::disassemble` (if I disabled all BOLT's optmization passes)
+        * so, it means that after `Streamer.emitInstruction(Instr)` is executed, the size of `NOP`s are changed.
+        * however, the [Streamer.emitInstruction()](https://llvm.org/doxygen/classllvm_1_1MCStreamer.html#a2e263d122b10b0bcc1bbf6c63202208c) is a function in llvm's `MCStreamer` class
 
-- [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L1202) is how BOLT reads binary instrucitons from a given binary 
+### If we don't want the length of NOPs change, what can we do?
+- 3 ways to address this problem
+    + using BOLT's BAT
+        * BAT supports the translation of non-branch instructions
+        * later we may need to come back to this approach if we implement APT-GET in BOLT
+    + when compiling the program, add compiler flags to remove `NOP`s
+        * tried `-fno-align-functions` from [this link](https://stackoverflow.com/questions/7912464/why-does-gcc-pad-functions-with-nops), but it doesn't work
+    + using BOLT's optimization pipeline to remove compiler flags
+        * <strong>left</strong>
+            - binary first produced by APT-GET without `-Wl,--emit-relocs` flag
+            - then use BOLT's optimization passes to remove most of the `NOP`s
+                + the cmd is `llvm-bolt pagerank -o pagerank.bolt`
+                + no profile is sent to `llvm-bolt`, so no BB-reordered or Function reoredered is performed
+        * <strong>right</strong>
+            - binary first produced by APT-GET with `-Wl,--emit-relocs` flag 
+                + so function is able to moved to a new location
+            - then use BOLT's optimization passes to remove most of the `NOP`s and move the function to a new location
+    + ![screenshot4](/assets/2023-04-12/s4.png)
+    + <strong>limitations</strong> for 
+
+### Make pg^2 to support function reordering
++ (1) use BOLT to preprocess the binary that is optimized by APT-GET to eliminate all `NOP`s
++ (2) pg^2 invokes that BOLTed binary + inputs
++ (3) for the first round of code replacement
+    - inject `do_work` function at a new location
+    - inject unmoved functions (because these functions may be tha caller of `do_work`)
+    - inject v-tables (but it seems pagerank doesn't contain v-table)
+    - moved the program counter to the new location
+    - resume `pg^2`
++ (4) for the second round of code replacement
+    - extract the binary code of prefetch instruction
+    - change the prefetch distance of prefetch instruction
+    - inject the new prefetch distance to the target process
++ (5) for the 3rd, 4th, 5th ... rounds of code replacement
+    - change the prefetch distance of prefetch instruction
+    - inject the new prefetch distance to the target process
+
+### Add prefetch to CFG without changing the CFG
+
+
