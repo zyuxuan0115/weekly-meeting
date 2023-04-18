@@ -17,7 +17,7 @@ categories: cont-opt
     + the vimdiff of original and the `do_work` function that is optimized by `APT-GET`
     + ![screenshot2](/assets/2023-04-12/s2.png)
 
-### Even if we disable all optimization passes, BOLT still change the length of NOPs, Why?
+### Even if we disable all optimization passes, BOLT still changes the length of NOPs, Why?
 - In [if(BC.MIB->isNoop(Instruction))](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L1411), it says
 ```
 NOTE: disassembly loses the correct size information for noops.
@@ -37,12 +37,12 @@ NOTE: disassembly loses the correct size information for noops.
 
 ### If we don't want the length of NOPs change, what can we do?
 - 3 ways to address this problem
-    + using BOLT's BAT
+    + use BOLT's BAT (BOLT Address Translation)
         * BAT supports the translation of non-branch instructions
         * later we may need to come back to this approach if we implement APT-GET in BOLT
     + when compiling the program, add compiler flags to remove `NOP`s
         * tried `-fno-align-functions` from [this link](https://stackoverflow.com/questions/7912464/why-does-gcc-pad-functions-with-nops), but it doesn't work
-    + using BOLT's optimization pipeline to remove compiler flags
+    + use BOLT's optimization pipeline to remove compiler flags
         * <strong>left</strong>
             - binary first produced by APT-GET without `-Wl,--emit-relocs` flag
             - then use BOLT's optimization passes to remove most of the `NOP`s
@@ -53,9 +53,18 @@ NOTE: disassembly loses the correct size information for noops.
                 + so function is able to moved to a new location
             - then use BOLT's optimization passes to remove most of the `NOP`s and move the function to a new location
     + ![screenshot4](/assets/2023-04-12/s4.png)
-    + <strong>limitations</strong> for 
+    + <strong>limitations</strong> for this approach
+        - we need to preprocess the original binary by BOLT in order to eliminate all `NOP`s
+        - after a binary being processed by BOLT, `libunwind` cannot correctly resolve the symbols of functions on the call stack.
+            * I have tested using `pg^2` to run BOLTed binary. `libunwind` can only print the last function on the call stack
+                + ![screenshot6](/assets/2023-04-12/s7.png)
+                + 
+                + ![screenshot7](/assets/2023-04-12/s6.png)           
+            * however, if we change the BOLTed binary to be the original binary (`NOP`s are not deleted by BOLT), `libunwind` can print all functions on the call stack. 
+                + ![screenshot5](/assets/2023-04-12/s5.png)
 
-### Make pg^2 to support function reordering
+### Make pg^2 support function reordering
+![diagram](/assets/2023-04-11/diagram.png)
 + (1) use BOLT to preprocess the binary that is optimized by APT-GET to eliminate all `NOP`s
 + (2) pg^2 invokes that BOLTed binary + inputs
 + (3) for the first round of code replacement
@@ -73,6 +82,10 @@ NOTE: disassembly loses the correct size information for noops.
     - inject the new prefetch distance to the target process
 
 ### Add prefetch to CFG without changing the CFG
-![s7_hilight](/assets/2023-02-25/opt_highlight.png)
+- optimized CFG
+![s7_hilight](/assets/2023-04-12/opt_highlight.png)
+
+- original CFG
+![s8](/assets/2023-04-12/orig.png)
 
 In pagerank, the line that causes most LLC miss is [here](https://github.com/upenn-acg/floar/blob/master/apt-get/CRONO/apps/pagerank/pagerank_lock.cc#L117)
