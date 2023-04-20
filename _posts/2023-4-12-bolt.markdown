@@ -4,6 +4,39 @@ title:  "2023-4-12 turn off BOLT's optimizations"
 date:   2023-4-12 7:53:46 -0500
 categories: cont-opt 
 ---
+## Recap 1: padding approach
+### Before execution
+![d1.png](/assets/2023-03-27/d1.png)
+
+### During execution
+![d2.png](/assets/2023-03-27/d2.png)
+
+### After we scan through all prefetch distances
+- We pick the highest IPC  
+- And use the corresponding prefetch dist as the optimal prefetch dist
+- inject prefetch again
+
+## Recap 2: last week's meeting
+### On stack replacement
+- If we don't use the synthetic original binary at the beginning of pg^2's execution...
+	+ For the first round of code replacement, we need to replace the original `do_work` with the optimizaed `do_work`
+		* when pg^2 performs the code replacement, the `do_work` function <strong>is executing</strong>!
+		* so this `do_work` function must be <strong>on the call stack</strong>
+		* we are doing on stack replacement.
+	+ this is tricky because the CFG of 2 `do_work` functions are different
+		* ![cfg](/assets/2023-04-11/cfg.png)
+		* this means that the values of the original `do_work` function stored on the call stack will not match the optimized `do_work` function
+	+ So we need to
+    	* make the optimized `do_work`'s CFG close to the original CFG
+		* move the optimized `do_work` function to a new location
+			- especailly when the size of the optimized `do_work` is larger than the original `do_work`
+		* move the program counter and update the call stack
+![diagram](/assets/2023-04-11/diagram.png)
+- But for the <strong>2nd, 3rd, 4th</strong> ... round of code replacement
+	* we already have the prefetch instruction injected
+	* we only need to change the prefetch distance of that prefetch instruction 
+
+## New things
 ### Conclusion from vimdiff 2 do_work's assembly code
 - ![screenshot3](/assets/2023-04-12/s3.png)
 - The version that have `do_work` moved by BOLT doesn't reorder BB
@@ -63,7 +96,7 @@ NOTE: disassembly loses the correct size information for noops.
             * however, if we change the BOLTed binary to be the original binary (`NOP`s are not deleted by BOLT), `libunwind` can print all functions on the call stack. 
                 + ![screenshot5](/assets/2023-04-12/s5.png)
 
-### Make pg^2 support function reordering
+### Make pg^2 support function relocation
 ![diagram](/assets/2023-04-11/diagram.png)
 + (1) use BOLT to preprocess the binary that is optimized by APT-GET to eliminate all `NOP`s
 + (2) pg^2 invokes that BOLTed binary + inputs
@@ -88,4 +121,72 @@ NOTE: disassembly loses the correct size information for noops.
 - original CFG
 ![s8](/assets/2023-04-12/orig.png)
 
-In pagerank, the line that causes most LLC miss is [here](https://github.com/upenn-acg/floar/blob/master/apt-get/CRONO/apps/pagerank/pagerank_lock.cc#L117)
+- In pagerank, the line that causes most LLC miss is [here](https://github.com/upenn-acg/floar/blob/master/apt-get/CRONO/apps/pagerank/pagerank_lock.cc#L117)
+
+- To inject prefetch, we need to 
+    + add boundary check
+        * may need `CMove`
+        * <strong>need to discuss with Joe later </strong>
+    + add prefetch
+        * what are we going to prefetch
+        * where should we inject prefetch
+    + the machine code we add for prefetch
+```
+push %rax
+mov 0x3c8(%r9, %rdx, 8), %rax
+prefetchT0 (%rax)
+pop %rax
+``` 
+        * in this way, the call stack might be safe.
+            - any exceptions?
+            - need to discuss with Joe on Friday
+        * for updating program counter, when pausing the target program
+            - if the current PC is less than the address of `push %rax`, 
+                + PC = PC + `starting address of moved do_work` - `starting address of original do_work`
+            - if the current PC is greater than the address of `pop %rax`,
+                + PC = PC + `starting address of moved do_work` - `starting address of original do_work` + length of these 4 instructions
+
+### Where to add new code
+- How does BOLT work 
+    + first disassemble machine code from binary into MCInst. This is in `BinaryFunction->disassemble()`
+    + then run optimization passes. Optimization passes are in `bolt/lib/Passes/`
+    + finally in `BinaryEmitter->emitFunctions()`, it converts `MCInst` into machine code.
+- In order to inject prefetch insn, we need to add a new optimization pass [InjectPrefetchPass](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Passes/InjectPrefetchPass.cpp)
+    + Now it's still an empty pass
+    + I have made it registered to BOLT and pass the re-compilation of BOLT
+
+### Create prefetch instruction in BOLT
+- `BinaryBasicBlock class` has a member [instructions](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryBasicBlock.h#L65)
+    + it stores all `MCInst`s into a [smallVector](https://llvm.org/doxygen/classllvm_1_1SmallVector.html) called [InstructionListType](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/llvm/lib/Analysis/DependenceGraphBuilder.cpp#L34)
+        * From `BinaryBasicBlock.h`'s [insertInstruction()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/Core/BinaryBasicBlock.h#L766)'s  we are able to inject `prefetchT0` at any loction of the Basic Block we want. 
+```cpp
+iterator insertInstruction(iterator At, MCInst &NewInst) {
+	adjustNumPseudos(NewInst, 1); // TODO: what's this?
+	return Instructions.insert(At, NewInst);
+}
+```
+    + In `BinaryBasicBlock class` we can add the following function to create prefetch instruction, just as [BinaryBasicBlock::addBranchInstruction()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryBasicBlock.cpp#L459) in BOLT's code
+```cpp
+void BinaryBasicBlock::addPrefetchT0Instruction(MCPhysReg Reg, iterator location) {
+    // I'm not sure if we need to specify registers at this level
+    // if we do need, the Reg is X86::RDX
+    BinaryContext &BC = Function->getBinaryContext();
+    MCInst NewInst;
+    BC.MIB->createPrefetchT0(NewInst, Reg, BC.Ctx.get());
+    Instructions.insert(location, NewInst);
+}
+```
+    + In BOLT's [MCBuilder class](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/MCPlusBuilder.h#L1401), it can create instructions like `createCall`.
+        * the real createCall() is in the derive class [X86MCPlusBuilder](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Target/X86/X86MCPlusBuilder.cpp#L3132)
+        * also have [createIndirectCall()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Target/X86/X86MCPlusBuilder.cpp#L3447) as an example
+```cpp
+bool createPrefetchT0(MCInst &Inst, MCPhysReg Reg,
+                  MCContext *Ctx) override {
+    Inst.setOpcode(X86::PREFETCHT0);
+    Inst.addOperand(MCOperand::createReg(Reg));
+    return true;
+}
+```
+    + BOLT has also implemented 
+        - [createPushRegister](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Target/X86/X86MCPlusBuilder.cpp#L3291) and [createPopRegister](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Target/X86/X86MCPlusBuilder.cpp#L3317)
+    

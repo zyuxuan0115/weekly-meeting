@@ -1,0 +1,95 @@
+---
+layout: post
+title:  "2023-4-17 MCInst in BOLT"
+date:   2023-4-17 7:53:46 -0500
+categories: cont-opt 
+---
+### llvm's MCInst
+- Reference for llvm's MCInst is [here](https://llvm.org/doxygen/classllvm_1_1MCInst.html)
+- Reference for `X86InsertPrefetch` pass is [here](https://llvm.org/doxygen/X86InsertPrefetch_8cpp_source.html)
+- Search `MCInst` and `New` keyword in all BOLT's source code.
+	+ I had the following results:
+
+```cpp
+lib/Core/BinaryBasicBlock.cpp:  MCInst NewInst;
+lib/Passes/Instrumentation.cpp:  for (MCInst &NewInst : Instrs) {
+lib/Passes/Instrumentation.cpp:      MCInst NewInst;
+lib/Passes/ShrinkWrapping.cpp:    MCInst NewInst;
+```
+
+```cpp
+void BinaryBasicBlock::addBranchInstruction(const BinaryBasicBlock *Successor) {
+  assert(isSuccessor(Successor));
+  BinaryContext &BC = Function->getBinaryContext();
+  MCInst NewInst;
+  std::unique_lock<llvm::sys::RWMutex> Lock(BC.CtxMutex);
+  BC.MIB->createUncondBranch(NewInst, Successor->getLabel(), BC.Ctx.get());
+  Instructions.emplace_back(std::move(NewInst));
+}
+
+void BinaryBasicBlock::addTailCallInstruction(const MCSymbol *Target) {
+  BinaryContext &BC = Function->getBinaryContext();
+  MCInst NewInst;
+  BC.MIB->createTailCall(NewInst, Target, BC.Ctx.get());
+  Instructions.emplace_back(std::move(NewInst));
+}
+```
+
+- Then I looked into the [BinaryBasicBlock.cpp](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryBasicBlock.cpp) code
+	+ In the code 
+		* they first declare new `MCInst`
+		* then create this instruction as a TailCall `BC.MIB->createTailCall(NewInst, Target, BC.Ctx.get());`
+	+ seems like <strong>BC.MIB</strong> is the place we should pay attention to
+		* are there other types of `MCInst` that we can create?
+		* so I further checked [BC.MIB](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryContext.h#L587), and find
+			- std::unique_ptr<MCPlusBuilder> MIB;
+	+ so it seems that we should look into the `MCPlusBuilder` class
+		* I looked into [MCPlusBuilder.h](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/MCPlusBuilder.h), and there are
+			- [createNoop](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/Core/MCPlusBuilder.h#L1440) function
+				* is injecting a `NOOP` enough?
+			- [createCall](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/MCPlusBuilder.h#L1474) function
+				* if we want to inject a `prefetch` function call. The `MCSymbol *Target` (a.k.a `prefetch`) is not in the symbol table?
+				* to add arguments to this call, Do we need to add other instructions? (e.g. `createLoad` to load data (argument) into the corresponding register?)
+				* the arguments of the call need to be passed from `APT-GET`'s [code](https://github.com/upenn-acg/floar/blob/master/apt-get/SWPrefetchingLLVMPass/SWPrefetchingLLVMPass.cpp#L589)
+				* (<strong>IMPORTANT</strong>) what if an argument of `prefetch` should be put into a specific register, but that register is in use? 
+					+ how do we detect whether the register is in use?
+		* Both `createNoop` and `createCall` are virtual functions 
+			- So I found functions that override these virtual functions
+			- they are [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Target/X86/X86MCPlusBuilder.cpp#L2915) and [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Target/X86/X86MCPlusBuilder.cpp#L2522) 
+		* I didn't see any function called `createPrefetch`
+			- So we need to create `createPrefetch` by ourselves
+
+```cpp
+bool createNoop(MCInst &Inst) const override {
+    Inst.setOpcode(X86::NOOP);
+    return true;
+}
+```
+
+- I also looked into [BinaryBasicBlock.h](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/Core/BinaryBasicBlock.h#L766)
+	+ it also has `insertInstruction()` to insert a new `MCInst`. 
+```cpp
+iterator insertInstruction(iterator At, MCInst &NewInst) {
+	adjustNumPseudos(NewInst, 1);
+	return Instructions.insert(At, NewInst);
+}
+```
+
+### how to createPrefetch?
+- X86 prefetch instruction set [reference](https://c9x.me/x86/html/file_module_x86_id_252.html)
+- what is the `OPCODE` of `prefetcht0`
+	+ `grep -r -I "X86::PREFETCH" llvm-project` shows that 
+	```
+	llvm/lib/Target/X86/X86InsertPrefetch.cpp:      {"_nta_", X86::PREFETCHNTA},
+	llvm/lib/Target/X86/X86InsertPrefetch.cpp:      {"_t0_", X86::PREFETCHT0},
+	llvm/lib/Target/X86/X86InsertPrefetch.cpp:      {"_t1_", X86::PREFETCHT1},
+	llvm/lib/Target/X86/X86InsertPrefetch.cpp:      {"_t2_", X86::PREFETCHT2},
+	```
+	+ So the opcode is `X86::PREFETCHT0`
+- how to compose a binary instruction
+
+
+`LoopBase class` is in this [LoopInfo.h](https://llvm.org/doxygen/LoopInfo_8h.html)
+
+[createPushRegister](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Target/X86/X86MCPlusBuilder.cpp#L3291)
+[createPopRegister](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Target/X86/X86MCPlusBuilder.cpp#L3317)
