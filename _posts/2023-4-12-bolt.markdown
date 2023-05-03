@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "2023-4-12 turn off BOLT's optimizations"
-date:   2023-4-12 7:53:46 -0500
+title:  "2023-4-21 turn off BOLT's optimizations"
+date:   2023-4-21 7:53:46 -0500
 categories: cont-opt 
 ---
 ## Recap 1: padding approach

@@ -1,0 +1,113 @@
+---
+layout: post
+title:  "2023-4-21 Binary Loop"
+date:   2023-4-21 7:53:46 -0500
+categories: data-cache
+---
+### Using perf to locate TOP LLC load miss location
+- the original binary
+
+![CFG](/assets/2023-04-21/pr_orig_cfg1.png)
+
+- If we want to inject prefetch at <strong>binary level</strong>
+  + What do we want to prefetch?
+  + Where should we inject prefetch instructions?
+
+In APT-GET's script, it uses the following commands to locate TOP LLC load miss location
+```shell
+perf record -e cpu/event=0xd1,umask=0x20,name=MEM_LOAD_RETIRED.L3_MISS/ppp -- <command to run the executable>
+perf report --stdio #reports the function that contains the Top LLC load miss location
+perf annotate --stdio -M att <function name>
+```
+![s1](/assets/2023-04-21/s1.png)
+- In the screenshot, it shows the instruction at location `0x401520` cause the TOP LLC load miss.
+- I also check the binary by `objdump -d <executable>`
+
+![s2](/assets/2023-04-21/s2.png)
+
+
+
+- the BOLTed binary
+
+![CFG2](/assets/2023-04-21/pr_orig_cfg2.png)
+
+
+### How to run BOLT's BinaryLoop 
+- In `BinaryFunction.cpp`'s [BinaryFunction::calculateLoopInfo()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L4015), BOLT has example code for `BinaryLoop`.
+
+```cpp
+// Discover loops.
+BinaryDominatorTree DomTree;
+DomTree.recalculate(*this);
+BLI.reset(new BinaryLoopInfo());
+BLI->analyze(DomTree);
+
+// Traverse discovered loops and add depth and profile information.
+std::stack<BinaryLoop *> St;
+for (auto I = BLI->begin(), E = BLI->end(); I != E; ++I) {
+  St.push(*I);
+  ++BLI->OuterLoops;
+}
+```
+
+- The `BinaryDominatorTree` is declared in `BinaryLoop.h` 
+    + `using BinaryDominatorTree = DomTreeBase<BinaryBasicBlock>;`
+- `DomTree.recalculate()` is in [llvm::DomTreeUpdater class](https://llvm.org/doxygen/classllvm_1_1DomTreeUpdater.html#a16573be9dccc430b2f944e78cd54373e)
+- BLI is a [member](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryFunction.h#L251) of `BinaryFunction class`
+    + `std::unique_ptr<BinaryLoopInfo> BLI;`
+
+### How to set and get annotation of an instruction
+- Set the annotation of `offset` of an instruction is [here](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Core/BinaryFunction.cpp#L1409)
+- Get the annotation of `offset` of an instruction is [here](https://github.com/upenn-acg/BOLT/blob/main/bolt/lib/Core/BinaryEmitter.cpp#L470)
+- So we can add annotation of the <strong>absolute address</strong> of each instruction by ourselves
+
+
+### How to allocate register at BOLT MCInst level
+- From BOLT's [X86MCPlusBuilder class](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Target/X86/X86MCPlusBuilder.cpp#L3225), we have function `getX86R11`
+```
+MCPhysReg getX86R11() const override { return X86::R11; }
+```
+- So we can create `%rax` by ourselves
+
+
+
+### Performance
+- The comparison of BOLTed binary, original, and APT-GET
+  + number of iterations in pagerank is 1000
+
+| input name |	original exec time  | BOLTed exec time | APT-GET optimized exec time |
+|:---:|:---:|:---:| :---:|
+| roadNet-PA | 21 sec | 13.5 sec | 13.5 sec | 
+
+
+- After adding BOLT appoach to PG^2
+
+![diagram](/assets/2023-04-11/diagram.png)
+
+| # iterations |	original exec time  | BOLTed exec time | pg^2 exec time |
+|:---:|:---:|:---:| :---:|
+| 1000 | 21 sec | 13.5 sec | 16 sec | 
+| 3000 | 62 sec | 40 sec | 43 sec | 
+
+- Overhead of perf and llvm-bolt
+
+| app name |	execution time  | specified profile time | 
+|:---:|:---:|:---:|
+| llvm-bolt | 0.024721 sec |  | 
+| perf record | 2.277401 sec | 0.1 sec | 
+| perf report | 0.017494 sec |  | 
+| perf annotate | 0.024752 sec |  | 
+
+- The padding approach does not have the overhead of `perf record`
+
+### Adding Bounds Check
+![CFG3](/assets/2023-04-21/pr_orig_cfg3.png)
+
+### How to create a Binary Basic Block
+- In `BinaryFunction.h`, BOLT has [createBasicBlock()](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/include/bolt/Core/BinaryFunction.h#L1507)
+
+### Condition Code of JCC (Branch) Instructions
+- [CondCode of Branch](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/llvm/lib/Target/X86/MCTargetDesc/X86BaseInfo.h#L296)
+
+### Current status
+![S4](/assets/2023-04-21/S4.png)
