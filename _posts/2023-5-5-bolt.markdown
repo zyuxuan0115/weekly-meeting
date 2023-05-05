@@ -1,0 +1,28 @@
+---
+layout: post
+title:  "2023-5-5 Apply BOLT on gcc compiled binary"
+date:   2023-5-5 7:53:46 -0500
+categories: data-cache
+---
+### Make BOLT work with the clang version pagerank
+![S2](/assets/2023-05-05/s2.png)
+
+| exec time |	original exec time  | BOLT injects 4 insn | APT-GET optimized | BOLT injects 2 BB | 
+|:---:|:---:|:---:| :---:| :---:|
+| roadNet-PA | 21 sec | 13.5 sec | 13.5 sec | 13.8 sec |
+
+### GCC version's CFG
+
+- gcc version original binary
+
+![CFG](/assets/2023-05-05/pr_gcc.png)
+
+- clang version original binary
+
+![CFG1](/assets/2023-05-05/pr_orig_cfg1.png)
+
+### Compare the BOLTed code layout with original
+- in order to check if there is any changes in the BOLTed binary
+	+ I injected BoundsCheckBB and PrefetchBB to pagerank.
+	+ then deleted the instructions I had inserted
+	+ then compared 2 code layout,![S1](/assets/2023-05-05/s1.png)

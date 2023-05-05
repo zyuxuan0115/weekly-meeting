@@ -4,7 +4,7 @@ title:  "2023-4-21 Binary Loop"
 date:   2023-4-21 7:53:46 -0500
 categories: data-cache
 ---
-### Using perf to locate TOP LLC load miss location
+### Inject prefetch at binary level
 - the original binary
 
 ![CFG](/assets/2023-04-21/pr_orig_cfg1.png)
@@ -13,11 +13,12 @@ categories: data-cache
   + What do we want to prefetch?
   + Where should we inject prefetch instructions?
 
+### Using perf to locate TOP LLC load miss location
 In APT-GET's script, it uses the following commands to locate TOP LLC load miss location
 ```shell
-perf record -e cpu/event=0xd1,umask=0x20,name=MEM_LOAD_RETIRED.L3_MISS/ppp -- <command to run the executable>
-perf report --stdio #reports the function that contains the Top LLC load miss location
-perf annotate --stdio -M att <function name>
+perf record -e MEM_LOAD_RETIRED.L3_MISS/ppp -p <PID> -- sleep 0.1
+perf report --stdio -i perf.data #reports the function that contains the Top LLC load miss location
+perf annotate --stdio -i perf.data -M att <function name>
 ```
 ![s1](/assets/2023-04-21/s1.png)
 - In the screenshot, it shows the instruction at location `0x401520` cause the TOP LLC load miss.
@@ -72,6 +73,8 @@ MCPhysReg getX86R11() const override { return X86::R11; }
 
 
 ### Performance
+![s6](/assets/2023-04-21/s6.png)
+
 - The comparison of BOLTed binary, original, and APT-GET
   + number of iterations in pagerank is 1000
 
@@ -80,7 +83,7 @@ MCPhysReg getX86R11() const override { return X86::R11; }
 | roadNet-PA | 21 sec | 13.5 sec | 13.5 sec | 
 
 
-- After adding BOLT appoach to PG^2
+- Making PG^2 to support BOLT approach
 
 ![diagram](/assets/2023-04-11/diagram.png)
 
@@ -108,6 +111,31 @@ MCPhysReg getX86R11() const override { return X86::R11; }
 
 ### Condition Code of JCC (Branch) Instructions
 - [CondCode of Branch](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/llvm/lib/Target/X86/MCTargetDesc/X86BaseInfo.h#L296)
-
+- [how to get condCode](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Target/X86/X86MCPlusBuilder.cpp#L375)
+- [example of creating Branch instr](https://github.com/upenn-acg/BOLT/blob/pg2/func-reloc/bolt/lib/Target/X86/X86MCPlusBuilder.cpp#L2848)
 ### Current status
 ![S4](/assets/2023-04-21/S4.png)
+
+
+### Issues with BOLT's approach
+- How BOLT works
+  + disassemble a `BinaryFunction`
+    * convert machine code into `MCInst`
+  + run optimization passes
+    * we inject prefetch here
+  + emit instructions 
+    * convert `MCInst` back to machine code
+- The length of `NOP`s
+
+![nops](/assets/2023-04-12/s2.png)
+
+- When we change the `rip` (instruction pointer) after code replacement
+  + new rip = old rip + the starting addr of moved function - the starting addr of original function
+
+- Solution we previously proposed
+  + using BOLT to pre-process the original binary
+
+![nops](/assets/2023-04-12/s4.png)
+
+- The problem when we apply pg2 to this approach
+![s5](/assets/2023-04-21/s5.png)
