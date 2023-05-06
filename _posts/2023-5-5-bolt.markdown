@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "2023-5-5 Apply BOLT on gcc compiled binary"
+title:  "2023-5-5 Apply BOLT to gcc compiled binary"
 date:   2023-5-5 7:53:46 -0500
 categories: data-cache
 ---
@@ -25,4 +25,5 @@ categories: data-cache
 - in order to check if there is any changes in the BOLTed binary
 	+ I injected BoundsCheckBB and PrefetchBB to pagerank.
 	+ then deleted the instructions I had inserted
-	+ then compared 2 code layout,![S1](/assets/2023-05-05/s1.png)
+	+ then compared 2 code layout
+![S1](/assets/2023-05-05/s1.png)
