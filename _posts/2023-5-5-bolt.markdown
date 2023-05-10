@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "2023-5-5 Apply BOLT to gcc compiled binary"
+title:  "2023-5-5 Apply BOLT to CRONO workloads"
 date:   2023-5-5 7:53:46 -0500
 categories: data-cache
 ---
@@ -87,10 +87,15 @@ categories: data-cache
 
 ![sssp](/assets/2023-05-05/sssp.png)
 
+- [map table for 64-bit register -> lower 32-bit register](https://github.com/upenn-acg/BOLT/blob/pg2/bat/bolt/lib/Target/X86/X86MCPlusBuilder.cpp#L2802)
+
 | exec time (seconds) | sssp | sssp.bolt (prefetch dist=64) |
 |:---:|:---:|:---:| 
 | v=100,000,d=600 | 23.171046 | 22.495365 |
 
+## bfs's CFG
+
+![bfs](/assets/2023-05-05/bfs.png)
 
 ## dfs's CFG
 
