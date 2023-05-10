@@ -7,9 +7,10 @@ categories: data-cache
 ### Make BOLT work with the clang version pagerank
 ![S2](/assets/2023-05-05/s2.png)
 
-| exec time |	original exec time  | BOLT injects 4 insn | APT-GET optimized | BOLT injects 2 BB | 
-|:---:|:---:|:---:| :---:| :---:|
-| roadNet-PA | 21 sec | 13.5 sec | 13.5 sec | 13.8 sec |
+- nice feature
+	+ all injected binary basic blocks are consecutive
+
+
 
 ### GCC version's CFG
 
@@ -26,4 +27,71 @@ categories: data-cache
 	+ I injected BoundsCheckBB and PrefetchBB to pagerank.
 	+ then deleted the instructions I had inserted
 	+ then compared 2 code layout
+
 ![S1](/assets/2023-05-05/s1.png)
+
+### BAT (BOLT address translation table) again 
+- objdump original & objdump BOLTed & BAT 
+	+ the `BAT-dump` I used is `commit 2b88298c2ab221228744ca8dba70c2d3bcff593b`. 
+	+ `BAT-dump` in llvm's repo can work with the older version of BOLT's BAT. 
+
+![S3](/assets/2023-05-05/s3.png)
+
+- Leverage BAT to update `rip` (instruction pointer)
+	+ BAT: BOLTed addr -> original addr
+	+ <strong>reversed BAT</strong>: original addr -> BOLTed addr
+	+ How to update `rip`?
+		* key = starting addr of the current BB
+		* `rip` = `rip` - key + reversed BAT[key]
+
+### Add heuritic to decide when to stop injecting prefetch
+- consider the slope k of two consecutive points
+	+ if k > 0: keep on profiling and injecting
+	+ if k <= 0: stop profiling and injecting
+		* pick the highest IPC with its corresponding prefetch distance
+
+![when2stop](/assets/2023-03-27/when2stop.png)
+
+![when2stop2](/assets/2023-03-27/when2stop2.png)
+
+## final performance
+
+| exec time |	original | BOLT offline injects 2 BB <br>(prefetch dist = 64) not optimal | pg^2 | 
+|:---:|:---:|:---:| :---:| :---:|
+| roadNet-PA (1000 iter) | 21 sec | 14.1 sec | 15.2 sec | 
+
+## final overhead
+- overall delay: 5.276543 seconds
+
+| overhead (seconds) | llvm-bolt | bat-dump | perf record | perf report | perf annotate | ptrace (code replacement) | 
+|:---:|:---:|:---:| :---:| :---:|:---:|:---:|
+| roadNet-PA (1000 iter) |   0.028653  | 0.006148  | 2.267611  | 0.016779 | 0.026512 | 0.003332 |
+
+| overhead (seconds) | perf stat | ptrace (inject prefetch) |
+|:---:|:---:|:---:| :---:| :---:|:---:|:---:| 
+| roadNet-PA (1000 iter) | 0.301873309 | 0.001182 |
+
+
+## Make BOLT work for bc
+![s4](/assets/2023-05-05/s4.png)
+
+![bc](/assets/2023-05-05/bc.png)
+
+| exec time (seconds) | bc | bc.bolt (prefetch dist=64) |
+|:---:|:---:|:---:| 
+| v=20000,d=200 | 86.268588 | 75.260175 |
+
+
+## Make BOLT work for sssp
+![s5](/assets/2023-05-05/s5.png)
+
+![sssp](/assets/2023-05-05/sssp.png)
+
+| exec time (seconds) | sssp | sssp.bolt (prefetch dist=64) |
+|:---:|:---:|:---:| 
+| v=100,000,d=600 | 23.171046 | 22.495365 |
+
+
+## dfs's CFG
+
+![dfs](/assets/2023-05-05/dfs.png)
