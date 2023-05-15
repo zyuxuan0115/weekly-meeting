@@ -67,6 +67,10 @@ categories: data-cache
 |:---:|:---:|:---:| :---:| :---:|:---:|:---:|
 | roadNet-PA (1000 iter) |   0.028653  | 0.006148  | 2.267611  | 0.016779 | 0.026512 | 0.003332 |
 
+- `perf record -e <event name> -c 100 -- ./<exe> -args`
+	+ This means that for every 100 occurrences of the event that `perf` is measuring, `perf` will have a sample for that
+	+ the overhead of `perf record` doesn't change
+
 | overhead (seconds) | perf stat | ptrace (inject prefetch) |
 |:---:|:---:|:---:| :---:| :---:|:---:|:---:| 
 | roadNet-PA (1000 iter) | 0.301873309 | 0.001182 |
@@ -93,10 +97,19 @@ categories: data-cache
 |:---:|:---:|:---:| 
 | v=100,000,d=600 | 23.171046 | 22.495365 |
 
-## bfs's CFG
+## Make BOLT work for bfs
 
 ![bfs](/assets/2023-05-05/bfs.png)
 
+| exec time (seconds) | bfs | bfs.bolt (prefetch dist=64) |
+|:---:|:---:|:---:| 
+| v=200,000, d=20 | 27.093457 | 21.423685|
+
 ## dfs's CFG
+- original dfs
 
 ![dfs](/assets/2023-05-05/dfs.png)
+
+- dfs has prefetch injected by APT-GET
+
+![dfs_pref](/assets/2023-05-05/dfs_pref.png)
