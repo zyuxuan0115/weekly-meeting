@@ -43,8 +43,30 @@ categories: data-cache
 |  8   | 5.04 | 5.50 | 5.41 |
 
 
+### hashjoin-ph-2
+- command to run hashjoin-ph-2
+	+ `./npj2epb --r-size=16777216 --s-size=268435456`
 
+- Top LLC Miss function:
+	+ ![s2](/assets/2023-05-23/s2.png)
 
+- However, they inserted `__builtin_prefetch()` in `probe_hashtable()` function 
+	+ ![s3](/assets/2023-05-23/s3.png)
+	+ it even showed <strong>The perf.data data has no samples!</strong> when I ran `perf annotate --stdio -M att -i perf.data probe_hashtable`
+- Because `create_relation_pk` & `create_relation_fk` are in the initialization, I checked 
+	+ `radix_cluster`
+	+ `bucket_chaining_join`
+	+ `parallel_radix_partition`
+- CFG of `create_relation_pk`
 
+![create_relation_pk](/assets/2023-05-23/create_relation_pk.png) 
 
+- CFG of `radix_cluster`
 
+![radix_cluster](/assets/2023-05-23/radix_cluster.png)
+
+- CFG of `bucket_chaining_join`
+![bucket_chain_join](/assets/2023-05-23/bucket_chain_join.png)
+
+- CFG of `parallel_radix_partition`
+![parallel](/assets/2023-05-23/parallel.png)
