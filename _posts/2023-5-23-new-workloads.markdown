@@ -14,27 +14,16 @@ categories: data-cache
 ![opt](/assets/2023-05-23/randaccswpf.png)
 
 ### IS
-- original
+- our solution
+![is](/assets/2023-05-23/is_clang.png)
 
-![orig1](/assets/2023-05-23/is.png) 
+- performance
 
-- optimized
-
-![opt](/assets/2023-05-23/isswpf.png)
-
-| 10 iterations | is | isswpf |
-|:---:|:---:|:---:| 
-|  exec time (seconds)  | 1.409256| 1.055583 |
+| 10 iterations | is | isswpf(pf dist=2048) | is.bolt(pr dist=2048) | 
+|:---:|:---:|:---:|:---:|
+|  exec time (seconds)  | 1.409256 | 1.055583 | 1.022855 |
 
 - (1.4093-1.0556)/1.4093 = 25%
-
-
-- comparison
-
-![is_3](/assets/2023-05-23/is_3.png)
-
-- our solution
-![is_4](/assets/2023-05-23/is_4.png)
 
 
 ### CG
@@ -42,16 +31,16 @@ categories: data-cache
 
 ![cg_clang](/assets/2023-05-23/cg_clang.png)
 
-| | cg (sec) | cgswpf (sec) |
-|:---:|:---:|:---:| 
-|  1   | 5.15 | 5.67 |
-|  2   | 5.43 | 5.10 |
-|  3   | 5.32 | 5.32 |
-|  4   | 5.46 | 5.03 |
-|  5   | 5.65 | 5.32 |
-|  6   | 5.00 | 5.20 |
-|  7   | 5.09 | 5.72 |
-|  8   | 5.04 | 5.50 |
+| | cg (sec) | cgswpf (sec) | cg.bolt(sec) |
+|:---:|:---:|:---:|:---:| 
+|  1   | 5.15 | 5.67 | 5.35 |
+|  2   | 5.43 | 5.10 | 5.71 |
+|  3   | 5.32 | 5.32 | 5.54 |
+|  4   | 5.46 | 5.03 | 5.56 | 
+|  5   | 5.65 | 5.32 | 5.12 | 
+|  6   | 5.00 | 5.20 | 5.70 |
+|  7   | 5.09 | 5.72 | 5.54 |
+|  8   | 5.04 | 5.50 | 5.41 |
 
 
 
