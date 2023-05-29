@@ -4,6 +4,8 @@ title:  "2023-5-23 explore new workloads"
 date:   2023-5-22 7:53:46 -0500
 categories: data-cache
 ---
+The link of new workloads is [here](https://github.com/SamAinsworth/reproduce-cgo2017-paper/)
+
 ### randacc
 - original
 
@@ -43,7 +45,7 @@ categories: data-cache
 |  8   | 5.04 | 5.50 | 5.41 |
 
 
-### hashjoin-ph-2
+### hashjoin-ph-2 & hashjoin-ph-8
 - command to run hashjoin-ph-2
 	+ `./npj2epb --r-size=16777216 --s-size=268435456`
 
@@ -70,3 +72,12 @@ categories: data-cache
 
 - CFG of `parallel_radix_partition`
 ![parallel](/assets/2023-05-23/parallel.png)
+
+- If we insert prefetch in `radix_cluster`, `bucket_chaining_join` & `parallel_radix_partition`
+	+ How to measure performance improvement?
+	+ Measure the execution time of each function?
+
+### graph-500
+
+![graph-500](/assets/2023-05-23/g500.png)
+
