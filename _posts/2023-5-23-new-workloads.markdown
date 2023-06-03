@@ -27,6 +27,7 @@ The link of new workloads is [here](https://github.com/SamAinsworth/reproduce-cg
 
 - (1.4093-1.0556)/1.4093 = 25%
 
+- prefetching 2 locations has the same performance as prefetching 1 location 
 
 ### CG
 ![s1](/assets/2023-05-23/s1.png)
@@ -68,10 +69,50 @@ The link of new workloads is [here](https://github.com/SamAinsworth/reproduce-cg
 ![radix_cluster](/assets/2023-05-23/radix_cluster.png)
 
 - CFG of `bucket_chaining_join`
+
 ![bucket_chain_join](/assets/2023-05-23/bucket_chain_join.png)
 
 - CFG of `parallel_radix_partition`
+
 ![parallel](/assets/2023-05-23/parallel.png)
+
+|parallel_radix_partition |  BOLTed, pf distance=128 (sec) | original(sec) |
+|:---:|:---:|:---:|
+|  1   | 0.547044 | 0.652046 |
+|  2   | 0.659253 | 0.705690 | 
+|  3   | 0.651533 | 0.715434 | 
+|  4   | 0.581727 | 0.669210 |
+|  5   | 0.590320 | 0.628317 | 
+|  6   | 0.621251 | 0.661052 | 
+|  7   | 0.641712 | 0.688747 | 
+|  8   | 0.638623 | 0.690977 | 
+| average|  |  |
+
+
+|radix_cluster |  BOLTed, pf distance=128 (sec) | original(sec) |
+|:---:|:---:|:---:|
+|  1   | 0.585211 | 0.583108 |
+|  2   | 0.589890 | 0.585972 | 
+|  3   | 0.590394 | 0.586469 | 
+|  4   | 0.583394 | 0.581534 |
+|  5   | 0.592914 | 0.577221 | 
+|  6   | 0.587597 | 0.579575 | 
+|  7   | 0.583853 | 0.581242 | 
+|  8   | 0.587139 | 0.585114 | 
+
+
+|bucket_chaining_join |  BOLTed, pf distance=128 (sec) | original(sec) |
+|:---:|:---:|:---:|
+|  1   | 0.123915 | 0.127183 |
+|  2   | 0.126259 | 0.124573 | 
+|  3   | 0.125050 | 0.126704 | 
+|  4   | 0.122405 | 0.124450 |
+|  5   | 0.123304 | 0.123850 | 
+|  6   | 0.127147 | 0.124056 | 
+|  7   | 0.125577 | 0.125487 | 
+|  8   | 0.124733 | 0.125009 | 
+
+
 
 - If we insert prefetch in `radix_cluster`, `bucket_chaining_join` & `parallel_radix_partition`
 	+ How to measure performance improvement?
@@ -79,5 +120,26 @@ The link of new workloads is [here](https://github.com/SamAinsworth/reproduce-cg
 
 ### graph-500
 
-![graph-500](/assets/2023-05-23/g500.png)
+- `./g500-no -s 18 -e 18`
 
+- original graph-500
+
+![graph-500](/assets/2023-05-23/g500_no.png)
+
+- BOLTed graph-500
+
+![graph-500_bolt](/assets/2023-05-23/g500_bolt.png)
+
+
+| | g500 | g500.bolt  | g500-man-outoforder(swpf)  |
+|:---:|:---:|:---:|:---:|
+|  1   | 7.642 | 8.347 | 7.315 | 
+
+![graph-500_bolt](/assets/2023-05-23/g500_outoforder.png)
+
+
+
+### pagerank again
+![old_approach](/assets/2023-04-21/pr_orig_cfg3.png)
+
+![pagerank](/assets/2023-05-23/pagerank_pref.png)
