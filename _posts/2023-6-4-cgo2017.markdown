@@ -1,10 +1,14 @@
 ---
 layout: post
-title:  "2023-5-23 explore new workloads"
-date:   2023-5-22 7:53:46 -0500
+title:  "2023-6-4 explore new workloads"
+date:   2023-6-4 7:53:46 -0500
 categories: data-cache
 ---
 The link of new workloads is [here](https://github.com/SamAinsworth/reproduce-cgo2017-paper/)
+
+### Soyoon's results on slack
+
+![s4](/assets/2023-06-04/s4.png) 
 
 ### randacc
 - original
@@ -17,13 +21,13 @@ The link of new workloads is [here](https://github.com/SamAinsworth/reproduce-cg
 
 ### IS
 - our solution
-![is](/assets/2023-05-23/is_clang.png)
+![is](/assets/2023-06-04/is_clang.png)
 
 - performance
 
-| 10 iterations | is | isswpf(pf dist=2048) | is.bolt(pr dist=2048) | 
-|:---:|:---:|:---:|:---:|
-|  exec time (seconds)  | 1.409256 | 1.055583 | 1.022855 |
+| 10 iterations | is | isswpf(pf dist=2048) | is.bolt(pr dist=2048) | apt-get | 
+|:---:|:---:|:---:|:---:|:---:|
+|  exec time (seconds)  | 1.409256 | 1.055583 | 1.022855 | 1.007589 |
 
 - (1.4093-1.0556)/1.4093 = 25%
 
@@ -32,9 +36,9 @@ The link of new workloads is [here](https://github.com/SamAinsworth/reproduce-cg
 ### CG
 ![s1](/assets/2023-05-23/s1.png)
 
-![cg_clang](/assets/2023-05-23/cg_clang.png)
+![cg_clang](/assets/2023-06-04/cg_clang.png)
 
-| | cg  | cgswpf  | cg.bolt(inner loop)| cg.bolt(outer loop)|
+| | cg (sec) | cgswpf (sec) | cg.bolt(inner loop)| cg.bolt(outer loop)|
 |:---:|:---:|:---:|:---:| :---:| 
 |  1   | 5.15 | 5.67 | 5.35 | 5.34 |
 |  2   | 5.43 | 5.10 | 5.71 | 5.26 |
@@ -44,17 +48,17 @@ The link of new workloads is [here](https://github.com/SamAinsworth/reproduce-cg
 |  6   | 5.00 | 5.20 | 5.70 | 5.28 |
 |  7   | 5.09 | 5.72 | 5.54 | 5.70 |
 |  8   | 5.04 | 5.50 | 5.41 | 5.58 |
-
+|  <strong>average</strong> | 5.268 | 5.358 | 5.491 | 5.479 |
 
 ### hashjoin-ph-2 & hashjoin-ph-8
 - command to run hashjoin-ph-2
 	+ `./npj2epb --r-size=16777216 --s-size=268435456`
 
 - Top LLC Miss function:
-	+ ![s2](/assets/2023-05-23/s2.png)
+	+ ![s2](/assets/2023-06-04/s2.png)
 
 - However, they inserted `__builtin_prefetch()` in `probe_hashtable()` function 
-	+ ![s3](/assets/2023-05-23/s3.png)
+	+ ![s3](/assets/2023-06-04/s3.png)
 	+ it even showed <strong>The perf.data data has no samples!</strong> when I ran `perf annotate --stdio -M att -i perf.data probe_hashtable`
 - Because `create_relation_pk` & `create_relation_fk` are in the initialization, I checked 
 	+ `radix_cluster`
@@ -62,19 +66,19 @@ The link of new workloads is [here](https://github.com/SamAinsworth/reproduce-cg
 	+ `parallel_radix_partition`
 - CFG of `create_relation_pk`
 
-![create_relation_pk](/assets/2023-05-23/create_relation_pk.png) 
+![create_relation_pk](/assets/2023-06-04/create_relation_pk.png) 
 
 - CFG of `radix_cluster`
 
-![radix_cluster](/assets/2023-05-23/radix_cluster.png)
+![radix_cluster](/assets/2023-06-04/radix_cluster.png)
 
 - CFG of `bucket_chaining_join`
 
-![bucket_chain_join](/assets/2023-05-23/bucket_chain_join.png)
+![bucket_chain_join](/assets/2023-06-04/bucket_chain_join.png)
 
 - CFG of `parallel_radix_partition`
 
-![parallel](/assets/2023-05-23/parallel.png)
+![parallel](/assets/2023-06-04/parallel.png)
 
 |parallel_radix_partition |  BOLTed, pf distance=128 (sec) | original(sec) |
 |:---:|:---:|:---:|
@@ -86,7 +90,11 @@ The link of new workloads is [here](https://github.com/SamAinsworth/reproduce-cg
 |  6   | 0.621251 | 0.661052 | 
 |  7   | 0.641712 | 0.688747 | 
 |  8   | 0.638623 | 0.690977 | 
+| <strong>average</strong> | 0.616143| 0.676275 |
 
+- The `parallel_radix_partition` function is called 4 times
+- each time, its execution time is about 0.16 seconds. 
+- speedup: (0.676275 - 0.616143)/0.676275 = 8.89%
 
 
 |radix_cluster |  BOLTed, pf distance=128 (sec) | original(sec) |
@@ -99,6 +107,10 @@ The link of new workloads is [here](https://github.com/SamAinsworth/reproduce-cg
 |  6   | 0.587597 | 0.579575 | 
 |  7   | 0.583853 | 0.581242 | 
 |  8   | 0.587139 | 0.585114 | 
+| <strong>average</strong> | 0.587549 | 0.582529 |
+
+- The `radix_cluster` function is called more than 250 times
+- each time, its execution time is about 0.002 seconds. 
 
 
 |bucket_chaining_join |  BOLTed, pf distance=128 (sec) | original(sec) |
@@ -111,12 +123,15 @@ The link of new workloads is [here](https://github.com/SamAinsworth/reproduce-cg
 |  6   | 0.127147 | 0.124056 | 
 |  7   | 0.125577 | 0.125487 | 
 |  8   | 0.124733 | 0.125009 | 
+| <strong>average</strong> | 0.124799 | 0.125164 |
 
+- The `bucket_chaining_join` function is called more than 32000 times
+- each time, its execution time is about 0.000004 seconds. 
 
+- If we insert prefetch instructions in `radix_cluster`, `bucket_chaining_join` & `parallel_radix_partition` at runtime
+	+ how to measure performance? 
+		* the overall performance will not change, so `perf stat IPC` doesn't work
 
-- If we insert prefetch in `radix_cluster`, `bucket_chaining_join` & `parallel_radix_partition`
-	+ How to measure performance improvement?
-	+ Measure the execution time of each function?
 
 ### graph-500
 
@@ -128,18 +143,31 @@ The link of new workloads is [here](https://github.com/SamAinsworth/reproduce-cg
 
 - BOLTed graph-500
 
-![graph-500_bolt](/assets/2023-05-23/g500_bolt.png)
+![graph-500_bolt](/assets/2023-06-04/g500_bolt.png)
 
 
-| | g500 | g500.bolt  | g500-man-outoforder(swpf)  |
+| | g500 | g500.bolt (inner)  | g500-man-outoforder(swpf)  |
 |:---:|:---:|:---:|:---:|
 |  1   | 7.642 | 8.347 | 7.315 | 
 
-![graph-500_bolt](/assets/2023-05-23/g500_outoforder.png)
+- swpf approach
 
+![graph-500_out_new](/assets/2023-06-04/g500_outpng.png)
+
+- BOLT inserts prefetch to the outer loop
+
+![graph-500_bolt_new](/assets/2023-06-04/g500_bolt_new.png)
+
+| | g500 | g500.bolt (inner)  | g500-man-outoforder(swpf)  | g500.bolt (outer)
+|:---:|:---:|:---:|:---:|:---:|
+|  1   | 7.642 | 8.347 | 7.315 | 7.765 |
 
 
 ### pagerank again
 ![old_approach](/assets/2023-04-21/pr_orig_cfg3.png)
 
-![pagerank](/assets/2023-05-23/pagerank_pref.png)
+![pagerank](/assets/2023-06-04/pagerank_pref.png)
+
+| | pr |   pr(apt-get) | pr.bolt v1.0 | pr.bolt (inner) | pr.bolt(outer) |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+|  1   | 20-21 | 13-14 | 13-14 | 22-27 | 24-27 |

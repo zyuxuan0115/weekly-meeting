@@ -1,0 +1,88 @@
+---
+layout: post
+title:  "2023-5-22 PG^2 revert back to original"
+date:   2023-5-22 7:53:46 -0500
+categories: data-cache
+---
+## Make BOLT work for pagerank
+![S2](/assets/2023-05-22/pr.png)
+
+| exec time (seconds) | pagerank (1000 iter) | pagerank.bolt (prefetch dist=64) |
+|:---:|:---:|:---:| 
+| roadNet-PA | 21 sec | 14.1 |
+
+
+## Make BOLT work for bc
+![bc](/assets/2023-05-22/bc.png)
+
+| exec time (seconds) | bc | bc.bolt (prefetch dist=64) |
+|:---:|:---:|:---:| 
+| v=20000,d=200 | 86.268588 | 75.260175 |
+
+
+## Make BOLT work for sssp
+![sssp](/assets/2023-05-22/sssp.png)
+
+| exec time (seconds) | sssp | sssp.bolt (prefetch dist=64) |
+|:---:|:---:|:---:| 
+| v=100,000,d=600 | 23.171046 | 22.495365 |
+
+## Make BOLT work for bfs
+
+![bfs](/assets/2023-05-22/bfs.png)
+
+| exec time (seconds) | bfs | bfs.bolt (prefetch dist=64) |
+|:---:|:---:|:---:| 
+| v=200,000, d=20 | 27.093457 | 21.423685|
+
+## change the heuristic to decide when to stop changing prefetch distance
+- old heuristic
+	+ consider the slope k of two consecutive points
+		* if k > 0: keep on profiling and injecting
+		* if k <= 0: stop profiling and injecting
+			- pick the highest IPC with its corresponding prefetch distance
+
+![when2stop](/assets/2023-03-27/when2stop.png)
+
+![when2stop2](/assets/2023-03-27/when2stop2.png)
+
+
+
+- new heuristic 
+	+ basic stride = 5
+	+ original IPC = perf stat's result
+	+ optimal IPC = 0
+	+ optimal prefetch distance = 0
+
+| prefetch distance | 5 | 10 | 20 | 40 | 80 | 160 | 120 | 100 | 90 | 85 |
+|:---:|:---:|:---:| :---:|:---:|:---:| 
+| pagerank's IPC | 0.7 | 0.8 | 0.9 | 0.95 | 1.0 | 0.96 | 0.98 | 0.99 | 0.995 | 0.996|
+
+- conclusion: 
+	+ optimal prefetch dist = 80, optimal IPC = 1.0
+	+ if optimal IPC >= original IPC
+		- use the new prefetch dist
+	+ if optimal IPC < original IPC
+		- revert back to the original code
+
+- make pg^2 support reverting back to the original `do_work` code
+![diagram](/assets/2023-04-11/diagram.png)
+ 
+![S2](/assets/2023-05-22/pr_pc.png)
+
+- run `ptrace(SINGLE_STEP)` until the current Instruction Pointer(IP) hits the first intruction whose PC can be translated back to the PC in the original function
+- and then move IP.
+
+| exec time (seconds) | pagerank (1000 iter) | pagerank.bolt (prefetch dist=64) | pg^2 |
+|:---:|:---:|:---:|:---:| 
+| roadNet-PA | 21  | 14.1 | 15.2 |
+
+
+## allocate a new register in BOLT's injectPrefetchPass
+![S2](/assets/2023-05-22/pr_pc.png)
+
+- keep a list for register in use
+- when we need to allocate a new register for the injected prfetch code
+	+ check the list and pick a register that is not in use 
+
+
