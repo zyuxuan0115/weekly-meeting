@@ -18,6 +18,23 @@ categories: data-cache
 
 ![is](/assets/2023-06-06/is_aptget.png)
 
+- <strong>execution time</strong>
+![is-pf-l2-hit](/assets/2023-06-06/is-exec-time.png)
+
+- <strong>sw_prefetch_access.t0</strong>
+	+ Number of PREFETCHT0 instructions executed
+
+![is-prefetch](/assets/2023-06-06/is-prefetch_access.t0.png)
+
+- <strong>l2_rqsts.pf_hit</strong>
+	+ Requests from the L1/L2/L3 hardware prefetchers or Load software prefetches that hit L2 cache
+
+![is-pf-l2-hit](/assets/2023-06-06/is-l2_rqsts.pf_hit.png)
+
+- <strong>l2_rqsts.pf_miss</strong>
+	+ Requests from the L1/L2/L3 hardware prefetchers or Load software prefetches that miss L2 cache
+
+![is-pf-l2-miss](/assets/2023-06-06/is-l2_rqsts.pf_miss.png)
 
 ### CG
 - `./cg`
@@ -81,10 +98,31 @@ categories: data-cache
 
 ![g500](/assets/2023-06-06/g500-apt-get.png) 
 
+- <strong>execution time </strong>
+
+![g500-exec-time](/assets/2023-06-06/g500-exec-time.png)
+
+- <strong>sw_prefetch_access.t0</strong>
+	+ Number of PREFETCHT0 instructions executed
+
+![sw-pref](/assets/2023-06-06/g500_prefetch_access.t0.png) 
+
+- <strong>l2_rqsts.pf_hit</strong>
+	+ Requests from the L1/L2/L3 hardware prefetchers or Load software prefetches that hit L2 cache
+
+![pf-hit](/assets/2023-06-06/g500_l2_rqsts.pf_hit.png) 
+
+- <strong>l2_rqsts.pf_miss</strong>
+	+ Requests from the L1/L2/L3 hardware prefetchers or Load software prefetches that miss L2 cache
+
+![pf-miss](/assets/2023-06-06/g500_l2_rqsts.pf_miss.png) 
+
 ### hashjoin-2 & hashjoin-8
 - apt-get cannot insert prefetch to `create_relation_fk`
 - BOLT cannot insert prefetch to the `create_relation_fk`
 	+ but BOLT can insert prefetch to `bucket_chaining_join`, `radix_cluster`, `parallel_radix_partition`
 	+ `parallel_radix_partition` has 8.89% performance improvement
 - swpf inserts prefetch to a wrong function, so no performence improvement
+	
+
 
