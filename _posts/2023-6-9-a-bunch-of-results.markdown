@@ -148,21 +148,3 @@ categories: data-cache
 	+ LLC: `0x401540`: 0.05372664389 times/second
 
 ![large_twitch](/assets/2023-06-09/graph_p2p-Gnutella24.png)
-
-
-
-### sssp + real workloads on cat16
-
-![sssp1](/assets/2023-06-09/graph_loc-gowalla_edges.png)
-
-![sssp2](/assets/2023-06-09/graph_com-amazon_ungraph.png)
-
-![sssp3](/assets/2023-06-09/graph_web-NotreDame.png)
-
-![sssp4](/assets/2023-06-09/graph_amazon0312.png)
-
-- algorithm for searching for optimal prefetch distance at runtime
-
-### pagerank + real workloads on cat16
-
-![pr](/assets/2023-06-09/graph_soc-Epinions1.png)
