@@ -1,0 +1,34 @@
+---
+layout: post
+title:  "2023-7-17 updates"
+date:   2023-7-17 1:53:46 -0500
+categories: data-cache
+---
+### paper
+- revised section 3: design of pg2
+- done with section 4: experimental setup
+
+### pg2 works for all workloads
+- <strong>./pagerank_lock 1 1 roadNet-PA.txt 3000</strong>
+- <strong>./sssp 1 1 web-Stanford.txt 5</strong>
+	+ multiple prefetch locations
+- <strong>./bc 1 20000 200</strong>
+	+ synthetic workload
+- <strong>./bfs 1 1 roadNet-PA.txt 500</strong>
+	+ always bad
+	+ can roll back to the original
+- <strong>./is 400</strong>
+	+ during the code replacement, the rank() function may not be executing
+- <strong>./randacc 2000,000,000</strong>
+	+ super long dependency chain to compute the address of the prefetch
+ 
+### randacc
+
+![randacc](/assets/2023-07-17/randacc.png)
+
+### need to do
+- understand why APT-GET cannot insert prefetch to bfs
+	+ need Saba's help
+- write section 5: evaluation
+	+ measure pg2's performance 
+		* might need to debug pg2/BOLT if bugs occur
