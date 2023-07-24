@@ -1,0 +1,44 @@
+---
+layout: post
+title:  "2023-7-17 updates"
+date:   2023-7-17 1:53:46 -0500
+categories: data-cache
+---
+### paper
+
+- revised section 3 & 4
+	+ now section 3 only 5 pages
+
+### pg2 on pagerank
+
+- profile with max frequency + longer duration
+	+ pg2 works with more workloads
+	+ overall performance of the workload doesn't get worse
+	+ should we increase the profile duration to see if we can get pg2 work with more inputs?
+
+### randacc
+
+![randacc](/assets/2023-07-23/graph_8_to_128.png)
+
+- execution time of randacc on the cascade varies greatly
+- test 5 times and compute the average
+
+### performance over time graph
+
+![pagerank](/assets/2023-07-23/roadNet-PA.png)
+
+- now it's pagerank + roadNet-PA
+
+### pagerank result on cat16  
+
+![barChart](/assets/2023-07-23/barChart.png)
+
+
+### next steps
+- understand why APT-GET cannot insert prefetch to bfs
+	+ need Saba's help
+- write section 5: evaluation
+	+ measure pg2's execution time
+		* might need to debug pg2/BOLT if bugs occur
+	+ measure LLC MPKI
+	+ measure dynamic instruction count
