@@ -4,4 +4,34 @@ title:  "2023-9-25 SSF"
 date:   2023-9-23 1:53:46 -0500
 categories: serverless functions
 ---
+### Serverless function
+- Serverless function
+	+ 
+- cold start vs. warm start
+	+ warm start: 
+		* function in memory?
+		* function in container (or VM) and container is loaded to the server?
+	+ cold start:
+		* function not in memory?
+		* function not in container, nor is container loaded to the server?
+- step functions and drvier functions
+	+ defines how to stitch serverless functions 
+	+ can we check the invocation of step function or driver functions to know the call graph of serverless functions
+- stateful serverless function
+	+ why do we need the serverless function to be stateful
+		* the serverless functions write to persistent memory
+		* need to have a log since the write might fail
+		* need a log in case there is any 
+- build call graph
+	+ motivation
+		- 
+	+ 
+- 
 
+
+### Profile
+- Can Intel LBR profile the execution of programs in containers (VM)
+- Can Intel LBR profile the non-C/C++ programs?
+- currently Ocolos can only change the code layout of C/C++ functions
+	+ need to check whether BOLT supports non-C/C++ functions
+	+ I guess it can since it operates functions at MCInst (close to machine code) level
