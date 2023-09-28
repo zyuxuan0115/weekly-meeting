@@ -5,14 +5,15 @@ date:   2023-9-23 1:53:46 -0500
 categories: serverless functions
 ---
 ### Acquire cloudlab account and setup servers
-- 
+- to get start -> [here](https://docs.cloudlab.us/getting-started.html)
 
 ### Build nightcore
 - [github page](https://github.com/ut-osa/nightcore/tree/asplos-release) of nightcore
 	+ `git clone --recurse-submodules git@github.com:ut-osa/nightcore.git`
-	+ need to install cmake
+	+ need to install [the newest cmake](https://cmake.org/download/)
 	+ `./build_deps.sh`
 	+ need to install g++-9, gcc-9
 	+ in Makefile
 		* change `CXX ?= g++` to be `CXX = g++-9`
 		* add `-I./deps/abseil-cpp` to the end of `INCLUDE=`
+cmake ../ -DCMAKE_CXX_STANDARD=11
