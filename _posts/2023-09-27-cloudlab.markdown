@@ -50,8 +50,14 @@ categories: serverless functions
 	+ local `Foo` calls remote `Bar`
 	+ local `Foo` calls local `Bar`
 	+ measure the performance of both cases
-- In [foo.c code](https://github.com/ut-osa/nightcore/blob/asplos-release/examples/c/foo.c#L39) 
-	+ Bar is called.
+- How `Bar` is called
+	+ In [foo.c code](https://github.com/ut-osa/nightcore/blob/asplos-release/examples/c/foo.c#L39) 
+```
+int ret = context->invoke_func_fn(
+							context->caller_context, "Bar", input, input_length,
+							&bar_output, &bar_output_length);
+```
+- the type of `invoke_func_fn` is `faas_invoke_func_fn_t`.
 	+ the type define of `faas_invoke_func_fn_t` is [here](https://github.com/ut-osa/nightcore/blob/asplos-release/include/faas/worker_v1_interface.h#L22); 	
 
 ### Performance measurements
