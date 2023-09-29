@@ -14,6 +14,10 @@ categories: serverless functions
 ### Build nightcore
 - [github page](https://github.com/ut-osa/nightcore/tree/asplos-release) of nightcore
 	+ `git clone --recurse-submodules git@github.com:ut-osa/nightcore.git`
-	+ need to install [the newest version of cmake](https://cmake.org/download/)
+	+ need to install 
+		* [the newest version of cmake](https://cmake.org/download/)
+		* [gcc-10](http://www.netgull.com/gcc/releases/gcc-10.1.0/)
+			- `./configuration --prefix=/the/path/of/your/gcc-10`
+			- after building gcc-10, `export CXX=/the/path/of/your/gcc-10/bin/g++`
 	+ `./build_deps.sh`
 	+ need to comment out `nightcore/src/common/stat.h`'s line #236 
