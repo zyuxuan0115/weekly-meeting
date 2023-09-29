@@ -6,7 +6,7 @@ categories: serverless functions
 ---
 ### Acquire cloudlab account and setup servers
 - to get start -> [here](https://docs.cloudlab.us/getting-started.html)
-	+ profile selected is m510
+	+ profile selected is `m510` (according to Haoran)
 - the size of the root dir is too small.
 	+ larger storage is at `/proj/zyuxuanssf-PG0` 
 	+ ![here](/assets/2023-09-27/s1.png) 
@@ -23,7 +23,7 @@ categories: serverless functions
 	+ Before compilation, need to comment out `nightcore/src/common/stat.h`'s line #236 
 	+ `make -j`	
 
-### Run example of nightcore
+### Run C example of nightcore
 - in `nightcore/examples/c`, when running `run_stack.sh`
 	+ From `nightcore/examples/c/outputs/launcher_foo.log`, get an error msg:
 		* `/usr/lib/x86_64-linux-gnu/libstdc++.so.6: version 'CXXABI_1.3.11' not found`
@@ -34,7 +34,7 @@ categories: serverless functions
 		```
 
 ### About curl
-- nightcore uses `curl -X POST -d "Hello" http://127.0.0.1:8080/function/Foo` 
+- nightcore uses `curl -X POST -d "Hello" http://127.0.0.1:8080/function/Foo` to run `Foo` 
 	+ send HTTP POST request with data "Hello" to local serverless function `Foo`
 	+ `Foo` then calls local `Bar` function
 - From `man curl`
@@ -44,10 +44,15 @@ categories: serverless functions
 		* The specified request method will be used instead of the method otherwise used (which defaults to GET). Common additional HTTP requests include PUT and DELETE.
 	+ -d, --data <data>
 		* (HTTP) Sends the specified data in a POST request to the HTTP server
+
+### Make Foo call remote Bar
 - What we need
 	+ local `Foo` calls remote `Bar`
 	+ local `Foo` calls local `Bar`
 	+ measure the performance of both cases
+- In [foo.c code](https://github.com/ut-osa/nightcore/blob/asplos-release/examples/c/foo.c#L39) 
+	+ Bar is called.
+	+ the type define of `faas_invoke_func_fn_t` is [here](https://github.com/ut-osa/nightcore/blob/asplos-release/include/faas/worker_v1_interface.h#L22); 	
 
 ### Performance measurements
 - In C example, I measured the execution time of local call
