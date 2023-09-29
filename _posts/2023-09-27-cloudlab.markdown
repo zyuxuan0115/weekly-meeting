@@ -17,10 +17,10 @@ categories: serverless functions
 	+ need to install 
 		* [the newest version of cmake](https://cmake.org/download/)
 		* [gcc-10](http://www.netgull.com/gcc/releases/gcc-10.1.0/)
-			- `./configuration --prefix=/the/path/of/your/gcc-10`
-			- after building gcc-10, `export CXX=/the/path/of/your/gcc-10/bin/g++`
+			- `./configuration --prefix=/proj/zyuxuanssf-PG0/gcc-10`
+			- after building gcc-10, `export CXX=/proj/zyuxuanssf-PG0/gcc-10`
 	+ `./build_deps.sh`
-	+ need to comment out `nightcore/src/common/stat.h`'s line #236 
+	+ Before compilation, need to comment out `nightcore/src/common/stat.h`'s line #236 
 	+ `make -j`	
 
 ### Run example of nightcore
@@ -31,3 +31,14 @@ categories: serverless functions
 		> sudo find / -name 'libstdc++.so.6'
 		> export LD_LIBRARY_PATH="/proj/zyuxuanssf-PG0/gcc-10/lib64" 
 		```
+
+### About curl
+- nightcore uses `curl -X POST -d "Hello" http://127.0.0.1:8080/function/Foo` to run serverless function `Foo`
+- From `man curl`
+	+ curl  is a tool to transfer data from or to a server, using one of the supported protocols (DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET and TFTP). The command is designed to work without user interaction. 
+
+
+- In C example, I measured the execution time of local call
+```
+
+```
