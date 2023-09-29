@@ -21,3 +21,4 @@ categories: serverless functions
 			- after building gcc-10, `export CXX=/the/path/of/your/gcc-10/bin/g++`
 	+ `./build_deps.sh`
 	+ need to comment out `nightcore/src/common/stat.h`'s line #236 
+	+ `make -j`	
