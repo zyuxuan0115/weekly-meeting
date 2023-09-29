@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "2023-9-25 SSF"
-date:   2023-9-23 1:53:46 -0500
+title:  "2023-9-27 Cloudlab"
+date:   2023-9-27 1:53:46 -0500
 categories: serverless functions
 ---
 ### Acquire cloudlab account and setup servers
