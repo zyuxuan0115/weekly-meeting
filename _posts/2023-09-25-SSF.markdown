@@ -6,7 +6,10 @@ categories: serverless functions
 ---
 ### Serverless function
 - Serverless function
-	+ 
+	+ function as a service
+	+ client define the function?
+		* how does client define it? 
+			- writes a function and sends it to the server provider? 
 - cold start vs. warm start
 	+ warm start: 
 		* function in memory?
@@ -20,18 +23,27 @@ categories: serverless functions
 - stateful serverless function
 	+ why do we need the serverless function to be stateful
 		* the serverless functions write to persistent memory
-		* need to have a log since the write might fail
-		* need a log in case there is any 
-- build call graph
+		* need to have a log since the write might fail (node crashes)
+		* need a log in case there is any distributed coordination? 
+- profile and build call graph
 	+ motivation
-		- 
-	+ 
-- 
+		- the reason we want to change the code layout for Ocolos is 
+			* if the input of a program changes, the code layout of a program is not optimal for the new input
+			* input changes frequently
+		- for serverless functions, does the call graph change frequently
+			* if the call graph is fixed there is no need to move serverless functions around at runtime
+		- how to profile the whole system? 
 
 
 ### Profile
 - Can Intel LBR profile the execution of programs in containers (VM)
-- Can Intel LBR profile the non-C/C++ programs?
-- currently Ocolos can only change the code layout of C/C++ functions
-	+ need to check whether BOLT supports non-C/C++ functions
-	+ I guess it can since it operates functions at MCInst (close to machine code) level
+	+ [LBR example](/cont-opt/2022/12/08/perf2bolt.html) 
+		* Can Intel LBR profile the non-C/C++ programs?
+	+ BOLT
+		* currently Ocolos can only change the code layout of C/C++ functions
+		* need to check whether BOLT supports non-C/C++ functions
+			- I guess it can since it operates functions at MCInst (close to machine code) level
+		* BOLT doesn't support continuous optimization
+			- we have extended BOLT to support continuous optimization
+			- but have some limitation
+

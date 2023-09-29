@@ -1,0 +1,114 @@
+---
+layout: post
+title:  "2023-7-9 make pg2 work for all"
+date:   2023-7-9 1:53:46 -0500
+categories: data-cache
+---
+### paper
+- revised the algorithm of searching for optimal prefetch distance
+- finished section 4 environmental setup
+	+ include adding signal after initialization of the graph
+	+ include adding iteration count
+
+
+### pg2 works for all workloads
+- <strong>./pagerank_lock 1 1 roadNet-PA.txt 3000</strong>
+- <strong>./sssp 1 1 web-Stanford.txt 5</strong>
+	+ multiple prefetch locations
+- <strong>./bc 1 20000 200</strong>
+	+ synthetic workload
+- <strong>./bfs 1 1 roadNet-PA.txt 500</strong>
+	+ always bad
+	+ can roll back to the original
+- <strong>./is 400</strong>
+	+ during the code replacement, the rank() function may not be executing
+- <strong>./randacc 2000,000,000</strong>
+	+ super long dependency chain to compute the address of the prefetch
+ 
+
+### make pg2 work for nas-is 
+![call_stack](/assets/2023-07-09/call_stack.png)
+
+- BOLTed address of `rank`
+![s4](/assets/2023-07-09/s4.png)
+
+- original address of `rank`
+![s5](/assets/2023-07-09/s5.png)
+
+- solution
+	+ also patch the call sites of rank in main, during code replacement
+
+
+### algorithm for searching optimal prefetch distance
+- start from a random point r from [1,100] (?)
+- first test the direction for searching 
+	+ go rignt if IPC[r+5] >= IPC[r]
+	+ go left if IPC[r-5] >= IPC[r]
+- then search for the interval for binary search
+- binary search
+- <strong>UPDATES</strong>: [1,100] good?
+ 
+| nas-is  | orig | pref-dist=64 | pref-dist=128 |pref-dist=256 | pref-dist=512 | pref-dist=2048 | 
+| :----: | :----:| :----:| :----: | :----: | :----: | :----: | 
+| exec time (sec) | 55.00 | 46.42 |  42.15 | 41.47 | 41.15 | 41.14 |
+
+
+### randacc.bolt has no performance improvement
+ 
+| randacc  | orig | pref-dist=8 | 
+| :----: | :----:| :----:|  
+| exec time (sec) | 5.696 | 4.750 |  
+| exec time (sec) | 5.664 | 5.051 |  
+| exec time (sec) | 5.269 | 5.069 |  
+| exec time (sec) | 5.118 | 4.945 |
+| exec time (sec) | 5.886 | 4.992 |  
+| exec time (sec) | 5.913 | 4.961 |  
+| exec time (sec) | 5.893 | 4.771 |  
+| exec time (sec) | 5.046 | 5.133 |
+| exec time (sec) | 5.844 | 5.175 |
+| exec time (sec) | 5.900 | 4.911 |
+ 
+- but after the iteration count is added to the code
+	+ no performance improvement
+
+
+### APT-GET on sssp
+- According to Saba: APT-GET cannot insert prefetch to sssp
+- APT-GET can insert to `sssp_outer_atomic`, but
+	+ has 2 prefetch locations
+	+ ![s1](/assets/2023-07-09/s1.png)
+	+ same prefetch instructions are inserted
+	+ ![s2](/assets/2023-07-09/s2.png)
+	+ APT-GET version binary has no performance improvement
+	+ ![s3](/assets/2023-07-09/s3.png)
+	+ if `sssp_outer_atomic` runs with real workload, the Top LLC Miss function is not `do_work`
+		- `do_work` doesn't even have any profile samples!
+	+ while in `sssp`, we have 
+		- significant performance improvement for all real inputs
+		- multiple prefetch locations: even better than prefetching for single prefetch location
+		- differen curves with different optimal prefetch distance.
+		- the only downside is APT-GET cannot insert prefetch to it
+- TBD: figure out why APT-GET cannot insert prefetch to bc
+- TBD: measure the performance of APT-GET on bfs	
+
+### prefetch for multiple locations 
+
+
+### measure performance of pg2
+- based on BOLTed prefetch dist vs. exec time curve
+![n4](/assets/2023-07-09/4curves.png)
+
+![a1](/assets/2023-07-09/graph_amazon0505.png)
+
+![a2](/assets/2023-07-09/graph_public_figure_edges.png)
+
+![a3](/assets/2023-07-09/graph_politician_edges.png)
+
+![a4](/assets/2023-07-09/graph_public_figure_edges.png)
+
+- also want to test all real noisy cases to see how well/bad pg2 works
+
+![a5](/assets/2023-07-09/graph_email-Eu-core.png)
+
+
+

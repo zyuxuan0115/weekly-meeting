@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "2023-7-17 updates"
-date:   2023-7-17 1:53:46 -0500
+title:  "2023-7-23 updates"
+date:   2023-7-23 1:53:46 -0500
 categories: data-cache
 ---
 ### paper
@@ -24,6 +24,8 @@ categories: data-cache
 - test 5 times and compute the average
 
 ### performance over time graph
+
+![s1](/assets/2023-07-23/s1.png)
 
 ![pagerank](/assets/2023-07-23/roadNet-PA.png)
 
