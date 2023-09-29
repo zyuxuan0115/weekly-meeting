@@ -52,7 +52,7 @@ categories: serverless functions
 	+ measure the performance of both cases
 - How `Bar` is called
 	+ In [foo.c code](https://github.com/ut-osa/nightcore/blob/asplos-release/examples/c/foo.c#L39) 
-```
+```c++
 int ret = context->invoke_func_fn(
 							context->caller_context, "Bar", input, input_length,
 							&bar_output, &bar_output_length);
