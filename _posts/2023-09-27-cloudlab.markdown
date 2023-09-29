@@ -25,7 +25,8 @@ categories: serverless functions
 
 ### Run example of nightcore
 - in `nightcore/examples/c`, when running `run_stack.sh`
-	+ `/usr/lib/x86_64-linux-gnu/libstdc++.so.6: version 'CXXABI_1.3.11' not found`
+	+ From `nightcore/examples/c/outputs/launcher_foo.log`, get an error msg:
+		* `/usr/lib/x86_64-linux-gnu/libstdc++.so.6: version 'CXXABI_1.3.11' not found`
 	+ to fix this problem
 		```bash
 		> sudo find / -name 'libstdc++.so.6'
