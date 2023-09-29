@@ -39,6 +39,8 @@ categories: serverless functions
 	+ `Foo` then calls `Bar`
 - From `man curl`
 	+ `curl` is a tool to transfer data from or to a server, using one of the supported protocols (DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET and TFTP). The command is designed to work without user interaction. 
+	+ -X, --request <command>
+    * (HTTP) Specifies a custom request method to use when communicating with the HTTP server.  The specified request method will be used instead  of  the  method  otherwise  used (which  defaults to GET). Read the HTTP 1.1 specification for details and explanations. Common additional HTTP requests include PUT and DELETE, but related technologies like WebDAV offers PROPFIND, COPY, MOVE and more.
 
 ### Performance measurements
 - In C example, I measured the execution time of local call
