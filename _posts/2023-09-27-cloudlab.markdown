@@ -44,6 +44,10 @@ categories: serverless functions
 		* The specified request method will be used instead of the method otherwise used (which defaults to GET). Common additional HTTP requests include PUT and DELETE.
 	+ -d, --data <data>
 		* (HTTP) Sends the specified data in a POST request to the HTTP server
+- What we need
+	+ local `Foo` calls remote `Bar`
+	+ local `Foo` calls local `Bar`
+	+ measure the performance of both cases
 
 ### Performance measurements
 - In C example, I measured the execution time of local call
