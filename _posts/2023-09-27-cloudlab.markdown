@@ -22,3 +22,12 @@ categories: serverless functions
 	+ `./build_deps.sh`
 	+ need to comment out `nightcore/src/common/stat.h`'s line #236 
 	+ `make -j`	
+
+### Run example of nightcore
+- in `nightcore/examples/c`, when running `run_stack.sh`
+	+ `/usr/lib/x86_64-linux-gnu/libstdc++.so.6: version 'CXXABI_1.3.11' not found`
+	+ to fix this problem
+		```bash
+		> sudo find / -name 'libstdc++.so.6'
+		> export LD_LIBRARY_PATH="/proj/zyuxuanssf-PG0/gcc-10/lib64" 
+		```
