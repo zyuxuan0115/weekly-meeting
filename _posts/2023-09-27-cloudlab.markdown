@@ -59,7 +59,8 @@ int ret = context->invoke_func_fn(
 ```
 - the type of `invoke_func_fn` is `faas_invoke_func_fn_t`.
 	+ the type define of `faas_invoke_func_fn_t` is [here](https://github.com/ut-osa/nightcore/blob/asplos-release/include/faas/worker_v1_interface.h#L22)	
-
+	+ a little bit new knowledge of C/C++'s [typedef of function pointer](https://stackoverflow.com/questions/4295432/typedef-function-pointer)
+ 
 ### Performance measurements
 - In C example, I measured the execution time of local call
 ```
