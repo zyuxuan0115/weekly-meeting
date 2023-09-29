@@ -33,9 +33,11 @@ categories: serverless functions
 		```
 
 ### About curl
-- nightcore uses `curl -X POST -d "Hello" http://127.0.0.1:8080/function/Foo` to run serverless function `Foo`
+- nightcore uses `curl -X POST -d "Hello" http://127.0.0.1:8080/function/Foo` 
+	+ to run serverless function `Foo`
+	+ `Foo` then calls `Bar`
 - From `man curl`
-	+ curl  is a tool to transfer data from or to a server, using one of the supported protocols (DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET and TFTP). The command is designed to work without user interaction. 
+	+ `curl` is a tool to transfer data from or to a server, using one of the supported protocols (DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET and TFTP). The command is designed to work without user interaction. 
 
 
 - In C example, I measured the execution time of local call
