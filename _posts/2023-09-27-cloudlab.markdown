@@ -42,6 +42,8 @@ categories: serverless functions
 	+ `-X, --request <command>`
 		* (HTTP) Specifies a custom request method to use when communicating with the HTTP server.  
 		* The specified request method will be used instead of the method otherwise used (which defaults to GET). Common additional HTTP requests include PUT and DELETE.
+	+ -d, --data <data>
+		* (HTTP) Sends the specified data in a POST request to the HTTP server
 
 ### Performance measurements
 - In C example, I measured the execution time of local call
