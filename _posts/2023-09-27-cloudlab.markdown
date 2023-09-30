@@ -46,7 +46,7 @@ categories: serverless functions
 	+ `-d, --data <data>`
 		* (HTTP) Sends the specified data in a POST request to the HTTP server
 
-### Understand how nightcore works
+### Understand how RPC nightcore works
 - How does `Foo` call `Bar`
 	+ In [foo.c code](https://github.com/ut-osa/nightcore/blob/asplos-release/examples/c/foo.c#L39) #39 
 ```c++
@@ -80,8 +80,3 @@ int ret = context->invoke_func_fn(
 - <strong>Conclusion</strong> of [foo.c](https://github.com/ut-osa/nightcore/blob/asplos-release/examples/c/foo.c) 
 	+ `faas_init`, `faas_create_func_worker`, `faas_destroy_func_worker`, `faas_func_call` are overloaded.
 	+ because we need to instantiate them, for example, make `foo` call `bar` 
-
- 
-### Performance measurements
-- In C example, I measured the execution time of local call
-- `strace -c`
