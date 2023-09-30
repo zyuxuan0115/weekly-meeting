@@ -82,6 +82,4 @@ int ret = context->invoke_func_fn(
  
 ### Performance measurements
 - In C example, I measured the execution time of local call
-```
-
-```
+- `strace -c`
