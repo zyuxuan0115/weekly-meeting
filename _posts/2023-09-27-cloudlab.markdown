@@ -51,7 +51,7 @@ categories: serverless functions
 	+ local `Foo` calls local `Bar`
 	+ measure the performance of both cases
 - How `Bar` is called
-	+ In [foo.c code](https://github.com/ut-osa/nightcore/blob/asplos-release/examples/c/foo.c#L39) 
+	+ In [foo.c code](https://github.com/ut-osa/nightcore/blob/asplos-release/examples/c/foo.c#L39) #39 
 ```c++
 int ret = context->invoke_func_fn(
 					context->caller_context, "Bar", input, input_length,
@@ -63,15 +63,21 @@ int ret = context->invoke_func_fn(
 - in `Foo`,
 	+ `faas_create_func_worker`, `faas_destroy_func_worker`, `faas_func_call`, `faas_init` are reloaded.
 		* the original "virtual functions" are all in [nightcore/include/faas/worker_v1_interface.h](https://github.com/ut-osa/nightcore/blob/asplos-release/include/faas/worker_v1_interface.h#L22)	
-- the next question 
+- the next question: understand the functionality of functions with prefix `faas_`  
 	+ where are these "virtual functions" (i.e., `faas_create_func_worker`) created and called
 		* the answer is [nightcore/src/worker/v1/func_worker.cpp](https://github.com/ut-osa/nightcore/blob/asplos-release/src/worker/v1/func_worker.cpp#L47) 
-		* in function [FuncWorker::Serve()](https://github.com/ut-osa/nightcore/blob/asplos-release/src/worker/v1/func_worker.cpp#L47), we have all functions loaded and renamed
-			- `faas_init`: `faas_init`
+		* in function [FuncWorker::Serve()](https://github.com/ut-osa/nightcore/blob/asplos-release/src/worker/v1/func_worker.cpp#L47), we have all functions loaded from `func_library_` and renamed
+			- `init_fn_`: `faas_init`
 			- `create_func_worker_fn_`: `faas_create_func_worker_fn_t`
 			- `destroy_func_worker_fn_`: `faas_destroy_func_worker_fn_t`
 			- `func_call_fn_`: `faas_func_call_fn_t`
-
+		* then in function [FuncWorker::MainServingLoop()](https://github.com/ut-osa/nightcore/blob/asplos-release/src/worker/v1/func_worker.cpp#L87)
+			- serverless function is created by calling `create_func_worker_fn_`
+			- in the while loop the created function is called by calling `func_call_fn_`
+				* and in this `func_call_fn_`, `foo` will invoke `bar`.
+- get back to [foo.c](https://github.com/ut-osa/nightcore/blob/asplos-release/examples/c/foo.c)
+	+ when `foo` invoke `bar`	
+	
 
  
 ### Performance measurements
