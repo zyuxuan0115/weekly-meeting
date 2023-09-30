@@ -46,12 +46,8 @@ categories: serverless functions
 	+ `-d, --data <data>`
 		* (HTTP) Sends the specified data in a POST request to the HTTP server
 
-### Make Foo call remote Bar
-- What we need
-	+ local `Foo` calls remote `Bar`
-	+ local `Foo` calls local `Bar`
-	+ measure the performance of both cases
-- How `Bar` is called
+### Understand how nightcore works
+- How does `Foo` call `Bar`
 	+ In [foo.c code](https://github.com/ut-osa/nightcore/blob/asplos-release/examples/c/foo.c#L39) #39 
 ```c++
 int ret = context->invoke_func_fn(
@@ -62,7 +58,7 @@ int ret = context->invoke_func_fn(
 	+ the type define of `faas_invoke_func_fn_t` is in [nightcore/include/faas/worker_v1_interface.h](https://github.com/ut-osa/nightcore/blob/asplos-release/include/faas/worker_v1_interface.h#L22)	
 	+ a little new knowledge of C/C++'s [typedef of function pointer](https://stackoverflow.com/questions/4295432/typedef-function-pointer)
 - in `Foo`,
-	+ `faas_create_func_worker`, `faas_destroy_func_worker`, `faas_func_call`, `faas_init` are reloaded.
+	+ `faas_create_func_worker`, `faas_destroy_func_worker`, `faas_func_call`, `faas_init` are overloaded.
 		* the original "virtual functions" are all in [nightcore/include/faas/worker_v1_interface.h](https://github.com/ut-osa/nightcore/blob/asplos-release/include/faas/worker_v1_interface.h#L22)	
 - the next question: understand the functionality of functions with prefix `faas_`  
 	+ where are these "virtual functions" (i.e., `faas_create_func_worker`) created and called
@@ -72,13 +68,18 @@ int ret = context->invoke_func_fn(
 			- `create_func_worker_fn_`: `faas_create_func_worker_fn_t`
 			- `destroy_func_worker_fn_`: `faas_destroy_func_worker_fn_t`
 			- `func_call_fn_`: `faas_func_call_fn_t`
+			- then `init_fn_` is executed.
 		* then in function [FuncWorker::MainServingLoop()](https://github.com/ut-osa/nightcore/blob/asplos-release/src/worker/v1/func_worker.cpp#L87)
 			- serverless function is created by calling `create_func_worker_fn_`
+				* `create_func_worker_fn_` will also take `&FuncWorker::InvokeFuncWrapper` as an argument 
+					+ this is the same as in `foo.c`, we have `faas_create_func_worker` that takes `invoke_func_fn` as an argument
+					+ so the invoke of the callee is this [self->InvokeFunc](https://github.com/ut-osa/nightcore/blob/asplos-release/src/worker/v1/func_worker.cpp#L370)
+					+ the real `InvokeFunc` is [here](https://github.com/ut-osa/nightcore/blob/asplos-release/src/worker/v1/func_worker.cpp#L177)
 			- in the while loop the created function is called by calling `func_call_fn_`
 				* and in this `func_call_fn_`, `foo` will invoke `bar`.
-- get back to [foo.c](https://github.com/ut-osa/nightcore/blob/asplos-release/examples/c/foo.c)
-	+ when `foo` invoke `bar`	
-	
+- <strong>Conclusion</strong> of [foo.c](https://github.com/ut-osa/nightcore/blob/asplos-release/examples/c/foo.c) 
+	+ `faas_init`, `faas_create_func_worker`, `faas_destroy_func_worker`, `faas_func_call` are overloaded.
+	+ because we need to instantiate them, for example, make `foo` call `bar` 
 
  
 ### Performance measurements
