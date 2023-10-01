@@ -11,5 +11,5 @@ categories: serverless functions
 - A little bit about [docker](https://en.wikipedia.org/wiki/Docker_(software))
 	+ things about docker's [swarm](https://docs.docker.com/engine/swarm/)
 		* Swarm mode is an advanced feature for managing a cluster of Docker daemons.
-
-
+		* Decentralized design: people can deploy both kinds of nodes, managers and workers, using the Docker Engine.
+	+ to install docker: `apt install docker.io`
