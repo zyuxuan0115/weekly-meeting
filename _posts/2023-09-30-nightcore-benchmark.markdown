@@ -8,13 +8,19 @@ categories: serverless functions
 - According to Haoran, in nightcore benchmark, it has the controller
 - [github repo](https://github.com/ut-osa/nightcore-benchmarks/tree/master), [nightcore paper](https://www.cs.utexas.edu/users/witchel/pubs/jia21asplos-nightcore.pdf)
 	+ the evaluation runs on aws. but we (I) only have cloudlab
-- in nightcore benchmark's [exp_helper](https://github.com/ut-osa/nightcore-benchmarks/blob/master/scripts/exp_helper#L148) script
-	+ a function called `setup_docker_swarm_for_machines`
-	+ another function called `start_machines_main`
-		* in `start_machine_main`, the [config.json](https://github.com/ut-osa/nightcore-benchmarks/blob/master/experiments/hipstershop_4node/config.json) is read.
-		* this file is important because it tells us how to config manager and worker nodes for <strong>docker swarm</strong> 
+- before everything runs it builds the docker image of nightcore
+- In `nightcore-benchmark/experiments/<benchmark-name>/run_all.sh`
+	+ it first runs [exp_helper](https://github.com/ut-osa/nightcore-benchmarks/blob/master/scripts/exp_helper#L148) with argument `start-machine` to create a <strong>docker swarm</strong>
+	+ then it writes to `machine_infos` about all machines information in the created docker swarm 
+		* in nightcore benchmark's [exp_helper](https://github.com/ut-osa/nightcore-benchmarks/blob/master/scripts/exp_hel0per#L148) script
+			- function `start_machines_main` calls `setup_docker_swarm_for_machines`
+			- in `start_machine_main`, the [config.json](https://github.com/ut-osa/nightcore-benchmarks/blob/master/experiments/hipstershop_4node/config.json) is read.
+				+ this file is important because it tells us how to config manager and worker nodes for <strong>docker swarm</strong> 
+	+ then it invokes `run_once` multiple times in order to
+		* run docker stack deploy on manager
+			- `docker stack deploy -c docker-compose.yml -c docker-compose-placement.yml <stack name>`
 
-### A little bit about [docker](https://en.wikipedia.org/wiki/Docker_(software))
+### About [docker](https://en.wikipedia.org/wiki/Docker_(software))
 - things about docker's [swarm](https://docs.docker.com/engine/swarm/)
 	+ Swarm mode is an advanced feature for managing a cluster of Docker daemons.
 	+ Decentralized design: people can deploy both kinds of nodes, managers and workers, using the Docker Engine.
