@@ -26,7 +26,6 @@ categories: serverless functions
 		* nightcore-engine is only declared once
 		* but in [run_once.sh](https://github.com/ut-osa/nightcore-benchmarks/blob/master/experiments/hipstershop_4node/run_once.sh#L19), it listed 4 engine nodes.
 			- does it mean docker will automatically create 4 engine nodes, because from `docker swarm` + [config.sh](https://github.com/ut-osa/nightcore-benchmarks/blob/master/experiments/hipstershop_4node/config.json) 4 engine nodes has already been created? (I checked [this line](https://github.com/ut-osa/nightcore-benchmarks/blob/master/scripts/exp_helper#L165))
-
 ```yml
 version: "3.8"
 services:
@@ -64,23 +63,6 @@ services:
       - 8080:8080
     volumes:
       - /tmp/nightcore_config.json:/tmp/nightcore/func_config.json
-
-  frontend-api-home:
-    image: zjia/nightcore-hipstershop:frontend-api-asplos-ae
-    command:
-      - --func_id=10
-      - --root_path_for_ipc=/tmp/nightcore/ipc
-      - --fprocess_output_dir=/tmp/nightcore/output
-    env_file:
-      - common.env
-    environment:
-      - GOGC=1000
-      - FAAS_GO_MAX_PROC_FACTOR=8
-      - SWARM_TASK_SLOT={{.Task.Slot}}
-    volumes:
-      - /mnt/inmem/nightcore:/tmp/nightcore
-    depends_on:
-      - nightcore-engine
 ```
 
 ### Some thoughts about making Foo on server1 and Bar on Server2
