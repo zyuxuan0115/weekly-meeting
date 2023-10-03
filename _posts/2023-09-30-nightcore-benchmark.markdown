@@ -12,7 +12,7 @@ categories: serverless functions
 - In `nightcore-benchmark/experiments/<benchmark-name>/run_all.sh`
 	+ it first runs [exp_helper](https://github.com/ut-osa/nightcore-benchmarks/blob/master/scripts/exp_helper#L148) with argument `start-machine` to create a <strong>docker swarm</strong>
 	+ then it writes to `machine_infos` about all machines information in the created docker swarm 
-		* in nightcore benchmark's [exp_helper](https://github.com/ut-osa/nightcore-benchmarks/blob/master/scripts/exp_hel0per#L148) script
+		* in nightcore benchmark's [exp_helper](https://github.com/ut-osa/nightcore-benchmarks/blob/master/scripts/exp_helper#L148) script
 			- function `start_machines_main` calls `setup_docker_swarm_for_machines`
 			- in `start_machine_main`, the [config.json](https://github.com/ut-osa/nightcore-benchmarks/blob/master/experiments/hipstershop_4node/config.json) is read.
 				+ this file is important because it tells us how to config manager and worker nodes for <strong>docker swarm</strong> 
