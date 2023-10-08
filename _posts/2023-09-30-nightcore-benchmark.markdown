@@ -92,6 +92,7 @@ services:
 	+ [how to write a docker file](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/) 
 - useful docker instructions for <strong>docker swarm </strong>
 	+ tutorial: [3 networked host machines](https://docs.docker.com/engine/swarm/swarm-tutorial/#three-networked-host-machines)
+		* to check node in docker swarm: `docker node ls`
 	+ `docker stack`: Docker stack is ignoring “build” instructions. It need pre-built images to exist.
 		* example: `docker stack deploy -c docker-compose.yml somestackname`
 		* need a `docker-compose.yml` file. in nightcore-benchmark, the yml file is [here](https://github.com/ut-osa/nightcore-benchmarks/blob/master/experiments/hipstershop_4node/docker-compose.yml)
