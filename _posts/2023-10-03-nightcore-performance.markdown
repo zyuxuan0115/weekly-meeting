@@ -42,6 +42,8 @@ categories: serverless functions
 	+ if RPC replaced with normal call, the code after RPC might also have their PC updated
 		- PC relative instructions needs to be updated again.
 - Can BOLT change the code layout of libraries?
+- Is updating the text section of a program running in a docker container feasible?
+	+ previously we only update programs that are running without containers. 
 
 ### things about building a RPC graph
 - The RPC graph must be updated at some point after the deployment.
