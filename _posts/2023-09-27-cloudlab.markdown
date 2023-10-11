@@ -18,7 +18,8 @@ categories: serverless functions
 	+ need to install 
 		* [the newest version of cmake](https://cmake.org/download/)
 		* [gcc-10](http://www.netgull.com/gcc/releases/gcc-10.1.0/)
-			- `./configuration --prefix=/proj/zyuxuanssf-PG0/gcc-10`
+			- `./contrib/download_prerequisites`
+			- `./configure --prefix=/proj/zyuxuanssf-PG0/gcc-10`
 			- after building gcc-10, `export CXX=/proj/zyuxuanssf-PG0/gcc-10`
 		* [Python 3.12](https://devguide.python.org/getting-started/setup-building/#build-dependencies) (for nightcore-benchmark's script)
 	+ `./build_deps.sh`
