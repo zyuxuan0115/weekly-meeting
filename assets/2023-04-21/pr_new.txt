@@ -1,0 +1,390 @@
+digraph G{
+	 subgraph cluster_34 {
+		 label="do_work"
+		 shape=ellipse
+		 color=black
+		"4012b0"[shape=ellipse,label="[4012b0,4012cb)
+4012b0 : push %rbp
+4012b0 : push %r15
+4012b0 : push %r14
+4012b0 : push %r13
+4012b0 : push %r12
+4012b0 : push %rbx
+4012b0 : sub $0x68,%rsp
+4012b0 : mov %rdi,%r15
+4012b0 : mov $0x4031de,%edi
+4012b0 : call 0xfffffeca(%rip)"];
+		"4012cb"[shape=ellipse,label="[4012cb,401329)
+4012cb : mov 0x18(%r15),%eax
+4012cb : mov (%r15),%rbx
+4012cb : mov 0x10(%r15),%rcx
+4012cb : mov %rcx,0x48(%rsp)
+4012cb : mov 0x20(%r15),%r14d
+4012cb : cvtsi2sd %r14d,%xmm2
+4012cb : mov 0x24(%r15),%r13d
+4012cb : cvtsi2sd %eax,%xmm0
+4012cb : cvtsi2sd 0x1c(%r15),%xmm1
+4012cb : mulsd %xmm2,%xmm0
+4012cb : divsd %xmm1,%xmm0
+4012cb : cvttsd2si %xmm0,%ebp
+4012cb : mov %rax,0x50(%rsp)
+4012cb : lea 0x1(%rax),%eax
+4012cb : xorps %xmm0,%xmm0
+4012cb : cvtsi2sd %eax,%xmm0
+4012cb : movsd %xmm2,0x60(%rsp)
+4012cb : mulsd %xmm2,%xmm0
+4012cb : divsd %xmm1,%xmm0
+4012cb : cvttsd2si %xmm0,%r12d
+4012cb : mov 0x28(%r15),%rdi
+4012cb : call 0xfffffd8c(%rip)"];
+		"401329"[shape=ellipse,label="[401329,401382)
+401329 : mov %ebp,0xc(%rsp)
+401329 : movsxd %ebp,%rax
+401329 : mov %r13,0x40(%rsp)
+401329 : add $0x1,%r13d
+401329 : mov %r12d,0x20(%rsp)
+401329 : movsxd %r12d,%rcx
+401329 : mov %rax,%r12
+401329 : mov %rcx,%rax
+401329 : sub %r12,%rax
+401329 : mov %rax,0x30(%rsp)
+401329 : mov %r12,%rax
+401329 : not %rax
+401329 : add %rcx,%rax
+401329 : mov %rax,0x28(%rsp)
+401329 : lea 0x1(%r12),%rax
+401329 : mov %rax,0x10(%rsp)
+401329 : mov %rcx,%rax
+401329 : mov %rcx,0x18(%rsp)
+401329 : sub %r12d,%eax
+401329 : mov %eax,0x24(%rsp)
+401329 : mov $0x3e8,%eax
+401329 : mov %r12,0x38(%rsp)
+401329 : jmp 0x38(%rip)"];
+		"401390"[shape=ellipse,label="[401390,401399)
+401390 : mov 0x28(%r15),%rdi
+401390 : call 0xfffffd1c(%rip)"];
+		"401399"[shape=ellipse,label="[401399,40139e)
+401399 : mov 0x38(%rsp),%r12"];
+		"40139e"[shape=ellipse,label="[40139e,4013a7)
+40139e : mov 0x28(%r15),%rdi
+40139e : call 0xfffffd0e(%rip)"];
+		"4013a7"[shape=ellipse,label="[4013a7,4013b8)
+4013a7 : mov 0x58(%rsp),%rcx
+4013a7 : lea 0xffffffff(%rcx),%eax
+4013a7 : cmp $0x1,%ecx
+4013a7 : jbe 0x2e8(%rip)"];
+		"4013b8"[shape=ellipse,label="[4013b8,4013c4)
+4013b8 : mov %rax,0x58(%rsp)
+4013b8 : cmp $0x0,0x50(%rsp)
+4013b8 : jnz 0x13(%rip)"];
+		"4013c4"[shape=ellipse,label="[4013c4,4013d5)
+4013c4 : mov $0x3feb333333333333,%rax
+4013c4 : mov %rax,0x5d9b(%rip)"];
+		"4013d5"[shape=ellipse,label="[4013d5,4013e1)
+4013d5 : mov %r15,%rbp
+4013d5 : mov 0x28(%r15),%rdi
+4013d5 : call 0xfffffcd4(%rip)"];
+		"4013e1"[shape=ellipse,label="[4013e1,4013f1)
+4013e1 : mov 0x24(%rsp),%r15d
+4013e1 : mov 0x18(%rsp),%rax
+4013e1 : cmp %eax,0xc(%rsp)
+4013e1 : jl 0x1b(%rip)"];
+		"4013f1"[shape=ellipse,label="[4013f1,4013fd)
+4013f1 : mov %rbp,%r15
+4013f1 : mov 0x28(%rbp),%rdi
+4013f1 : call 0xfffffcb8(%rip)"];
+		"4013fd"[shape=ellipse,label="[4013fd,4013ff)
+4013fd : jmp 0xffffff93(%rip)"];
+		"401400"[shape=ellipse,label="[401400,40140a)
+401400 : add $0x1,%r12
+401400 : add $0xff,%r15d
+401400 : jz 0x58(%rip)"];
+		"40140a"[shape=ellipse,label="[40140a,401418)
+40140a : mov 0x5d4f(%rip),%rax
+40140a : cmp $0x1,0x0(%rax,%r12,4)
+40140a : jnz 0xffffffea(%rip)"];
+		"401418"[shape=ellipse,label="[401418,401422)
+401418 : mov $0x405110,%edi
+401418 : call 0xfffffd53(%rip)"];
+		"401422"[shape=ellipse,label="[401422,401450)
+401422 : movsd 0x0(%rbx,%r12,8),%xmm0
+401422 : divsd 0x60(%rsp),%xmm0
+401422 : mulsd 0x1bd2(%rip),%xmm0
+401422 : addsd 0x5d32(%rip),%xmm0
+401422 : movsd %xmm0,0x5d2a(%rip)
+401422 : mov $0x405110,%edi
+401422 : call 0xfffffc75(%rip)"];
+		"401450"[shape=ellipse,label="[401450,401452)
+401450 : jmp 0xffffffb0(%rip)"];
+		"401460"[shape=ellipse,label="[401460,40146c)
+401460 : mov %rbp,%r15
+401460 : mov 0x28(%rbp),%rdi
+401460 : call 0xfffffc49(%rip)"];
+		"40146c"[shape=ellipse,label="[40146c,40147a)
+40146c : mov 0x20(%rsp),%eax
+40146c : cmp %eax,0xc(%rsp)
+40146c : jnl 0xffffff1c(%rip)"];
+		"40147a"[shape=ellipse,label="[40147a,4014c0)
+40147a : mov 0x5ccf(%rip),%r8
+40147a : mov 0x5cf0(%rip),%rcx
+40147a : mov 0x38(%rsp),%r12
+40147a : mov %r12,%rdx
+40147a : cmp $0x0,0x40(%rsp)
+40147a : mov 0x48(%rsp),%r9
+40147a : mov $0x3fc3333333333333,%r10
+40147a : movsd 0x1b6c(%rip),%xmm3
+40147a : mov $0x3ff0000000000000,%r11
+40147a : movsd 0x1b52(%rip),%xmm4
+40147a : jns 0x41(%rip)"];
+		"4014c0"[shape=ellipse,label="[4014c0,4014ce)
+4014c0 : mov %r12,%rdx
+4014c0 : test $0x1,0x30(%rsp)
+4014c0 : jz 0xc6(%rip)"];
+		"4014ce"[shape=ellipse,label="[4014ce,4014d9)
+4014ce : cmp $0x1,0x0(%r8,%r12,4)
+4014ce : jnz 0xa1(%rip)"];
+		"4014d9"[shape=ellipse,label="[4014d9,4014e2)
+4014d9 : mov %r10,0x0(%rcx,%r12,8)
+4014d9 : jmp 0xac(%rip)"];
+		"4014f0"[shape=ellipse,label="[4014f0,4014ff)
+4014f0 : add $0x1,%rdx
+4014f0 : cmp 0x18(%rsp),%rdx
+4014f0 : jz 0xa7(%rip)"];
+		"4014ff"[shape=ellipse,label="[4014ff,401506)
+4014ff : cmp $0x1,0x0(%r8,%rdx,4)
+4014ff : jnz 0x5c(%rip)"];
+		"401506"[shape=ellipse,label="[401506,401520)
+401506 : mov %r10,0x0(%rcx,%rdx,8)
+401506 : mov 0x0(%r9,%rdx,8),%rsi
+401506 : mov 0x5c53(%rip),%rdi
+401506 : movapd %xmm4,%xmm0
+401506 : xor %eax,%eax
+401506 : nop 0x0(%rax,%rax,1)"];
+		"401520"[shape=ellipse,label="[401520,401529)
+401520 : movsxd 0x0(%rsi,%rax,4),%rbp
+401520 : cmp %r14d,%ebp
+401520 : jnle 0x3e(%rip)"];
+		"401529"[shape=ellipse,label="[401529,401554)
+401529 : movsd 0x5c3f(%rip),%xmm1
+401529 : mulsd 0x0(%rbx,%rbp,8),%xmm1
+401529 : xorps %xmm2,%xmm2
+401529 : cvtsi2sd 0x0(%rdi,%rbp,4),%xmm2
+401529 : divsd %xmm2,%xmm1
+401529 : addsd %xmm1,%xmm0
+401529 : movsd %xmm0,0x0(%rcx,%rdx,8)
+401529 : add $0x1,%rax
+401529 : cmp %rax,%r13
+401529 : jnz 0xffffffce(%rip)"];
+		"401554"[shape=ellipse,label="[401554,401556)
+401554 : jmp 0x11(%rip)"];
+		"401560"[shape=ellipse,label="[401560,401565)
+401560 : movsd 0x0(%rcx,%rdx,8),%xmm0"];
+		"401565"[shape=ellipse,label="[401565,40156b)
+401565 : ucomisd %xmm3,%xmm0
+401565 : jb 0xffffff87(%rip)"];
+		"40156b"[shape=ellipse,label="[40156b,401574)
+40156b : mov %r11,0x0(%rcx,%rdx,8)
+40156b : jmp 0xffffff81(%rip)"];
+		"401574"[shape=ellipse,label="[401574,401585)
+401574 : movsd 0x0(%rcx,%r12,8),%xmm0
+401574 : ucomisd %xmm3,%xmm0
+401574 : mov 0x10(%rsp),%rdx
+401574 : jb 0xb(%rip)"];
+		"401585"[shape=ellipse,label="[401585,401589)
+401585 : mov %r11,0x0(%rcx,%r12,8)"];
+		"401589"[shape=ellipse,label="[401589,40158e)
+401589 : mov 0x10(%rsp),%rdx"];
+		"40158e"[shape=ellipse,label="[40158e,40159a)
+40158e : cmp $0x0,0x28(%rsp)
+40158e : jnz 0xc0(%rip)"];
+		"40159a"[shape=ellipse,label="[40159a,4015a0)
+40159a : nop 0x0(%rax,%rax,1)"];
+		"4015a0"[shape=ellipse,label="[4015a0,4015a9)
+4015a0 : mov 0x28(%r15),%rdi
+4015a0 : call 0xfffffb0c(%rip)"];
+		"4015a9"[shape=ellipse,label="[4015a9,4015b8)
+4015a9 : mov 0x18(%rsp),%rax
+4015a9 : cmp %eax,0xc(%rsp)
+4015a9 : jnl 0xfffffdec(%rip)"];
+		"4015b8"[shape=ellipse,label="[4015b8,4015d0)
+4015b8 : mov 0x5b91(%rip),%rax
+4015b8 : mov 0x5bb2(%rip),%rcx
+4015b8 : mov %r12,%rdx
+4015b8 : test $0x1,0x30(%rsp)
+4015b8 : jz 0x1b(%rip)"];
+		"4015d0"[shape=ellipse,label="[4015d0,4015dc)
+4015d0 : cmp $0x1,0x0(%rax,%r12,4)
+4015d0 : mov 0x10(%rsp),%rdx
+4015d0 : jnz 0xf(%rip)"];
+		"4015dc"[shape=ellipse,label="[4015dc,4015e9)
+4015dc : mov 0x0(%rcx,%r12,8),%rdx
+4015dc : mov %rdx,0x0(%rbx,%r12,8)
+4015dc : mov 0x10(%rsp),%rdx"];
+		"4015e9"[shape=ellipse,label="[4015e9,4015f1)
+4015e9 : cmp $0x0,0x28(%rsp)
+4015e9 : jnz 0x20(%rip)"];
+		"4015f1"[shape=ellipse,label="[4015f1,4015f6)
+4015f1 : jmp 0xfffffdad(%rip)"];
+		"401600"[shape=ellipse,label="[401600,40160f)
+401600 : add $0x2,%rdx
+401600 : cmp %rdx,0x18(%rsp)
+401600 : jz 0xfffffd95(%rip)"];
+		"40160f"[shape=ellipse,label="[40160f,401615)
+40160f : cmp $0x1,0x0(%rax,%rdx,4)
+40160f : jz 0xd(%rip)"];
+		"401615"[shape=ellipse,label="[401615,40161c)
+401615 : cmp $0x1,0x4(%rax,%rdx,4)
+401615 : jnz 0xffffffe6(%rip)"];
+		"40161c"[shape=ellipse,label="[40161c,40161e)
+40161c : jmp 0x13(%rip)"];
+		"401620"[shape=ellipse,label="[401620,40162f)
+401620 : mov 0x0(%rcx,%rdx,8),%rsi
+401620 : mov %rsi,0x0(%rbx,%rdx,8)
+401620 : cmp $0x1,0x4(%rax,%rdx,4)
+401620 : jnz 0xffffffd3(%rip)"];
+		"40162f"[shape=ellipse,label="[40162f,40163b)
+40162f : mov 0x8(%rcx,%rdx,8),%rsi
+40162f : mov %rsi,0x8(%rbx,%rdx,8)
+40162f : jmp 0xffffffc7(%rip)"];
+		"401640"[shape=ellipse,label="[401640,401645)
+401640 : mov %r10,0x8(%rcx,%rdx,8)"];
+		"401645"[shape=ellipse,label="[401645,401654)
+401645 : add $0x2,%rdx
+401645 : cmp %rdx,0x18(%rsp)
+401645 : jz 0xffffff52(%rip)"];
+		"401654"[shape=ellipse,label="[401654,40165b)
+401654 : cmp $0x1,0x0(%r8,%rdx,4)
+401654 : jnz 0x17(%rip)"];
+		"40165b"[shape=ellipse,label="[40165b,401661)
+40165b : mov %r10,0x0(%rcx,%rdx,8)
+40165b : jmp 0x20(%rip)"];
+		"401670"[shape=ellipse,label="[401670,40167b)
+401670 : movsd 0x0(%rcx,%rdx,8),%xmm0
+401670 : ucomisd %xmm3,%xmm0
+401670 : jb 0x6(%rip)"];
+		"40167b"[shape=ellipse,label="[40167b,40167f)
+40167b : mov %r11,0x0(%rcx,%rdx,8)"];
+		"40167f"[shape=ellipse,label="[40167f,401687)
+40167f : cmp $0x1,0x4(%r8,%rdx,4)
+40167f : jz 0xffffffbb(%rip)"];
+		"401687"[shape=ellipse,label="[401687,401693)
+401687 : movsd 0x8(%rcx,%rdx,8),%xmm0
+401687 : ucomisd %xmm3,%xmm0
+401687 : jb 0xffffffb4(%rip)"];
+		"401693"[shape=ellipse,label="[401693,40169a)
+401693 : mov %r11,0x8(%rcx,%rdx,8)
+401693 : jmp 0xffffffad(%rip)"];
+		"40169a"[shape=ellipse,label="[40169a,4016ab)
+40169a : xor %eax,%eax
+40169a : add $0x68,%rsp
+40169a : pop %rbx
+40169a : pop %r12
+40169a : pop %r13
+40169a : pop %r14
+40169a : pop %r15
+40169a : pop %rbp
+40169a : ret near (%rsp)"];
+	}
+	"4012b0" -> "4012cb" 
+	"4012b0" -> "401190" 
+	"4012cb" -> "4010b0"
+	"4012cb" -> "401329" 
+	"401329" -> "4013b8" 
+	"401390" -> "4010b0" 
+	"401390" -> "401399" 
+	"401399" -> "40139e" 
+	"40139e" -> "4013a7" 
+	"40139e" -> "4010b0" 
+	"4013a7" -> "4013b8" 
+	"4013a7" -> "40169a" 
+	"4013b8" -> "4013d5" 
+	"4013b8" -> "4013c4" 
+	"4013c4" -> "4013d5" 
+	"4013d5" -> "4013e1" 
+	"4013d5" -> "4010b0" 
+	"4013e1" -> "40140a" 
+	"4013e1" -> "4013f1" 
+	"4013f1" -> "4010b0" 
+	"4013f1" -> "4013fd" 
+	"4013fd" -> "401390" 
+	"401400" -> "401460" 
+	"401400" -> "40140a" 
+	"40140a" -> "401418" 
+	"40140a" -> "401400" 
+	"401418" -> "401170" 
+	"401418" -> "401422" 
+	"401422" -> "4010c0" 
+	"401422" -> "401450" 
+	"401450" -> "401400" 
+	"401460" -> "4010b0" 
+	"401460" -> "40146c" 
+	"40146c" -> "40147a" 
+	"40146c" -> "401390" 
+	"40147a" -> "4014c0" 
+	"40147a" -> "4014ff" 
+	"4014c0" -> "4014ce" 
+	"4014c0" -> "40158e" 
+	"4014ce" -> "401574" 
+	"4014ce" -> "4014d9" 
+	"4014d9" -> "401589" 
+	"4014f0" -> "4014ff" 
+	"4014f0" -> "4015a0" 
+	"4014ff" -> "401560" 
+	"4014ff" -> "401506" 
+	"401506" -> "401520" 
+	"401520" -> "401565" 
+	"401520" -> "401529" 
+	"401529" -> "401520" 
+	"401529" -> "401554" 
+	"401554" -> "401565" 
+	"401560" -> "401565" 
+	"401565" -> "4014f0" 
+	"401565" -> "40156b" 
+	"40156b" -> "4014f0" 
+	"401574" -> "401585" 
+	"401574" -> "40158e" 
+	"401585" -> "401589" 
+	"401589" -> "40158e" 
+	"40158e" -> "401654" 
+	"40158e" -> "40159a" 
+	"40159a" -> "4015a0" 
+	"4015a0" -> "4015a9" 
+	"4015a0" -> "4010b0" 
+	"4015a9" -> "4015b8" 
+	"4015a9" -> "40139e" 
+	"4015b8" -> "4015e9" 
+	"4015b8" -> "4015d0" 
+	"4015d0" -> "4015dc" 
+	"4015d0" -> "4015e9" 
+	"4015dc" -> "4015e9" 
+	"4015e9" -> "4015f1" 
+	"4015e9" -> "40160f" 
+	"4015f1" -> "40139e" 
+	"401600" -> "40139e" 
+	"401600" -> "40160f" 
+	"40160f" -> "401620" 
+	"40160f" -> "401615" 
+	"401615" -> "401600" 
+	"401615" -> "40161c" 
+	"40161c" -> "40162f" 
+	"401620" -> "401600" 
+	"401620" -> "40162f" 
+	"40162f" -> "401600" 
+	"401640" -> "401645" 
+	"401645" -> "4015a0" 
+	"401645" -> "401654" 
+	"401654" -> "40165b" 
+	"401654" -> "401670" 
+	"40165b" -> "40167f" 
+	"401670" -> "40167b" 
+	"401670" -> "40167f" 
+	"40167b" -> "40167f" 
+	"40167f" -> "401687" 
+	"40167f" -> "401640" 
+	"401687" -> "401645" 
+	"401687" -> "401693" 
+	"401693" -> "401645" 
+	"40169a" -> "40275a" 
+	"40169a" -> "402794" 
+}
