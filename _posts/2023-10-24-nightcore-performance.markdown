@@ -8,7 +8,8 @@ categories: serverless functions
 - OS pipe + shared memory to pass function arguments and message
 	+ if the length is short, OS pipe for data transfer
 	+ if the length is long, OS pipe for communication, shared memory for data transfer
-- nightcore  
+- nightcore 
+	+ ![s3](/assets/2023-10-24/s3.png)
 - 2 microservice workloads are written in C++
 	+ if we use compiler to merge functions and are to use nightcore workloads, we can use these 2 
 - ![microservice](/assets/2023-10-24/s2.png) 
@@ -21,9 +22,18 @@ categories: serverless functions
 ### call invocation time on cloudlab
 
 | microseconds  | nightcore internal | pthread | normal | 
-| :----: | :----:| :----:|  
-|  44.5 | 181 | 1 | 
+| :----: | :----:| :----:| :----: | 
+| 50th tail latency |  44.5 | 181 | 1 | 
 
 - pthread: execution time from `pthread_create()` to `pthread_join()`
 
-since `pthread_create()` is long, can we 
+- since the overhead of `pthread_create()` is high
+	+ first create the threads. 
+	+ after the caller function calls, let the thread execute 
+
+| microseconds  | nightcore internal | pthread create | pthread lock <br> as signal | normal | 
+| :----: | :----:| :----:|:----:| :----:| 
+| 50th tail latency |  44.5 | 181 | 22 | 1 | 
+
+![s4](/assets/2023-10-24/s4.png)
+
