@@ -6,4 +6,19 @@ categories: serverless functions
 ---
 ### vHive
 - written in GO
+	+ how to install GO
+		* first [apt install](https://stackoverflow.com/questions/17480044/how-to-install-the-current-version-of-go-in-ubuntu-precise)
+		* then upgrade GO to [version 1.19](https://go.dev/dl/)
 - how to quick start [here](https://github.com/vhive-serverless/vhive/blob/6a0c478d2c9f/docs/quickstart_guide.md)
+	+ some tools vHive uses:
+		* [kubelet](https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/)
+		* [containerd](https://containerd.io/)
+		* `pushd` & `popd` & `screen -dmS <name>` & `tee -a`
+			- `pushd dir1`: similiar to `cd dir1`
+			- `popd`: pop the path of the old pwd
+			- `screen -dmS <name>`: Start as daemon: Screen session in detached mode.
+- useful thing
+	+ https://github.com/kubernetes/dashboard/issues/3789
+	+ https://hackmd.io/@maelvls/debug-cert-manager-webhook#Error-2-io-timeout
+	+ https://github.com/vhive-serverless/vHive/issues/781
+ 
