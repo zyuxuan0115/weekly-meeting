@@ -18,11 +18,11 @@ categories: serverless functions
 			- `popd`: pop the path of the old pwd
 			- `screen -dmS <name>`: Start as daemon: Screen session in detached mode.
 - about commit hash
-	+ `b0d116cc39d32524b2a2f62002ce4ac7f9d624f7` can be built successfully on cloudlab machines.
-	+ `c49a166ee4a3038418759b28d32a12b78b5ad9d7` has the `examples/deployer` code
-- useful thing
-	+ https://github.com/kubernetes/dashboard/issues/3789
-	+ https://hackmd.io/@maelvls/debug-cert-manager-webhook#Error-2-io-timeout
-	+ https://github.com/vhive-serverless/vHive/issues/781
+	+ `b0d116cc39d32524b2a2f62002ce4ac7f9d624f7` 
+		* can be built successfully on cloudlab machines.
+	+ `c49a166ee4a3038418759b28d32a12b78b5ad9d7` 
+		* has the `examples/deployer` code
 - [firecracker](https://firecracker-microvm.github.io/)
 	+ Firecracker is a virtual machine monitor (VMM) that uses the Linux Kernel-based Virtual Machine (KVM) to create and manage microVMs. 
+- github issue [reported](https://github.com/vhive-serverless/vHive/issues/875)
+	+ `kubectl get pods -A`
