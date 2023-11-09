@@ -34,3 +34,23 @@ categories: serverless functions
 	+ example is [here](https://www.phoronix.com/news/Linux-4.9-Mem-Protection-Keys)
 	+ on Intel Skylake server CPUs, and CPUs after Skylake
 
+
+Before a pkey can be used, it must first be allocated with `pkey_alloc()`. An application calls the `WRPKRU` instruction directly in order to change access permissions to memory covered with a key. In this example `WRPKRU` is wrapped by a C function called `pkey_set()`.
+
+```c++
+pkey = pkey_alloc(0, PKEY_DENY_WRITE);
+ptr = mmap(NULL, PAGE_SIZE, PROT_NONE, MAP_ANONYMOUS|MAP_PRIVATE, -1, 0);
+ret = pkey_mprotect(ptr, PAGE_SIZE, PROT_READ | PROT_WRITE, pkey);
+// ... application runs here
+```
+
+Now, if the application needs to update the data at 'ptr', it can gain access, do the update, then remove its write access:
+
+```c++
+pkey_set(pkey, 0); // clear PKEY_DENY_WRITE
+*ptr = foo; // assign something
+pkey_set(pkey, PKEY_DENY_WRITE); // set PKEY_DENY_WRITE again
+```
+
+Now when it frees the memory, it will also free the pkey since it is no longer in use:
+
