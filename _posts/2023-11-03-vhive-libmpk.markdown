@@ -13,6 +13,8 @@ categories: serverless functions
 	+ some tools vHive uses:
 		* [kubelet](https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/)
 		* [containerd](https://containerd.io/)
+		* [firecracker](https://firecracker-microvm.github.io/)
+			- Firecracker is a virtual machine monitor (VMM) that uses the Linux Kernel-based Virtual Machine (KVM) to create and manage microVMs. 
 		* `pushd` & `popd` & `screen -dmS <name>` & `tee -a`
 			- `pushd dir1`: similiar to `cd dir1`
 			- `popd`: pop the path of the old pwd
@@ -22,7 +24,13 @@ categories: serverless functions
 		* can be built successfully on cloudlab machines.
 	+ `c49a166ee4a3038418759b28d32a12b78b5ad9d7` 
 		* has the `examples/deployer` code
-- [firecracker](https://firecracker-microvm.github.io/)
-	+ Firecracker is a virtual machine monitor (VMM) that uses the Linux Kernel-based Virtual Machine (KVM) to create and manage microVMs. 
 - github issue [reported](https://github.com/vhive-serverless/vHive/issues/875)
 	+ `kubectl get pods -A`
+
+### libmpk
+- [github repo](https://github.com/sslab-gatech/libmpk), & [paper](https://www.usenix.org/system/files/atc19-park-soyeon.pdf)
+- normal `pkey_alloc()`, `pkey_free()` 
+	+ explainations are [here](https://lwn.net/Articles/689395/)
+	+ example is [here](https://www.phoronix.com/news/Linux-4.9-Mem-Protection-Keys)
+	+ on Intel Skylake server CPUs, and CPUs after Skylake
+
