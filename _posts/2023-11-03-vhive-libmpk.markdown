@@ -11,12 +11,15 @@ categories: serverless functions
 	+ ![s1](/assets/2023-11-03/s1.png) 
 - lazy inter-thread key synchronization
 	+ is used to accelerate `mpk_mprotect()`
+	+ ![s2](/assets/2023-11-03/s2.png)
+- metadata integrity
+	+ ensure the integrity of the mapping info
 
 ### pkey (Intel MPK)
 - normal `pkey_alloc()`, `pkey_free()` 
 	+ explainations are [here](https://lwn.net/Articles/689395/)
 	+ example is [here](https://www.phoronix.com/news/Linux-4.9-Mem-Protection-Keys)
-	+ on Intel Skylake server CPUs, and CPUs after Skylake
+	+ on [Intel Skylake](https://en.wikipedia.org/wiki/List_of_Intel_Xeon_processors_(Skylake-based)) server CPUs, and CPUs after Skylake
 - `mprotect` with `pkey` [here](https://man7.org/linux/man-pages/man2/mprotect.2.html)
 
 Before a pkey can be used, it must first be allocated with `pkey_alloc()`. An application calls the `WRPKRU` instruction directly in order to change access permissions to memory covered with a key. In this example `WRPKRU` is wrapped by a C function called `pkey_set()`.
