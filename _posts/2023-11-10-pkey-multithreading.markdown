@@ -9,7 +9,7 @@ categories: serverless functions
 	+ 40-50 ns
 	+ reality: 2000 ns (2 microseconds) 
 
-- Sebastian: a faster way to use signal between threads
+- <strong>Sebastian</strong>: a faster way to use signal between threads
 	+ [link here](https://stackoverflow.com/questions/4016789/sleeping-in-a-thread-c-posix-threads/4676069#4676069)
 
 ```
@@ -20,7 +20,7 @@ Time spent on pthread (signal): 23226 ns
 Time spent on normal func call: 164 ns
 ```
 
-- Kostas: conditional variable to take no longer than 5 microseconds
+- <strong>Kostas</strong>: conditional variable to take no longer than 5 microseconds
 	+ pin the 2 threads to different cores
 	+ performance <strong>even worse</strong>
 
@@ -34,38 +34,70 @@ Time spent on normal func call: 121 ns
 
 ### how does nightcore internal's OS pipe work
 
-### more about pkey (Intel MPK)
+### if nightcore transfer huge amount of data
+- how nightcore internal call works
+	+ [Engine::OnRecvMessage()](https://github.com/ut-osa/nightcore/blob/asplos-release/src/engine/engine.cpp#L223) 
+
+### more documentations about pkey (Intel MPK)
 - [how to use pkey](https://www.kernel.org/doc/html/next/core-api/protection-keys.html)
 	+ Before a pkey can be used, it must first be allocated with `pkey_alloc()`. 
 	+ An application calls the WRPKRU instruction directly in order to change access permissions to memory covered with a key. 
 	+ In this example WRPKRU is wrapped by a C function called `pkey_set()`.
 
 ```c++
-pkey = pkey_alloc(0, PKEY_DISABLE_WRITE);
-ptr = mmap(NULL, PAGE_SIZE, PROT_NONE, MAP_ANONYMOUS|MAP_PRIVATE, -1, 0);
-ret = pkey_mprotect(ptr, PAGE_SIZE, PROT_READ|PROT_WRITE, pkey);
+int pkey = pkey_alloc(0, PKEY_DISABLE_WRITE);
+void* ptr = mmap(NULL, PAGE_SIZE, PROT_NONE, MAP_ANONYMOUS|MAP_PRIVATE, -1, 0);
+int ret = pkey_mprotect(ptr, PAGE_SIZE, PROT_READ|PROT_WRITE, pkey);
 // ... application runs here
 ```
 
-- more explaination about pkey
+- if the application needs to update the data at 'ptr', it can gain access, do the update, then remove its write access:
+
+```c++
+pkey_set(pkey, 0); // clear PKEY_DISABLE_WRITE
+*ptr = foo; // assign something
+pkey_set(pkey, PKEY_DISABLE_WRITE); // set PKEY_DISABLE_WRITE again
+```
+
+- more explainations about pkey
 	+ [https://man7.org/linux/man-pages/man7/pkeys.7.html](https://man7.org/linux/man-pages/man7/pkeys.7.html)
   + [https://www.gnu.org/software/libc/manual/html_node/Memory-Protection.html#Memory-Protection-Keys](https://www.gnu.org/software/libc/manual/html_node/Memory-Protection.html#Memory-Protection-Keys)
+- <strong>how to use pkey in GO</strong>: [here](https://charlycst.github.io/posts/mpk/)
+
+### hardware support for Intel MPK
+- I ran the following code
+
+```c++
+int pkey = pkey_alloc(0, PKEY_DISABLE_ACCESS);
+if (pkey<0){
+   printf("pkey = %d, no available keys\n", pkey);
+   err(EXIT_FAILURE, "pkey_alloc");
+}
+```
+
+- and got the result
+
+```c++
+pkey = -1, no available keys
+pkey_test: pkey_alloc: Invalid argument
+```
+
+- from this [doc](https://www.kernel.org/doc/html/next/core-api/protection-keys.html), only <strong>Intel Skylake</strong> (server CPU) and after, support pkey.
 	+ how to check if hardware support Intel MPK
 		* [https://www.linuxhowtos.org/manpages/7/pkeys.htm](https://www.linuxhowtos.org/manpages/7/pkeys.htm)
-	+ how to use pkey in GO: [here](https://charlycst.github.io/posts/mpk/)
-
-- to choose hardware on cloudlab [here](https://docs.cloudlab.us/hardware.html)
+		* `/proc/cpuinfo` under the `flags` field. 
+			- The string `pku` in this field indicates hardware support for protection keys 
+			- The string `ospke` indicates that the kernel contains and has enabled protection keys support.
+	+ The current processor I'm using doesn't support pkey
+		* looked into cloudlab's documentation to choose hardware on cloudlab [here](https://docs.cloudlab.us/hardware.html) that support pkey
 
 - [pthread_key_create()](https://linux.die.net/man/3/pthread_key_create)
 
 
 ### where the call stacks are in multithread programs
 
-### if nightcore transfer huge amount of data
-- how nightcore internal call works
-	+ [Engine::OnRecvMessage()](https://github.com/ut-osa/nightcore/blob/asplos-release/src/engine/engine.cpp#L223) 
-
 ### measure vhive's function invocation time
 
 ### chat with Tanvir
 - a [paper](https://homes.cs.washington.edu/~arvind/papers/google-rpc.pdf) suggested from Tanvir
+- Tanvir wanted to have a meeting for the 3 of us
