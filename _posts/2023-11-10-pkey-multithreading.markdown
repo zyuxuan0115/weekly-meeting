@@ -88,6 +88,7 @@ pkey_test: pkey_alloc: Invalid argument
 		* `/proc/cpuinfo` under the `flags` field. 
 			- The string `pku` in this field indicates hardware support for protection keys 
 			- The string `ospke` indicates that the kernel contains and has enabled protection keys support.
+		* a [list](https://en.wikipedia.org/wiki/List_of_Intel_Xeon_processors_(Skylake-based)) of skylake based Intel processors
 	+ The current processor I'm using doesn't support pkey
 		* looked into cloudlab's documentation to choose hardware on cloudlab [here](https://docs.cloudlab.us/hardware.html) that support pkey
 
@@ -95,6 +96,11 @@ pkey_test: pkey_alloc: Invalid argument
 
 
 ### where the call stacks are in multithread programs
+![s1](/assets/2023-11-10/s1.png)
+
+- if we are to use pkey to protect the call stack of each threads, 
+	+ how do we get the starting address of each stack
+	+ how do we get the size of each stack
 
 ### measure vhive's function invocation time
 
