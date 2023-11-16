@@ -92,7 +92,8 @@ pkey_test: pkey_alloc: Invalid argument
 		* a [list](https://en.wikipedia.org/wiki/List_of_Intel_Xeon_processors_(Skylake-based)) of skylake based Intel processors
 	+ The current processor I'm using doesn't support pkey
 		* looked into cloudlab's documentation to choose hardware on cloudlab [here](https://docs.cloudlab.us/hardware.html) that support pkey
-	+ Tried <strong>Intel skylake</strong> processor and it supports pkey.
+	+ Tried <strong>Intel skylake</strong> processor <strong>c6420</strong> and profile <strong>vhive-ubuntu20</strong>
+		* it supports pkey.
 
 - [pthread_key_create()](https://linux.die.net/man/3/pthread_key_create)
 
