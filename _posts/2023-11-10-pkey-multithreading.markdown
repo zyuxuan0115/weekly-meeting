@@ -33,10 +33,11 @@ Time spent on normal func call: 121 ns
 ```
 
 ### how does nightcore internal's OS pipe work
-
-### if nightcore transfer huge amount of data
 - how nightcore internal call works
 	+ [Engine::OnRecvMessage()](https://github.com/ut-osa/nightcore/blob/asplos-release/src/engine/engine.cpp#L223) 
+
+### if nightcore transfers huge amount of data
+![latency](/assets/2023-11-10/latency.png)
 
 ### more documentations about pkey (Intel MPK)
 - [how to use pkey](https://www.kernel.org/doc/html/next/core-api/protection-keys.html)
@@ -91,6 +92,7 @@ pkey_test: pkey_alloc: Invalid argument
 		* a [list](https://en.wikipedia.org/wiki/List_of_Intel_Xeon_processors_(Skylake-based)) of skylake based Intel processors
 	+ The current processor I'm using doesn't support pkey
 		* looked into cloudlab's documentation to choose hardware on cloudlab [here](https://docs.cloudlab.us/hardware.html) that support pkey
+	+ Tried <strong>Intel skylake</strong> processor and it supports pkey.
 
 - [pthread_key_create()](https://linux.die.net/man/3/pthread_key_create)
 
@@ -101,7 +103,7 @@ pkey_test: pkey_alloc: Invalid argument
 - if we are to use pkey to protect the call stack of each threads, 
 	+ how do we get the starting address of each stack
 	+ how do we get the size of each stack
-
+	+ after a new thread is created, the 
 ### measure vhive's function invocation time
 
 ### chat with Tanvir
