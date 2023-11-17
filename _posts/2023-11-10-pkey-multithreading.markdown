@@ -41,8 +41,9 @@ Time spent on normal func call: 121 ns
 		* this function checks whether the payload uses pipe or shared memory
 		* the only caller is [UV_READ_CB_FOR_CLASS()](https://github.com/ut-osa/nightcore/blob/asplos-release/src/engine/message_connection.cpp#L276)
 			* a little bit about [lambda](https://www.cprogramming.com/c++11/c++11-lambda-closures.html)
+			* a little bit about [callback functions](https://developer.mozilla.org/en-US/docs/Glossary/Callback_function)
 			* `UV_READ_CB_FOR_CLASS()` is defined [here](https://github.com/ut-osa/nightcore/blob/asplos-release/src/common/uv.h#L101)
-- nightcore create pipe uses [libuv](https://github.com/libuv/libuv).
+- nightcore creates pipe using [libuv](https://github.com/libuv/libuv).
 	+ from [uv.h](https://github.com/libuv/libuv/blob/v1.x/include/uv.h#L821), we know 
 		* `uv_pipe_t` on Unix is a [Unix domain socket](https://en.wikipedia.org/wiki/Unix_domain_socket).
 	+ corresponding [uv.c](https://github.com/libuv/libuv/blob/v1.x/src/unix/pipe.c)
