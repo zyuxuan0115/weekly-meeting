@@ -53,6 +53,12 @@ Time spent on normal func call: 121 ns
 ### if nightcore transfers huge amount of data
 ![latency](/assets/2023-11-10/latency.png)
 
+- Nightcore’s message channels are designed for low-latency message passing between its engine and other components, which carry fixed-size 1KB messages. 
+	+ the first 64 bytes of a message is the header which contains the message type
+and other metadata
+	+ the remaining 960 bytes are message payload. 
+
+
 ### more about pkey (Intel MPK)
 - [how to use pkey](https://www.kernel.org/doc/html/next/core-api/protection-keys.html)
 	+ Before a pkey can be used, it must first be allocated with `pkey_alloc()`. 
@@ -110,7 +116,7 @@ pkey_test: pkey_alloc: Invalid argument
 		* it supports pkey.
 - problem with Intel MPK and pkey
 	* the key is too simple
-	* the value of newly allocated pkey is 1,2,3,...,15
+	* the values of newly allocated pkeys are 1,2,3,...,15
 
 - [pthread_key_create()](https://linux.die.net/man/3/pthread_key_create)
 
@@ -121,7 +127,7 @@ pkey_test: pkey_alloc: Invalid argument
 - if we are to use pkey to protect the call stack of each threads, 
 	+ how do we get the starting address of each stack
 	+ how do we get the size of each stack
-	+ after a new thread is created, the 
+	+ after a new thread is created, how to protect the memory region 
 
 ### measure vhive's function invocation time
 
