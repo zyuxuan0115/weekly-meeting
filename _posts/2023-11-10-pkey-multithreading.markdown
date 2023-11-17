@@ -33,6 +33,8 @@ Time spent on normal func call: 121 ns
 ```
 
 ### how does nightcore internal's OS pipe work
+![s2](/assets/2023-11-10/s2.png)
+
 - how nightcore internal call works
 	+ launcher writes message by calling [EngineConnection::WriteMessage()](https://github.com/zyuxuan0115/nightcore/blob/asplos-release/src/launcher/engine_connection.cpp#L73)
 		* in launcher's [EngineConnection::start()](https://github.com/zyuxuan0115/nightcore/blob/asplos-release/src/launcher/engine_connection.cpp#L23), event loop `uv_loop` is initialized to be either `pipe_handle` or `tcp_handle` 
@@ -51,7 +53,7 @@ Time spent on normal func call: 121 ns
 ### if nightcore transfers huge amount of data
 ![latency](/assets/2023-11-10/latency.png)
 
-### more documentations about pkey (Intel MPK)
+### more about pkey (Intel MPK)
 - [how to use pkey](https://www.kernel.org/doc/html/next/core-api/protection-keys.html)
 	+ Before a pkey can be used, it must first be allocated with `pkey_alloc()`. 
 	+ An application calls the WRPKRU instruction directly in order to change access permissions to memory covered with a key. 
@@ -64,7 +66,7 @@ int ret = pkey_mprotect(ptr, PAGE_SIZE, PROT_READ|PROT_WRITE, pkey);
 // ... application runs here
 ```
 
-- if the application needs to update the data at 'ptr', it can gain access, do the update, then remove its write access:
+- if the application needs to update the data at `ptr`, it can gain access, do the update, then remove its write access:
 
 ```c++
 pkey_set(pkey, 0); // clear PKEY_DISABLE_WRITE
@@ -106,6 +108,9 @@ pkey_test: pkey_alloc: Invalid argument
 		* looked into cloudlab's documentation to choose hardware on cloudlab [here](https://docs.cloudlab.us/hardware.html) that support pkey
 	+ Tried <strong>Intel skylake</strong> processor <strong>c6420</strong> and profile <strong>vhive-ubuntu20</strong>
 		* it supports pkey.
+- problem with Intel MPK and pkey
+	* the key is too simple
+	* the value of newly allocated pkey is 1,2,3,...,15
 
 - [pthread_key_create()](https://linux.die.net/man/3/pthread_key_create)
 
