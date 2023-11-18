@@ -118,8 +118,9 @@ pkey_test: pkey_alloc: Invalid argument
 	* the key is too simple
 	* the values of newly allocated pkeys are 1,2,3,...,15
 
-- [pthread_key_create()](https://linux.die.net/man/3/pthread_key_create)
-
+- Other isolation approach
+	+ [pthread_key_create()](https://linux.die.net/man/3/pthread_key_create)
+	+ [EPK](https://ipads.se.sjtu.edu.cn/_media/pub/members/2022_-_a_-_atc_-_epk.pdf)
 
 ### where the call stacks are in multithread programs
 ![s1](/assets/2023-11-10/s1.png)
