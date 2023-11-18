@@ -118,7 +118,7 @@ pkey_test: pkey_alloc: Invalid argument
 	* the key is too simple
 	* the values of newly allocated pkeys are 1,2,3,...,15
 
-- Other isolation approach
+- Other isolation approaches
 	+ [pthread_key_create()](https://linux.die.net/man/3/pthread_key_create)
 	+ [EPK](https://ipads.se.sjtu.edu.cn/_media/pub/members/2022_-_a_-_atc_-_epk.pdf)
 
