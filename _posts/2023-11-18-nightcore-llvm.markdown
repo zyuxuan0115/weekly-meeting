@@ -43,8 +43,7 @@ link from UTAustin [here](https://www.cs.utexas.edu/~pingali/CS380C/2020/assignm
 ```
 
 - in `nightcore/examples/c`
-  + `-g` adds general debug info to IR. 
-		* might be useful for identifying the virtual function call
+  + `-g` adds general debug info to IR. ( might be useful for identifying the virtual function call)
   
 ```bash
 > clang -I/proj/zyuxuanssf-PG0/nightcore/include -g -emit-llvm -S foo.c
@@ -57,6 +56,8 @@ link from UTAustin [here](https://www.cs.utexas.edu/~pingali/CS380C/2020/assignm
 		* [llvm.dbg.value](https://llvm.org/docs/SourceLevelDebugging.html#llvm-dbg-value)	
 		* [debug info assignment tracking](https://llvm.org/docs/AssignmentTracking.html): This intrinsic marks the position in IR where a source assignment occurred. It encodes the value of the variable.
 	+ why do we identify serverless function invocation in this way?
+		* because virtual function calls have no function name in LLVM IR
+			- [vtable](https://llvm.org/devmtg/2021-11/slides/2021-RelativeVTablesinC.pdf) again  
 		* because the format of function call invocation is fixed. 
 		* see [the nightcore code](https://github.com/ut-osa/nightcore/blob/asplos-release/include/faas/worker_v1_interface.h#L22)
 
@@ -109,4 +110,4 @@ typedef int (*faas_invoke_func_fn_t)(
 
 
 ### misc
-- [vtable](https://llvm.org/devmtg/2021-11/slides/2021-RelativeVTablesinC.pdf) again 
+
