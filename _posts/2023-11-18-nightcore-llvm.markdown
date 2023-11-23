@@ -108,6 +108,3 @@ typedef int (*faas_invoke_func_fn_t)(
 
 ### faster inter-thread synchronization
 
-
-### misc
-
