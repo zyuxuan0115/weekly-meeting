@@ -43,7 +43,8 @@ link from UTAustin [here](https://www.cs.utexas.edu/~pingali/CS380C/2020/assignm
 ```
 
 - in `nightcore/examples/c`
-  + `-g` adds general debug info to IR. might be useful for identify the virtual function call
+  + `-g` adds general debug info to IR. 
+		* might be useful for identifying the virtual function call
   
 ```bash
 > clang -I/proj/zyuxuanssf-PG0/nightcore/include -g -emit-llvm -S foo.c
@@ -96,9 +97,13 @@ typedef int (*faas_invoke_func_fn_t)(
 ```
 
 ### LLVM pass converts PRC into normal calls
-- [LLVM: how to create a call instruction](https://llvm.org/doxygen/classllvm_1_1CallInst.html)
-- [create new function in LLVM](https://stackoverflow.com/questions/17297109/create-new-function-in-llvm)
-- [my own code for creating functions to llvm](https://github.com/zyuxuan0115/cis573/blob/main/cis573lab11/src/Instrument.cpp)
+- Need to create a new function and a new call
+	+ create <strong>CallInst</strong>:
+		* [LLVM: how to create a call instruction](https://llvm.org/doxygen/classllvm_1_1CallInst.html)
+		* [my own code for creating functions to llvm](https://github.com/zyuxuan0115/cis573/blob/main/cis573lab11/src/Instrument.cpp)
+	+ create <strong>Function</strong>
+		* [create new function in LLVM](https://stackoverflow.com/questions/17297109/create-new-function-in-llvm)
+		* [stackoverflow: how to create a function in llvm](https://stackoverflow.com/questions/56099023/llvm-insert-function-call-into-another-function)
 
 ### faster inter-thread synchronization
 
