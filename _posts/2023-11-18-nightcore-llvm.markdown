@@ -60,6 +60,8 @@ link from UTAustin [here](https://www.cs.utexas.edu/~pingali/CS380C/2020/assignm
 			- [vtable](https://llvm.org/devmtg/2021-11/slides/2021-RelativeVTablesinC.pdf) again  
 		* because the format of function call invocation is fixed. 
 		* see [the nightcore code](https://github.com/ut-osa/nightcore/blob/asplos-release/include/faas/worker_v1_interface.h#L22)
+	+ useful links for 
+		* [how to get the FunctionType of a virtual function call](https://stackoverflow.com/questions/14811587/how-to-get-functiontype-from-callinst-when-call-is-indirect-in-llvm)
 
 ```c++
 typedef int (*faas_invoke_func_fn_t)(
@@ -103,8 +105,33 @@ typedef int (*faas_invoke_func_fn_t)(
 		* [LLVM: how to create a call instruction](https://llvm.org/doxygen/classllvm_1_1CallInst.html)
 		* [my own code for creating functions to llvm](https://github.com/zyuxuan0115/cis573/blob/main/cis573lab11/src/Instrument.cpp)
 	+ create <strong>Function</strong>
+		* The reason we need to create a new function is because we need a function with more arguments! 
 		* [create new function in LLVM](https://stackoverflow.com/questions/17297109/create-new-function-in-llvm)
 		* [stackoverflow: how to create a function in llvm](https://stackoverflow.com/questions/56099023/llvm-insert-function-call-into-another-function)
+		* from [stackoverflow](https://stackoverflow.com/questions/22494422/adding-an-argument-to-a-function-in-llvm), change the arguments of a function is tricky, the best way is to use `CloneFunctionInto` provided by LLVM
+			- [details](https://llvm.org/doxygen/namespacellvm.html#ac1b2be839460bb277d4f07f4aa5225ac) about `CloneFunctionInto` 
+			- [example of using CloneFunctionInto](https://stackoverflow.com/questions/16792357/using-clonefunctioninto-by-llvm)
+			- how [CloneFunctionInto](https://llvm.org/doxygen/Cloning_8h_source.html) is implemented in LLVM
+
+- In the new callee function, we need to copy the result back to the output buffer from  
+
+```c++
+int aaa(int* input) {
+  *input = 5;
+  return 1;
+}
+```
+
+```llvm
+ ; Function Attrs: noinline nounwind optnone uwtable
+ define i32 @aaa(i32* %0) #0 {
+   %2 = alloca i32*, align 8
+   store i32* %0, i32** %2, align 8
+   %3 = load i32*, i32** %2, align 8
+   store i32 5, i32* %3, align 4
+   ret i32 1
+ }
+```
 
 ### faster inter-thread synchronization
 
