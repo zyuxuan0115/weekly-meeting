@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "2023-11-18 nightcore & llvm"
+title:  "2023-11-18 llvm pass for merging serverless functions"
 date:   2023-11-18 1:53:46 -0500
 categories: serverless functions
 ---
