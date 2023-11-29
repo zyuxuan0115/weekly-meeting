@@ -18,6 +18,15 @@ categories: serverless functions
 		* using `libunwind` to get the function caller info from the call stack.
 
 ### understand how nightcore's external call works
+- about `rsync`
+	+ `rsync` is a program that behaves in much the same way that rcp does, but has many more options and uses the `rsync` remote-update protocol to greatly speed up file transfers when the destination file is being updated.
+	+ The `rsync` remote-update protocol allows rsync to transfer just the differences between two sets of files across the network connection, using an efficient checksum-search algorithm described in the technical report that accompanies this package.
+
+- about `NGINX`
+	+ `NGINX` is open source software for web serving, reverse proxying, caching, load balancing, media streaming, and more. It started out as a web server designed for maximum performance and stability.
+
+- more about `docker build`
+	+ 
 
 ### measure vhive’s function invocation time
 
@@ -116,7 +125,7 @@ typedef int (*faas_invoke_func_fn_t)(
 - In the new callee function, we need to copy the result back to the output buffer from  
 
 ```c++
-int aaa(int* input) {
+int test(int* input) {
   *input = 5;
   return 1;
 }
@@ -124,7 +133,7 @@ int aaa(int* input) {
 
 ```llvm
  ; Function Attrs: noinline nounwind optnone uwtable
- define i32 @aaa(i32* %0) #0 {
+ define i32 @test(i32* %0) #0 {
    %2 = alloca i32*, align 8
    store i32* %0, i32** %2, align 8
    %3 = load i32*, i32** %2, align 8
