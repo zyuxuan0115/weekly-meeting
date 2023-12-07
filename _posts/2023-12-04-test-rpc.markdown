@@ -80,8 +80,7 @@ private:
 	+ another thing to be noticed
 		* in unique ID's serverless function, [faas_worker->SetProcessor()](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/UniqueIdService/UniqueIdService.cpp#L56) also pass the callee function `compose post` as an argument 
 
-#### things to compile
-- based on the `Unique ID`, to generate the `libUniqueIdService.so`, we need at least the following files
+- <a name="things-to-compile">based</a> on the `Unique ID`, to generate the `libUniqueIdService.so`, we need at least the following files
 	+ `src/UniqueIdService/UniqueIdService.cpp`
 	+ `src/UniqueIdService/UniqueIdHandler.h`
 	+ `src/FaasWorker.h`
