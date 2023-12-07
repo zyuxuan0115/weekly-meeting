@@ -6,12 +6,12 @@ categories: serverless functions
 ---
 ### From nightcore's C++ workloads
 - I made both `movieReview` and `socialNetwork` work on cloudlab machines 
-- I checked if the `movieReview` workload contains the invocation `invoke_func_fn` 
+- I checked if the `socialNetwork` workload contains the invocation `invoke_func_fn` 
 	+ only nightcore [FaasWorker.h](https://github.com/zyuxuan0115/nightcore-test/blob/main/moviereview_singlenode/DeathStarBench/mediaMicroservices/src/FaasWorker.h) contains [invoke_func_fn_](https://github.com/zyuxuan0115/nightcore-test/blob/main/moviereview_singlenode/DeathStarBench/mediaMicroservices/src/FaasWorker.h)
 
-![s1](/assets/2023-11-29/S1.png)
+![s1](/assets/2023-12-06/s1.png)
 
-- I also check `socialNetwork` workload and it shows the same result.
+- I also check `movieReview` workload and it shows the same result.
 
 ```cpp
 class ClientTransport : public apache::thrift::transport::TVirtualTransport<ClientTransport> {
@@ -57,21 +57,47 @@ private:
 };
 ```
 
-- will there be any other ways for nightcore to call another serverless function?
+- almost all the serverless functions invoke `flush()`.
+
+![s2](/assets/2023-12-06/s2.png)
 
 - also, in real workloads, the way how one serverless function is declared is different from the sample code
 	+ For example in [MovieReviewService.cpp](https://github.com/zyuxuan0115/nightcore-test/blob/main/moviereview_singlenode/DeathStarBench/mediaMicroservices/src/MovieReviewService/MovieReviewService.cpp)
 
 
 
-### How many times does the RPC being invoked
+### The call graph of the socialNetwork workload
+![call_graph](/assets/2023-12-06/socialNet_arch.png)
+
+- example: `Unique ID` only calls `Compose Post`
+	+ in UniqueIdService's `faas_create_func_worker`, it calls [faas_worker->SetProcessor()](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/UniqueIdService/UniqueIdService.cpp#L56)
+		* it sets the processor to be [UniqueIdServiceProcessor](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/gen-cpp/UniqueIdService.h#L212) which takes a [UniqueIdHandler](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/UniqueIdService/UniqueIdHandler.h#L50) as argument.
+		* this means the serverless function to be processed is `Unique ID service`
+	+ then in `faas_func_call`, it calls [faas_worker->Process()](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/UniqueIdService/UniqueIdService.cpp#L72)
+		* in `class FaasWorker`'s [Process()](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/FaasWorker.h#L35) function, `Processor->Process()` will be called. 
+	+ the `faas_worker->SetProcessor` and `faas_worker->Process` functions are both in [FaasWorker.h](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/FaasWorker.h) 
+		* <strong>my guess</strong>: [process_UploadUniqueId()](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/gen-cpp/UniqueIdService.cpp#L342) in `UniqueIdServiceProcessor` class is the function that override `Processor->Precess()`
+	+ another thing to be noticed
+		* in unique ID's serverless function, [faas_worker->SetProcessor()](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/UniqueIdService/UniqueIdService.cpp#L56) also pass the callee function `compose post` as an argument 
+
+- based on the `Unique ID`, when we generate the `libUniqueIdService.so`, we need at least the following files
+	+ `src/UniqueIdService/UniqueIdService.cpp`
+	+ `src/UniqueIdService/UniqueIdHandler.h`
+	+ `src/FaasWorker.h`
+	+ `gen-cpp/UniqueIdService.cpp`
+	+ `gen-cpp/UniqueIdService.h`
+
+
+### make the compilation of SocialNetwork workloads work
 - unfortunately the serverless functions are compiled by `CMake`
 	+ we are using `clang` + `opt`, so we need to convert CMake to normal shell commands.
-	+ [the tutorial for cmake](https://www.internalpointers.com/post/modern-cmake-beginner-introduction)
+	+ <strong>[the tutorial for cmake](https://www.internalpointers.com/post/modern-cmake-beginner-introduction)</strong>
 	+ to run cmake, we need to install several dependencies:
-		* [mongo-c-driver](git clone https://github.com/mongodb/mongo-c-driver.git)
-		* `nlohmann-json3-dev` (the c++ json parser)
-			* `sudo apt-get install nlohmann-json3-dev`
-		* [amqpcpp](https://github.com/CopernicaMarketingSoftware/AMQP-CPP)
+		* <strong>from this [link](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/docker/cpp-microservice-deps/Dockerfile)</strong>
+		* `nlohmann-json3-dev` (the c++ json parser): `sudo apt-get install nlohmann-json3-dev`
 		* `boost library`: `sudo apt-get install libboost-all-dev`
-### 
+		* also the `#include <memory>` & `#include <string_view>` in the workloads require adding `-std=c++17` to the makefile
+	+ consider the `unique ID service`
+		* this is its [CMakeList.txt](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/UniqueIdService/CMakeLists.txt)
+
+
