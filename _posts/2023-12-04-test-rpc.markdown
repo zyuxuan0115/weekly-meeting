@@ -80,7 +80,8 @@ private:
 	+ another thing to be noticed
 		* in unique ID's serverless function, [faas_worker->SetProcessor()](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/UniqueIdService/UniqueIdService.cpp#L56) also pass the callee function `compose post` as an argument 
 
-- <a name="files"></a>based on the `Unique ID`, to generate the `libUniqueIdService.so`, we need at least the following files
+#### things to compile
+- based on the `Unique ID`, to generate the `libUniqueIdService.so`, we need at least the following files
 	+ `src/UniqueIdService/UniqueIdService.cpp`
 	+ `src/UniqueIdService/UniqueIdHandler.h`
 	+ `src/FaasWorker.h`
@@ -100,6 +101,6 @@ private:
 		* also the `#include <memory>` & `#include <string_view>` in the workloads require adding `-std=c++17` to the makefile
 - consider compiling `unique ID service`
 	+ this is its [CMakeList.txt](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/UniqueIdService/CMakeLists.txt)
-	+ previously we have [6 files](#files) that must be compiled in order to generate `libUniqueIdService.so`
+	+ previously we have [6 files](#things-to-compile) that must be compiled in order to generate `libUniqueIdService.so`
 
 
