@@ -105,9 +105,21 @@ private:
 		* how does clang convert functions in `.h` file into IR?
 		* I tested a simple example
 
+- the structure of the files
+
+```bash
+test
+├── build1.sh
+├── header
+│   ├── header.h
+│   └── main
+│       └── main.c
+├── header1.h
+```
+
+
 ```c
-#include "header.h"
-#include <stdio.h>
+#include "../header.h"
 int main(){
   int num = 1965;
   if (isEvenNum(num)) printf("%d is a even number\n", num);
@@ -120,24 +132,43 @@ int main(){
 
 ```c
 #include <stdbool.h>
+#include "../header1.h"
 bool isEvenNum(int num){
-  if (num%2==1) return true;
+  if (num%2==0){ printThings(); return true;}
   else return false;
 }
 ```
 
-compile it with `clang -fPIC -emit-llvm -S main.c -c -o main.ll`
+- and its header
 
-- the output `main.ll` contains both `main` and `isEvenNum`
+```c
+#include <stdio.h>
+void printThings(){
+  printf("it's an even number\n");
+}
+```
+
+compile it with `clang -fPIC -emit-llvm -S header/main/main.c -c -o main.ll`
+
+- the output `main.ll` contains `main`, `isEvenNum` and `printThings`
 
 ```llvm
-; ModuleID = 'main.c'
-source_filename = "main.c"
+; ModuleID = 'header/main/main.c'
+source_filename = "header/main/main.c"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-unknown-linux-gnu"
 
-@.str = private unnamed_addr constant [21 x i8] c"%d is a even number\0A\00", align 1
-@.str.1 = private unnamed_addr constant [25 x i8] c"%d is not a even number\0A\00", align 1
+@.str = private unnamed_addr constant [20 x i8] c"find a even number\0A\00", align 1
+@.str.1 = private unnamed_addr constant [21 x i8] c"%d is a even number\0A\00", align 1
+@.str.2 = private unnamed_addr constant [25 x i8] c"%d is not a even number\0A\00", align 1
+
+; Function Attrs: noinline nounwind optnone uwtable
+define void @printThings() #0 {
+  %1 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @.str, i64 0, i64 0))
+  ret void
+}
+
+declare i32 @printf(i8*, ...) #1
 
 ; Function Attrs: noinline nounwind optnone uwtable
 define zeroext i1 @isEvenNum(i32 %0) #0 {
@@ -150,6 +181,7 @@ define zeroext i1 @isEvenNum(i32 %0) #0 {
   br i1 %6, label %7, label %8
 
 7:                                                ; preds = %1
+  call void @printThings()
   store i1 true, i1* %2, align 1
   br label %9
 
@@ -174,17 +206,25 @@ define i32 @main() #0 {
 
 5:                                                ; preds = %0
   %6 = load i32, i32* %2, align 4
-  %7 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([21 x i8], [21 x i8]* @.str, i64 0, i64 0), i32 %6)
+  %7 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([21 x i8], [21 x i8]* @.str.1, i64 0, i64 0), i32 %6)
   br label %11
 
 8:                                                ; preds = %0
   %9 = load i32, i32* %2, align 4
-  %10 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([25 x i8], [25 x i8]* @.str.1, i64 0, i64 0), i32 %9)
+  %10 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([25 x i8], [25 x i8]* @.str.2, i64 0, i64 0), i32 %9)
   br label %11
 
 11:                                               ; preds = %8, %5
   ret i32 0
 }
-
-declare i32 @printf(i8*, ...) #1
 ```
+
+- this case show that if the `#include <some header>`'s path is correct, the functions in header files will also be compiled into IR.
+
+- now let's take a look at the relationship of `UniqueIdService` with `FaasWorker`
+	+ in [src/UniqueIdService/UniqueIdService.cpp](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/UniqueIdService/UniqueIdService.cpp#L16), it includes [src/UniqueIdService/UniqueIdHandler.h](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/UniqueIdService/UniqueIdHandler.h) 
+	+ in [src/UniqueIdService/UniqueIdHandler.h](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/UniqueIdService/UniqueIdHandler.h), it includes [src/ClientiPool.h](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/UniqueIdService/UniqueIdHandler.h#L19)
+	+ in [src/ClientPool.h](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/ClientPool.h), it includes [src/FaasWorker.h](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/FaasWorker.h)
+
+- so, the IR code of `parent_->invoke_func_fn_` must also be in the address space
+	+ and we can replace it 
