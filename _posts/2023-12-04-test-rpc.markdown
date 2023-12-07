@@ -80,13 +80,14 @@ private:
 	+ another thing to be noticed
 		* in unique ID's serverless function, [faas_worker->SetProcessor()](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/UniqueIdService/UniqueIdService.cpp#L56) also pass the callee function `compose post` as an argument 
 
-- based on the `Unique ID`, when we generate the `libUniqueIdService.so`, we need at least the following files
+- <a name="files"></a>based on the `Unique ID`, to generate the `libUniqueIdService.so`, we need at least the following files
 	+ `src/UniqueIdService/UniqueIdService.cpp`
 	+ `src/UniqueIdService/UniqueIdHandler.h`
 	+ `src/FaasWorker.h`
 	+ `gen-cpp/UniqueIdService.cpp`
 	+ `gen-cpp/UniqueIdService.h`
-
+	+ `gen-cpp/ComposePostService.cpp`
+	+ `gen-cpp/ComposePostService.h`
 
 ### make the compilation of SocialNetwork workloads work
 - unfortunately the serverless functions are compiled by `CMake`
@@ -97,7 +98,8 @@ private:
 		* `nlohmann-json3-dev` (the c++ json parser): `sudo apt-get install nlohmann-json3-dev`
 		* `boost library`: `sudo apt-get install libboost-all-dev`
 		* also the `#include <memory>` & `#include <string_view>` in the workloads require adding `-std=c++17` to the makefile
-	+ consider the `unique ID service`
-		* this is its [CMakeList.txt](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/UniqueIdService/CMakeLists.txt)
+- consider compiling `unique ID service`
+	+ this is its [CMakeList.txt](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/UniqueIdService/CMakeLists.txt)
+	+ previously we have [6 files](#files) that must be compiled in order to generate `libUniqueIdService.so`
 
 
