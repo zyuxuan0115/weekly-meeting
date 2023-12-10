@@ -69,6 +69,10 @@ private:
 ### The call graph of the socialNetwork workload
 ![call_graph](/assets/2023-12-06/socialNet_arch.png)
 
+- [Apache Thrift](https://thrift.apache.org/)
+	+ Apache Thrift allows you to define data types and service interfaces in a simple definition file. Taking that file as input, the compiler generates code to be used to easily build RPC clients and servers that communicate seamlessly across programming languages.
+  + the [code](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/gen-cpp/UniqueIdService.cpp#L2) in nightcore workload
+
 - example: `Unique ID` only calls `Compose Post`
 	+ in UniqueIdService's `faas_create_func_worker`, it calls [faas_worker->SetProcessor()](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/UniqueIdService/UniqueIdService.cpp#L56)
 		* it sets the processor to be [UniqueIdServiceProcessor](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/gen-cpp/UniqueIdService.h#L212) which takes a [UniqueIdHandler](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/UniqueIdService/UniqueIdHandler.h#L50) as argument.
@@ -88,6 +92,8 @@ private:
 	+ `gen-cpp/UniqueIdService.h`
 	+ `gen-cpp/ComposePostService.cpp`
 	+ `gen-cpp/ComposePostService.h`
+	+ `gen-cpp/social_network_types.cpp` (required by `gen-cpp/UniqueIdService.h`)
+	+ `gen-cpp/social_network_types.h` (required by `gen-cpp/UniqueIdService.h`)
 
 ### make the compilation of SocialNetwork workloads work
 - unfortunately the serverless functions are compiled by `CMake`
@@ -105,7 +111,7 @@ private:
 		* how does clang convert functions in `.h` file into IR?
 		* I tested a simple example
 
-- the structure of the files
+- the structure of the files and directory
 
 ```bash
 test
@@ -117,6 +123,7 @@ test
 ├── header1.h
 ```
 
+- `main.c`
 
 ```c
 #include "../header.h"
@@ -128,7 +135,7 @@ int main(){
 }
 ```
 
-- and its header
+- and its header `header.h`
 
 ```c
 #include <stdbool.h>
@@ -139,7 +146,7 @@ bool isEvenNum(int num){
 }
 ```
 
-- and its header
+- and its header `header1.h`
 
 ```c
 #include <stdio.h>
@@ -227,4 +234,18 @@ define i32 @main() #0 {
 	+ in [src/ClientPool.h](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/ClientPool.h), it includes [src/FaasWorker.h](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/FaasWorker.h)
 
 - so, the IR code of `parent_->invoke_func_fn_` must also be in the address space
-	+ and we can replace it 
+	+ and once we figure out which function is `invoke_func_fn`,  we can replace it with the normal function call
+
+
+### Using LLVM pass to detect invoke_func_fn 
+- we can tell the `invoke_func_fn` is in the address space.
+	+ the mangled function name is `_ZN10FaasWorker15ClientTransport5flushEv`, and in this function, `invoke_func_fn` is invoked
+
+![s3](/assets/2023-12-06/s3.png)
+
+### if we are to merge UniqueId & ComposePost
+- we first need to get a list of functions symbols that occur in both `libUniqueIdService.so` and `libComposePostService.so`
+	+ `_ZN14social_network11init_loggerEv`: src/logger.h
+	+ `_ZN14social_network16load_config_fileERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPN8nlohmann10basic_jsonISt3mapSt6vectorS5_blmdSaNS8_14adl_serializerEEE`: src/utils.h 
+	+ `_ZN14social_network11load_configEPN8nlohmann10basic_jsonISt3mapSt6vectorNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEblmdSaNS0_14adl_serializerEEE`: src/logger.h
+	+ `_ZN14social_network11SetUpTracerERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_`: src/tracing.h
