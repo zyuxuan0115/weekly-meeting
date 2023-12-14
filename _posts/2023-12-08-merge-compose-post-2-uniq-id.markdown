@@ -4,6 +4,36 @@ title:  "2023-12-08 Merge UniqID+ComposePost"
 date:   2023-12-08 1:53:46 -0500
 categories: serverless functions
 ---
+### Call graph of socialNetwork
+
+![socialNetwork](/assets/2023-12-08/socialNet_arch.png)
+
+### Steps to merge to serverless functions
+
+![diagram](/assets/2023-12-08/diagram.png)
+
+- an example
+
+```bash
+# compile the code into LLVM IR
+clang -I$NIGHTCORE_PATH/include -fPIC -emit-llvm -S $NIGHTCORE_PATH/examples/c_merge/foo.c -c -o foo.ll
+clang -I$NIGHTCORE_PATH/include -fPIC -emit-llvm -S $NIGHTCORE_PATH/examples/c_merge/bar.c -c -o bar.ll
+
+# change function name "faas_func_call" in bar to be "faas_func_callee"
+# also delete "faas_init", "faas_create_func_worker" and "faas_destroy_func_worker"
+opt -load $LLVM_PATH/build/lib/LLVMMergeFunc.so -enable-new-pm=0 -ChangeFuncName bar.ll -S -o bar_only.ll
+
+# merge "faas_func_callee" into foo's address space
+llvm-link foo.ll bar_only.ll -o foo_rpc_bar.ll -S
+
+# change the "faas_func_callee" to be "Bar" (normal function call)
+opt -load $LLVM_PATH/build/lib/LLVMMergeFunc.so -S -enable-new-pm=0 -o foo_bar.ll -MergeFunc < foo_rpc_bar.ll
+
+# finally generate obj of libfoo and link the .obj file
+llc -filetype=obj -relocation-model=pic foo_bar.ll -o libfoo.o
+clang -shared -fPIC -O2 -I../../include libfoo.o -o libfoo.so 
+```
+
 ### Duplication of functions in Caller and Callee address space
 - a list of functions symbols that occur in both `libUniqueIdService.so` and `libComposePostService.so`
 	+ there are <strong>6,395</strong> functions in `UniqueIdService` in total
@@ -31,28 +61,39 @@ categories: serverless functions
 
 
 ### Remove redundant functions 
+
+![rename](/assets/2023-12-08/rename.png)
+
 - How to decide which functions should be removed? 
 	+ check the file name of the function
 		* all functions from `src/logger.h`, `src/tracing.h`, `src/utils.h` have a possibility to have a duplicated version in callee.
 		* mark all functions from `src/logger.h`, `src/tracing.h`, `src/utils.h`
 	+ How to check the source file name of a function at IR level
-		* LLVM's general debug info
-		* some useful tutorial for LLVM's source 
+		* LLVM's general debug info `-g`
+		* some useful tutorial for accessing LLVM's general debug info at IR level
 			* [here](https://github.com/zyuxuan0115/misc-2023-11-20/blob/main/dmon/llvm-passes/selective-prefetch/Prefetch.cpp#L254) is how DMon read debug info from LLVM's optimization pass
 			* [How to strip off debug info in llvm IR](https://discourse.llvm.org/t/how-to-strip-off-metadata-debugging-information/70201)
 
+- Instead remove the redundant functions, annotate them
+	+ by changing their function name to be `<original_func_name>_redundant`
+	+ why not delete them?
+		* because they might have caller functions
 
-- when deleting a function, we also need to check if there is any caller functions
+![delete](/assets/2023-12-08/remove.png)
+
+- when deleting a function, the call instruction in the corresponding caller function should also be changed
 	+ From [how to get caller function of a function](https://discourse.llvm.org/t/how-to-get-the-caller-functions-of-a-function-in-llvm/61830), we can build a call graph
 	+ [an example](https://stackoverflow.com/questions/45073555/llvm-callgraphnode-giving-incorrect-function-name) of building a call graph		
 	+ [LLVM call graph class](https://llvm.org/doxygen/classllvm_1_1CallGraphNode.html) 
 
+![call](/assets/2023-12-08/call.png)
+
+
+### Merge Serverless functions
 - the next thing is to add if statement before the invocation of the serverless function
  
 - the function name of callee is: `ComposePostService`
 	+ I got it from [here](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/src/UniqueIdService/UniqueIdService.cpp#L52)
-
-`_ZN10FaasWorker7ProcessEPKcm`
 
 ```llvm
 ; Function Attrs: mustprogress noinline nounwind optnone uwtable
