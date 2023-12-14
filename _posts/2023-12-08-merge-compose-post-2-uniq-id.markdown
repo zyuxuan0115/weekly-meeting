@@ -90,6 +90,28 @@ clang -shared -fPIC -O2 -I../../include libfoo.o -o libfoo.so
 
 
 ### Merge Serverless functions
+- There are 3 functions that needs to be merged: `faas_init`, `faas_create_func_worker`, `faas_destroy_func_worker`
+- There is 1 function that acts as both the caller and the callee: `faas_func_call`
+	+ e.g. in `foo`'s address space `faas_func_call` calls another `faas_func_call` in `bar`'s address space
+
+
+#### (1) 3 functions that needs to be merged
+
+- both serverless functions (caller: `UniqID`, callee: `composePost`) have the same `faas_destroy_func_worker`
+  + finally we will only have 1 `faas_worker` for the merged serverless function
+	+ one of the `faas_destroy_func_worker`s can be deleted. (we don't need to free the `faas_worker` twice)
+
+```c++
+int faas_destroy_func_worker(void* worker_handle) {
+    FaasWorker* faas_worker = reinterpret_cast<FaasWorker*>(worker_handle);
+    delete faas_worker;
+    return 0;
+}
+```
+
+- 
+
+
 - the next thing is to add if statement before the invocation of the serverless function
  
 - the function name of callee is: `ComposePostService`
