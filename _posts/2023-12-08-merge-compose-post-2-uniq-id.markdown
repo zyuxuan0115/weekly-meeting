@@ -111,6 +111,7 @@ int faas_destroy_func_worker(void* worker_handle) {
 
 - 
 
+composePost function name `ComposePostService`
 
 - the next thing is to add if statement before the invocation of the serverless function
  
@@ -326,6 +327,75 @@ define linkonce_odr zeroext i1 @_ZN10FaasWorker7ProcessEPKcm(%class.FaasWorker* 
 ```
 %53 = invoke zeroext i1 %52(%"class.apache::thrift::TProcessor"* nonnull align 8 dereferenceable(24) %30, %"class.std::shared_ptr.70"* %8, %"class.std::shared_ptr.70"* %12, i8 * null)
 ```
+
+#### RPC invocation
+
+- original code is [here](https://github.com/zyuxuan0115/nightcore-test/blob/main/socialnetwork_singlenode/DeathStarBench/socialNetwork/src/FaasWorker.h#L138)
+
+```c++
+void flush() override {
+  uint8_t* data;
+  uint32_t data_length;
+  out_buf_.getBuffer(&data, &data_length);
+  const char* output;
+  size_t output_length;
+
+  fprintf(stderr, "@@@ %s\n", func_name_.c_str());
+  // the function name being printed here is "ComposePostService"
+
+  if (parent_->invoke_func_fn_(parent_->caller_context_, func_name_.c_str(),
+                               reinterpret_cast<const char*>(data),
+                               static_cast<size_t>(data_length),
+                               &output, &output_length) != 0) {
+    throw apache::thrift::transport::TTransportException(
+    apache::thrift::transport::TTransportException::UNKNOWN, "invoke_func call failed");
+  }
+  out_buf_.resetBuffer();
+  in_buf_.resetBuffer(reinterpret_cast<uint8_t*>(const_cast<char*>(output)),
+  static_cast<uint32_t>(output_length));
+}
+```
+
+- after we change the code it should be like this
+
+```c++
+void flush() override {
+  uint8_t* data;
+  uint32_t data_length;
+  out_buf_.getBuffer(&data, &data_length);
+  const char* output;
+  size_t output_length;
+
+  if (func_name_ != "ComposePostService"){
+    if (parent_->invoke_func_fn_(parent_->caller_context_, func_name_.c_str(),
+                                 reinterpret_cast<const char*>(data),
+                                 static_cast<size_t>(data_length),
+                                 &output, &output_length) != 0) {
+      throw apache::thrift::transport::TTransportException(
+      apache::thrift::transport::TTransportException::UNKNOWN, "invoke_func call failed");
+    }
+  }
+  else {
+    // normal function call of composePostService
+  }
+  out_buf_.resetBuffer();
+  in_buf_.resetBuffer(reinterpret_cast<uint8_t*>(const_cast<char*>(output)),
+  static_cast<uint32_t>(output_length));
+}
+```
+
+#### RPC return
+
+- the code is [here](https://github.com/zyuxuan0115/nightcore-test/blob/main/socialnetwork_singlenode/DeathStarBench/socialNetwork/src/FaasWorker.h#L102)
+
+```c++
+void write(const uint8_t* buf, uint32_t len) {
+  parent_->append_output_fn_(
+           parent_->caller_context_,
+           reinterpret_cast<const char*>(buf), static_cast<size_t>(len));
+}
+```
+
 
 ### Some useful LLVM tutorial (might be useful later)
 - things about [GetElementPtr](https://llvm.org/docs/GetElementPtr.html) 
