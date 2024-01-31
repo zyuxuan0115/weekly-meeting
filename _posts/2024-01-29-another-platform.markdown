@@ -32,7 +32,12 @@ categories: serverless functions
 		* `lwRestrict` change the permission of the root lwc, so the root lwc won't have access to A's lwc.
 		* <strong>in the same way create function B's lwc</strong>
 	+ on thing that need us to pay attention is
-		* we need to use ``			 
+		* we need to use `lwRestrict` and `lwOverlay` to change the permission of memory region that stores the arguments we want to pass from A to B. 			 
+
+### CHERI paper
+- [paper](https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/201505-oakland2015-cheri-compartmentalization.pdf)
+- we cannot use the things mentioned in CHERI even if they really build something that can help with with the isolation issue.
+	+ they build the hardware on FPGA. That is not a core in reality.
 
 ### Do we have to be faster than nightcore?
 - nightcore requires all containers to be running on the same machine
