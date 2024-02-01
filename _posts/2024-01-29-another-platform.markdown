@@ -14,7 +14,7 @@ categories: serverless functions
 - performance overhead is 67% for SPEC benchmark suite. 
 	+ however, I don't think the overhead for serverless functions is as high as SPEC benchmarks.
 	+ [SPEC benchmark suite](https://www.spec.org/cpu2017/Docs/overview.html#suites)
-- works only with LLVM 2.4 (a very old version)
+- works only with LLVM 3.4 (a very old version)
 
 ### Light-weight contexts
 - [paper](https://www.usenix.org/system/files/conference/osdi16/osdi16-litton.pdf) / [webpage](https://www.cs.umd.edu/projects/lwc/)
