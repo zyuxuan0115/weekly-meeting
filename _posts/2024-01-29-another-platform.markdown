@@ -30,11 +30,14 @@ categories: serverless functions
 		* `if caller != -1 then run function call A`
 		* erase the sensitive data in A
 		* `lwRestrict` change the permission of the root lwc, so the root lwc won't have access to A's lwc.
+		* then in the for loop
+			- lwSwitch to A' lwc
+			- lwSwitch to B' lwc
 		* <strong>in the same way create function B's lwc</strong>
 	+ on thing that need us to pay attention is
-		* we need to use `lwRestrict` and `lwOverlay` to change the permission of memory region that stores the arguments we want to pass from A to B. 			 
+		* we need to use `lwRestrict` or `lwOverlay` to change the permission of memory region that stores the arguments we want to pass from A to B. 			 
 
-### CHERI paper
+### CHERI (architecture) paper
 - [paper](https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/201505-oakland2015-cheri-compartmentalization.pdf)
 - we cannot use the things mentioned in CHERI even if they really build something that can help with with the isolation issue.
 	+ they build the hardware on FPGA. That is not a core in reality.
