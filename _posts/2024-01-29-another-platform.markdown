@@ -17,7 +17,7 @@ categories: serverless functions
 - works only with LLVM 2.4 (a very old version)
 
 ### Light-weight contexts
-- [paper](https://www.usenix.org/system/files/conference/osdi16/osdi16-litton.pdf)
+- [paper](https://www.usenix.org/system/files/conference/osdi16/osdi16-litton.pdf) / [webpage](https://www.cs.umd.edu/projects/lwc/)
 	+ I like the idea of the paper but they only implemented lwc in FreeBSD.
 		* you have to make sure your container's system is FreeBSD + lwc
 - an example of the isolation of sensitive data
