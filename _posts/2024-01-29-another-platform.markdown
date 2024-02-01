@@ -47,4 +47,17 @@ categories: serverless functions
 	+ nightcore never resolves the function cold start issue
 	+ the function cold start issue is a larger issue compared with RPC overhead
 
-### Thoughts about mucache
+### Thoughts about MuCache
+- MuCache
+	+ Wrapper
+		* readset (per service)
+			- request identifier : keys of data store within the request + call argument
+		* per-request context 
+			- the id of the request
+			- the hash value of the request’s arguments 
+			- the caller of the request
+			- visited services of the request and its subrequests
+				+ what is a subrequest?
+				+ how large could it be?
+			- whether the current request is read-only	
+	+ Cache Manager
