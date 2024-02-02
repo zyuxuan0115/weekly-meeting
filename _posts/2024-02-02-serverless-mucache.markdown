@@ -54,3 +54,4 @@ categories: serverless functions
 - things could be profiled and tuned
 	+ ![d2](/assets/2024-01-29/d2.png)
 	+ (3) use cache eviction rate to decide whether the current size of the cache is good enough
+	+ (4) for the cache replacement policy, there is another [paper](https://cachemon.github.io/SIEVE-website/blog/2023/12/17/sieve-is-simpler-than-lru/)
