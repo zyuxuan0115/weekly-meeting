@@ -6,8 +6,9 @@ categories: serverless functions
 ---
 
 ### Other C++ serverless platform
+We don't need the FaaS runtime written in C/C++, we only need the serverless functions written in C/C++
 - [google functions framework C++](https://github.com/GoogleCloudPlatform/functions-framework-cpp)
-- also, we don't need the FaaS runtime written in C/C++, we only need the serverless functions written in C/C++
+- [openfaas](https://github.com/openfaas)
 
 ### SoftBound paper
 - [paper](https://llvm.org/pubs/2009-06-PLDI-SoftBound.pdf) / [github repo](https://github.com/santoshn/softboundcets-34)
