@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "2024-02-02 outline + other FaaS platform + MuCache"
-date:   2024-01-29 1:53:46 -0500
+title:  "2024-02-02 FaaS + MuCache"
+date:   2024-02-02 1:53:46 -0500
 categories: serverless functions
 ---
 
@@ -11,15 +11,9 @@ categories: serverless functions
 
 ### SoftBound paper
 - [paper](https://llvm.org/pubs/2009-06-PLDI-SoftBound.pdf) / [github repo](https://github.com/santoshn/softboundcets-34)
-- performance overhead is 67% for SPEC benchmark suite. 
-	+ however, I don't think the overhead for serverless functions is as high as SPEC benchmarks.
-	+ [SPEC benchmark suite](https://www.spec.org/cpu2017/Docs/overview.html#suites)
-- works only with LLVM 3.4 (a very old version)
 
 ### Light-weight contexts
 - [paper](https://www.usenix.org/system/files/conference/osdi16/osdi16-litton.pdf) / [webpage](https://www.cs.umd.edu/projects/lwc/)
-	+ I like the idea of the paper but they only implemented lwc in FreeBSD.
-		* you have to make sure your container's system is FreeBSD + lwc
 - an example of the isolation of sensitive data
 ![s1](/assets/2024-01-29/s1.png)
 - how do we use lwc to guarantee `isolation` when merging serverless func?
