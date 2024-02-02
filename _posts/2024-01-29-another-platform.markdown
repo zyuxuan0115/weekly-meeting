@@ -54,6 +54,7 @@ categories: serverless functions
 			- request identifier : keys of data store within the request + call argument
 		* per-request context 
 			- the id of the request
+				+ if 2 requests from the RPC in a service, will they have different id?
 			- the hash value of the request’s arguments 
 			- the caller of the request
 			- visited services of the request and its subrequests
@@ -61,3 +62,5 @@ categories: serverless functions
 				+ how large could it be?
 			- whether the current request is read-only	
 	+ Cache Manager
+- the diagram
+	+ ![d1](/assets/2024-01-29/d1.png)
