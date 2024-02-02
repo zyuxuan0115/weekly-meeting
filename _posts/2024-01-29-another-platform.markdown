@@ -31,8 +31,8 @@ categories: serverless functions
 		* erase the sensitive data in A
 		* `lwRestrict` change the permission of the root lwc, so the root lwc won't have access to A's lwc.
 		* then in the for loop
-			- lwSwitch to A' lwc
-			- lwSwitch to B' lwc
+			- lwSwitch to A's lwc
+			- lwSwitch to B's lwc
 		* <strong>in the same way create function B's lwc</strong>
 	+ on thing that need us to pay attention is
 		* we need to use `lwRestrict` or `lwOverlay` to change the permission of memory region that stores the arguments we want to pass from A to B. 			 
@@ -63,4 +63,9 @@ categories: serverless functions
 			- whether the current request is read-only	
 	+ Cache Manager
 - the diagram
-	+ ![d1](/assets/2024-01-29/d1.png)
+![d1](/assets/2024-01-29/d1.png)
+- things could be profiled and tuned
+	+ ![d2](/assets/2024-01-29/d2.png)
+	+ (3) use cache eviction rate to decide whether the current size of the cache is good enough
+- a question about the call graph
+	+ since the services are distributed on different machines, how do you get the centralized call graph? 
