@@ -54,5 +54,3 @@ categories: serverless functions
 - things could be profiled and tuned
 	+ ![d2](/assets/2024-01-29/d2.png)
 	+ (3) use cache eviction rate to decide whether the current size of the cache is good enough
-- a question about the call graph
-	+ since the services are distributed on different machines, how do you get the centralized call graph? 
