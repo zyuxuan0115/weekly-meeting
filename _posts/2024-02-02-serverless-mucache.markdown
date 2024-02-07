@@ -39,7 +39,10 @@ context->append_output_fn(context->caller_context,
 
 - [ironFunction](https://github.com/iron-io)
 	+ [run IronFunction as a scheduler on top of Docker Standalone Swarm cluster](https://github.com/iron-io/functions/tree/master/docs/operating/docker-swarm)
+	+ [Protect the Docker daemon socket](https://docs.docker.com/engine/security/protect-access/)
+		* that's why we need to set `DOCKER_TLS_VERIFY`, `DOCKER_HOST`, `DOCKER_CERT_PATH` etc. 
 	+ the nice thing of `ironFunction`
+		* it convert the user request into `STDIN`, and the output to user only need to be set to `STDOUT`
 
 ### SoftBound paper
 - [paper](https://llvm.org/pubs/2009-06-PLDI-SoftBound.pdf) / [github repo](https://github.com/santoshn/softboundcets-34)
@@ -51,6 +54,8 @@ context->append_output_fn(context->caller_context,
 
 ### Light-weight contexts
 - [paper](https://www.usenix.org/system/files/conference/osdi16/osdi16-litton.pdf) / [webpage](https://www.cs.umd.edu/projects/lwc/)
+- FreeBSD [github](https://github.com/freebsd/freebsd-src)
+
 - how do we use lwc to guarantee `isolation` when merging serverless func?
 	+ assume we have 2 serverless functions A and B
 	+ in `main`:
