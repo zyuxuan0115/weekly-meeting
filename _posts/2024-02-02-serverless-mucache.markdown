@@ -48,6 +48,9 @@ context->append_output_fn(context->caller_context,
 - [paper](https://llvm.org/pubs/2009-06-PLDI-SoftBound.pdf) / [github repo](https://github.com/santoshn/softboundcets-34)
 - SoftBound doesn't take the generated IR as the input.
 	+ this is due to the fact that version of LLVM is too old 
+	+ but they still have the code for the pass of softbound
+		* it's at [here](https://github.com/santoshn/softboundcets-34/tree/master/softboundcets-llvm-clang34/lib/Transforms/SoftBoundCETS)
+		* we might be able to move them to the newer version of LLVM 
 
 ### How do you get call graph of a distributed system 
 - distributed tracing
@@ -55,6 +58,13 @@ context->append_output_fn(context->caller_context,
 ### Light-weight contexts
 - [paper](https://www.usenix.org/system/files/conference/osdi16/osdi16-litton.pdf) / [webpage](https://www.cs.umd.edu/projects/lwc/)
 - FreeBSD [github](https://github.com/freebsd/freebsd-src) / [version](https://docs.freebsd.org/en/books/porters-handbook/versions/)
+- can freebsd running in docker? 
+	* cannot directly run a freebsd os in docker, from [web](https://stackoverflow.com/questions/33864142/can-freebsd-be-run-inside-docker) 
+	* can run on a virtual machine inside docker [Youtube](https://www.youtube.com/watch?v=9-BowuxQrhE)
+
+```
+85365dfcbf28 - Andrew Rybchenko, Wed Dec 28 10:40:21 2016 +0000 : sfxge(4): cleanup: remove trailing whitespace
+```
 
 - how do we use lwc to guarantee `isolation` when merging serverless func?
 	+ assume we have 2 serverless functions A and B
