@@ -9,7 +9,8 @@ categories: serverless functions
 We don't need the FaaS runtime written in C/C++, we only need the serverless functions written in C/C++
 - [google functions framework C++](https://github.com/GoogleCloudPlatform/functions-framework-cpp)
 	+ [this page](https://github.com/GoogleCloudPlatform/functions-framework-cpp/tree/main/examples/howto_use_legacy_code) shows an example about how to build C++ serverless functions using google's function-framework-cpp
-	+ [build docker image and push to google's repo](https://cloud.google.com/artifact-registry/docs/docker/pushing-and-pulling)
+	+ <strong>Problem</strong>: need to deploy your serverless functions on their platform
+		* [build docker image and push to google's repo](https://cloud.google.com/artifact-registry/docs/docker/pushing-and-pulling)
 		* [Configure remote repository authentication to Docker Hub](https://cloud.google.com/artifact-registry/docs/repositories/configure-remote-auth-dockerhub)
 	+ [how to install google cloud cli](https://stackoverflow.com/questions/23247943/trouble-installing-google-cloud-sdk-in-ubuntu)
 
@@ -46,21 +47,54 @@ context->append_output_fn(context->caller_context,
 
 ### SoftBound paper
 - [paper](https://llvm.org/pubs/2009-06-PLDI-SoftBound.pdf) / [github repo](https://github.com/santoshn/softboundcets-34)
+
+SoftBound
+ 
+```bash
+clang -fsoftboundcets test.c -o test -L<git_repo>/softboundcets-lib -lm -lrt
+```
+
+Our Merge Function Pass
+
+```bash
+# compile the code into LLVM IR
+clang -I$NIGHTCORE_PATH/include -fPIC -emit-llvm -S foo.c -c -o foo.ll
+clang -I$NIGHTCORE_PATH/include -fPIC -emit-llvm -S bar.c -c -o bar.ll
+
+# change function name "faas_func_call" in bar to be "faas_func_callee"
+# also delete "faas_init", "faas_create_func_worker" and "faas_destroy_func_worker"
+opt -load $LLVM_PATH/build/lib/LLVMMergeFunc.so -enable-new-pm=0 -ChangeFuncName bar.ll -S -o bar_only.ll
+
+# merge "faas_func_callee" into foo's address space
+llvm-link foo.ll bar_only.ll -o foo_rpc_bar.ll -S
+
+# change the "faas_func_callee" to be "Bar" (normal function call)
+opt -load $LLVM_PATH/build/lib/LLVMMergeFunc.so -S -enable-new-pm=0 -o foo_bar.ll -MergeFunc < foo_rpc_bar.ll
+
+# finally generate obj of libfoo and link the .obj file
+llc -filetype=obj -relocation-model=pic foo_bar.ll -o libfoo.o
+clang -shared -fPIC -O2 -I../../include libfoo.o -o libfoo.so 
+```
+
 - SoftBound doesn't take the generated IR as the input.
 	+ this is due to the fact that version of LLVM is too old 
 	+ but they still have the code for the pass of softbound
-		* it's at [here](https://github.com/santoshn/softboundcets-34/tree/master/softboundcets-llvm-clang34/lib/Transforms/SoftBoundCETS)
+		* it's at [here](https://github.com/santoshn/softboundcets-34/tree/master/softboundcets-llvm-clang34/lib/Transforms/SoftBoundCETS) and [here](https://github.com/santoshn/softboundcets-34/tree/master/softboundcets-llvm-clang34/include/llvm/Transforms/SoftBoundCETS)
+		* the other of the passes is [here](https://github.com/santoshn/softboundcets-34/blob/master/softboundcets-llvm-clang34/tools/softboundcets/main.cpp)
 		* we might be able to move them to the newer version of LLVM 
-
-### How do you get call graph of a distributed system 
-- distributed tracing
 
 ### Light-weight contexts
 - [paper](https://www.usenix.org/system/files/conference/osdi16/osdi16-litton.pdf) / [webpage](https://www.cs.umd.edu/projects/lwc/)
 - FreeBSD [github](https://github.com/freebsd/freebsd-src) / [version](https://docs.freebsd.org/en/books/porters-handbook/versions/)
 - can freebsd running in docker? 
-	* cannot directly run a freebsd os in docker, from [web](https://stackoverflow.com/questions/33864142/can-freebsd-be-run-inside-docker) 
+	* cannot directly run a freebsd os in docker on Linux, from [web](https://stackoverflow.com/questions/33864142/can-freebsd-be-run-inside-docker) 
 	* can run on a virtual machine inside docker [Youtube](https://www.youtube.com/watch?v=9-BowuxQrhE)
+
+![d2](/assets/2024-02-02/d2.png)
+
+- FreeBSD can be running in docker on a FreeBSD system
+	- the webpage for [how to run docker on FreeBSD](https://wiki.freebsd.org/Docker) 
+- the commit hash we are going to use is around this version:
 
 ```
 85365dfcbf28 - Andrew Rybchenko, Wed Dec 28 10:40:21 2016 +0000 : sfxge(4): cleanup: remove trailing whitespace
@@ -80,4 +114,9 @@ context->append_output_fn(context->caller_context,
 		* <strong>in the same way create function B's lwc</strong>
 	+ on thing that need us to pay attention is
 		* we need to use `lwRestrict` or `lwOverlay` to change the permission of memory region that stores the arguments we want to pass from A to B. 			 
+
+
+### How do you get call graph of a distributed system 
+- distributed tracing
+
 
