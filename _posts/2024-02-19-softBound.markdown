@@ -76,6 +76,11 @@ clang -fsoftboundcets test.c -o test -L<git_repo>/softboundcets-lib -lm -lrt
 
 ### How do you get call graph of a distributed system 
 - distributed tracing
+- paper
+	* [Canopy](https://people.mpi-sws.org/~jcmace/papers/kaldor2017canopy.pdf) 
+
+### Other open-source compilers
+- [Numba](https://numba.pydata.org/)
 
 ### About DeathStarBench 
 - the RPC in [DeathStarBench](https://github.com/delimitrou/DeathStarBench/blob/master/socialNetwork/gen-cpp/UniqueIdService.h#L224)
