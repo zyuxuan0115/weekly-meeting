@@ -77,8 +77,9 @@ clang -fsoftboundcets test.c -o test -L<git_repo>/softboundcets-lib -lm -lrt
 ### How do you get call graph of a distributed system 
 - distributed tracing
 
-### About DeathStar 
+### About DeathStarBench 
 - the RPC in [DeathStarBench](https://github.com/delimitrou/DeathStarBench/blob/master/socialNetwork/gen-cpp/UniqueIdService.h#L224)
 - I'm just curious about how to use Apache thrift
 	* [here](https://github.com/apache/thrift/tree/master/tutorial/cpp) is an example
 - the [json parser library](https://www.json.org/json-en.html) in C
+- another useful json parser [jsmn](https://github.com/zserge/jsmn/tree/master)
