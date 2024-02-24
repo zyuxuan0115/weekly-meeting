@@ -77,16 +77,44 @@ clang -fsoftboundcets test.c -o test -L<git_repo>/softboundcets-lib -lm -lrt
 ### How do you get call graph of a distributed system 
 - distributed tracing
 - paper
-	+ [Canopy](https://people.mpi-sws.org/~jcmace/papers/kaldor2017canopy.pdf) 
+	+ [Canopy](https://people.mpi-sws.org/~jcmace/papers/kaldor2017canopy.pdf)
+- Do we really need distributed tracting built by other people?
+	+ we can build our own
+    * at the end of the function, collect the profile results, and send them out.
+		* have a seperate server that collects the results of profiling from each serverless function execution
+	
+```json
+{
+  "function_exec_time": "0.5ms",
+  "calls": [
+    {
+      "Caller":"A",
+      "Callee":"B",
+      "counts":"1" 
+    },
+    {
+      "Caller":"A",
+      "Callee":"C",
+      "counts":"2"
+    } 
+  ] 
+}
+
+``` 
 
 ### Other open-source compilers
 - [Numba](https://numba.pydata.org/) for Python
+	+ [github](https://github.com/numba/numba?tab=readme-ov-file)
 - [Rustc](https://github.com/rust-lang/rust/tree/master/compiler) for Rust
 	+ [Here](https://rust-lang.zulipchat.com/#narrow/stream/187780-t-compiler.2Fwg-llvm/topic/.E2.9C.94.20Running.20Custom.20LLVM.20Pass/near/320275483) is a post about how to write LLVM's optimization passes for Rustc 
 - [C# can also yeilds LLVM IR](https://en.wikipedia.org/wiki/LLVM#:~:text=Originally%20implemented%20for%20C%20and,ActionScript%2C%20Ada%2C%20C%23%20for%20.)
+
 ### About DeathStarBench 
 - the RPC in [DeathStarBench](https://github.com/delimitrou/DeathStarBench/blob/master/socialNetwork/gen-cpp/UniqueIdService.h#L224)
-- I'm just curious about how to use Apache thrift
+- I'm just curious about how to use Apache thrift Compiler
+	* apache thrift will automatically generate server template for your service
+	* then you can decide the 
 	* [here](https://github.com/apache/thrift/tree/master/tutorial/cpp) is an example
-- the [json parser library](https://www.json.org/json-en.html) in C
-- another useful json parser [jsmn](https://github.com/zserge/jsmn/tree/master)
+- If we want to convert C++ code to C, we need some good JSON parser in C
+	+ the [json parser library](https://www.json.org/json-en.html) in C
+	+ <strong>another useful json parser</strong> [jsmn](https://github.com/zserge/jsmn/tree/master)
