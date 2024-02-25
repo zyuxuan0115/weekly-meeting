@@ -5,7 +5,7 @@ date:   2024-02-19 1:53:46 -0500
 categories: serverless functions
 ---
 
-### open source serverless platform that supports C/C++
+### Open source serverless platform that supports C/C++
 We don't need the FaaS runtime written in C/C++, we only need the serverless functions written in C/C++
 #### OpenFaaS
 - [openfaas](https://github.com/openfaas): there is no tutorial about how to run openfaas at all
@@ -72,6 +72,8 @@ Passes.run(*M1.get());
 ### Get the call graph of a distributed system 
 - distributed tracing
 	+ [Canopy](https://people.mpi-sws.org/~jcmace/papers/kaldor2017canopy.pdf)
+	+ [jaeger](https://www.jaegertracing.io/): used by DeathStarBench
+		* [github](https://github.com/jaegertracing)
 - Do we really need distributed tracting built by other people?
 	+ we can build our own
     * at the end of the function, collect the profile results, and send them out.
