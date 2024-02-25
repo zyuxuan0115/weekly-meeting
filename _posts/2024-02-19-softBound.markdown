@@ -33,6 +33,19 @@ We don't need the FaaS runtime written in C/C++, we only need the serverless fun
 
 ### SoftBound
 - [paper](https://llvm.org/pubs/2009-06-PLDI-SoftBound.pdf) / [github repo](https://github.com/santoshn/softboundcets-34)
+
+#### SoftBound for llvm3.4
+- how to compile the code with SoftBound
+
+```bash
+clang -fsoftboundcets test.c -o test -L<git_repo>/softboundcets-lib -lm -lrt
+```
+
+- SoftBound doesn't take IR as the input
+	+ but they still have the code of the LLVM pass
+		* it's at [here](https://github.com/santoshn/softboundcets-34/tree/master/softboundcets-llvm-clang34/lib/Transforms/SoftBoundCETS) and [here](https://github.com/santoshn/softboundcets-34/tree/master/softboundcets-llvm-clang34/include/llvm/Transforms/SoftBoundCETS)
+		* the other of the passes is [here](https://github.com/santoshn/softboundcets-34/blob/master/softboundcets-llvm-clang34/tools/softboundcets/main.cpp)
+
 - On [this line](https://github.com/santoshn/softboundcets-34/blob/master/softboundcets-llvm-clang34/tools/softboundcets/main.cpp), it shows how different llvm passes are added.
 
 ```c++
@@ -51,27 +64,13 @@ if(fix_byval_attributes){
 
 Passes.add(createBitcodeWriterPass(Out->os()));
 Passes.run(*M1.get());
-
 ```
-
-SoftBound for llvm3.4
- 
-```bash
-clang -fsoftboundcets test.c -o test -L<git_repo>/softboundcets-lib -lm -lrt
-```
-
-- SoftBound doesn't take IR as the input
-	+ this is due to the fact that version of LLVM is too old 
-	+ but they still have the code for the pass of softbound
-		* it's at [here](https://github.com/santoshn/softboundcets-34/tree/master/softboundcets-llvm-clang34/lib/Transforms/SoftBoundCETS) and [here](https://github.com/santoshn/softboundcets-34/tree/master/softboundcets-llvm-clang34/include/llvm/Transforms/SoftBoundCETS)
-		* the other of the passes is [here](https://github.com/santoshn/softboundcets-34/blob/master/softboundcets-llvm-clang34/tools/softboundcets/main.cpp)
 
 - how does LLVM handle inline assembly?
 	* [here](https://www.youtube.com/watch?v=MeB7Dp3G2UE) they have a video about it 
 
-### How do you get call graph of a distributed system 
+### Get the call graph of a distributed system 
 - distributed tracing
-- paper
 	+ [Canopy](https://people.mpi-sws.org/~jcmace/papers/kaldor2017canopy.pdf)
 - Do we really need distributed tracting built by other people?
 	+ we can build our own
