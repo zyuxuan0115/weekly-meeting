@@ -5,7 +5,7 @@ date:   2024-02-25 1:53:46 -0500
 categories: serverless functions
 ---
 
-#### OpenFaaS
+### OpenFaaS
 - [openfaas](https://github.com/openfaas): there is no tutorial about how to run openfaas at all
 	+ [install OpenFaas](https://gcore.com/learning/create-serverless-functions-with-openfaas/)
 	+ In 2018 you create FaaS platform with openfaas in [this way](https://medium.com/@pavithra_38952/openfaas-on-docker-440541d635a2)
@@ -18,3 +18,5 @@ categories: serverless functions
   + [install OpenFaas](https://slopezza.medium.com/openfaas-installation-and-first-python-function-part-i-fa429053e8df): another example about why ironFunctions is slow.
 
 ![s1](/assets/2024-02-19/s1.webp)
+
+### LLVM support for Rust 
