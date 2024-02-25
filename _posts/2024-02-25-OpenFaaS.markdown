@@ -30,6 +30,14 @@ categories: serverless functions
 ### LLVM support for Rust 
 - [Generate LLVM IR from Rust source code](https://crates.io/crates/llvm-ir)
 
+```bash
+# For Rust sources, you can use rustc's --emit=llvm-ir flag
+# Of course you need to first install Rust
+> rustc src/main.rs --emit=llvm-ir -O -C no-prepopulate-passes -C codegen-units=1
 ```
-For Rust sources, you can use rustc's --emit=llvm-ir flag
+
+- to check the llvm version of `rustc`
+
+```bash
+> rustc --version --verbose
 ```
