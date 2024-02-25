@@ -12,11 +12,19 @@ categories: serverless functions
 	+ deploy existing containers to OpenFaaS [webpage](https://www.openfaas.com/blog/porting-existing-containers-to-openfaas/)
 	+ [docker support](https://docs.openfaas.com/languages/dockerfile/)
 	+ [older version](https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-openfaas-using-docker-swarm-on-ubuntu-16-04)
-  + the example of starting the OpenFaaS
-    * [Deploy OpenFaaS](https://ericstoekl.github.io/faas/deployment/swarm/#deploy-openfaas)
-    * [Deploy OpenFaaS to Docker Swarm](https://ericstoekl.github.io/faas/deployment/swarm/)
   + [install OpenFaas](https://slopezza.medium.com/openfaas-installation-and-first-python-function-part-i-fa429053e8df): another example about why ironFunctions is slow.
 
 ![s1](/assets/2024-02-19/s1.webp)
+
+- the docker compose file for 
+
+
+#### the example of starting the OpenFaaS
+- The older version of [OpenFaaS' manual](https://ericstoekl.github.io/faas/)
+	+ I think it works with the version with `802461dd025a8cec4784a2e40c7f4d0db501a2c3`
+- [Deploy OpenFaaS to Docker Swarm](https://ericstoekl.github.io/faas/deployment/swarm/)
+  + [Deploy OpenFaaS](https://ericstoekl.github.io/faas/deployment/swarm/#deploy-openfaas)
+    * [the docker compose of docker swarm]()
+	+ [FaaS-swarm](https://github.com/openfaas/faas-swarm/)
 
 ### LLVM support for Rust 
