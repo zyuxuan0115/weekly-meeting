@@ -15,7 +15,7 @@ We don't need the FaaS runtime written in C/C++, we only need the serverless fun
 	+ [docker support](https://docs.openfaas.com/languages/dockerfile/)
 	+ [older version](https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-openfaas-using-docker-swarm-on-ubuntu-16-04)
   + the example of starting the OpenFaaS
-		* [Deploy OpenFaaS](https://ericstoekl.github.io/faas/deployment/swarm/#deploy-openfaas)
+    * [Deploy OpenFaaS](https://ericstoekl.github.io/faas/deployment/swarm/#deploy-openfaas)
     * [Deploy OpenFaaS to Docker Swarm](https://ericstoekl.github.io/faas/deployment/swarm/)
   + [install OpenFaas](https://slopezza.medium.com/openfaas-installation-and-first-python-function-part-i-fa429053e8df): another example about why ironFunctions is slow.
 
