@@ -28,3 +28,8 @@ categories: serverless functions
 	+ [FaaS-swarm](https://github.com/openfaas/faas-swarm/)
 
 ### LLVM support for Rust 
+- [Generate LLVM IR from Rust source code](https://crates.io/crates/llvm-ir)
+
+```
+For Rust sources, you can use rustc's --emit=llvm-ir flag
+```
