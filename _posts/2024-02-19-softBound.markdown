@@ -26,6 +26,11 @@ We don't need the FaaS runtime written in C/C++, we only need the serverless fun
 	+ deploy existing containers to OpenFaaS [webpage](https://www.openfaas.com/blog/porting-existing-containers-to-openfaas/)
 	+ [docker support](https://docs.openfaas.com/languages/dockerfile/)
 	+ [older version](https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-openfaas-using-docker-swarm-on-ubuntu-16-04)
+  + [install OpenFaas](https://slopezza.medium.com/openfaas-installation-and-first-python-function-part-i-fa429053e8df): another example
+		* ![s1](/assets/2024-02-19/s1.webp)
+  + the example of starting the OpenFaaS
+		* [Deploy OpenFaaS](https://ericstoekl.github.io/faas/deployment/swarm/#deploy-openfaas)
+    * [Deploy OpenFaaS to Docker Swarm](https://ericstoekl.github.io/faas/deployment/swarm/)
 - [ironFunction](https://github.com/iron-io)
 	+ [run IronFunction as a scheduler on top of Docker Standalone Swarm cluster](https://github.com/iron-io/functions/tree/master/docs/operating/docker-swarm)
     * [scheduling service on a docker swarm mode cluster](https://semaphoreci.com/community/tutorials/scheduling-services-on-a-docker-swarm-mode-cluster)
@@ -99,7 +104,6 @@ clang -fsoftboundcets test.c -o test -L<git_repo>/softboundcets-lib -lm -lrt
     } 
   ] 
 }
-
 ``` 
 
 ### Other open-source compilers
@@ -118,3 +122,4 @@ clang -fsoftboundcets test.c -o test -L<git_repo>/softboundcets-lib -lm -lrt
 - If we want to convert C++ code to C, we need some good JSON parser in C
 	+ the [json parser library](https://www.json.org/json-en.html) in C
 	+ <strong>another useful json parser</strong> [jsmn](https://github.com/zserge/jsmn/tree/master)
+	  * [example code of jsondump](https://github.com/zserge/jsmn/blob/master/example/jsondump.c)
