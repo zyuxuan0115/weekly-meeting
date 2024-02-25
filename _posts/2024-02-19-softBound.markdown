@@ -5,8 +5,9 @@ date:   2024-02-19 1:53:46 -0500
 categories: serverless functions
 ---
 
-### Other C++ serverless platform
+### open source serverless platform that supports C/C++
 We don't need the FaaS runtime written in C/C++, we only need the serverless functions written in C/C++
+#### OpenFaaS
 - [openfaas](https://github.com/openfaas): there is no tutorial about how to run openfaas at all
 	+ [install OpenFaas](https://gcore.com/learning/create-serverless-functions-with-openfaas/)
 	+ In 2018 you create FaaS platform with openfaas in [this way](https://medium.com/@pavithra_38952/openfaas-on-docker-440541d635a2)
@@ -20,6 +21,7 @@ We don't need the FaaS runtime written in C/C++, we only need the serverless fun
 
 ![s1](/assets/2024-02-19/s1.webp)
 
+#### ironFunctions 
 - [ironFunction](https://github.com/iron-io)
 	+ [run IronFunction as a scheduler on top of Docker Standalone Swarm cluster](https://github.com/iron-io/functions/tree/master/docs/operating/docker-swarm)
     * [scheduling service on a docker swarm mode cluster](https://semaphoreci.com/community/tutorials/scheduling-services-on-a-docker-swarm-mode-cluster)
@@ -29,7 +31,7 @@ We don't need the FaaS runtime written in C/C++, we only need the serverless fun
 	+ the nice thing of `ironFunction`
 		* it convert the user request into `STDIN`, and the output to user only need to be set to `STDOUT`
 
-### SoftBound paper
+### SoftBound
 - [paper](https://llvm.org/pubs/2009-06-PLDI-SoftBound.pdf) / [github repo](https://github.com/santoshn/softboundcets-34)
 - On [this line](https://github.com/santoshn/softboundcets-34/blob/master/softboundcets-llvm-clang34/tools/softboundcets/main.cpp), it shows how different llvm passes are added.
 
@@ -52,18 +54,17 @@ Passes.run(*M1.get());
 
 ```
 
-SoftBound
+SoftBound for llvm3.4
  
 ```bash
 clang -fsoftboundcets test.c -o test -L<git_repo>/softboundcets-lib -lm -lrt
 ```
 
-- SoftBound doesn't take the generated IR as the input.
+- SoftBound doesn't take IR as the input
 	+ this is due to the fact that version of LLVM is too old 
 	+ but they still have the code for the pass of softbound
 		* it's at [here](https://github.com/santoshn/softboundcets-34/tree/master/softboundcets-llvm-clang34/lib/Transforms/SoftBoundCETS) and [here](https://github.com/santoshn/softboundcets-34/tree/master/softboundcets-llvm-clang34/include/llvm/Transforms/SoftBoundCETS)
 		* the other of the passes is [here](https://github.com/santoshn/softboundcets-34/blob/master/softboundcets-llvm-clang34/tools/softboundcets/main.cpp)
-		* we might be able to move them to the newer version of LLVM 
 
 - how does LLVM handle inline assembly?
 	* [here](https://www.youtube.com/watch?v=MeB7Dp3G2UE) they have a video about it 
@@ -112,3 +113,5 @@ clang -fsoftboundcets test.c -o test -L<git_repo>/softboundcets-lib -lm -lrt
 	+ the [json parser library](https://www.json.org/json-en.html) in C
 	+ <strong>another useful json parser</strong> [jsmn](https://github.com/zserge/jsmn/tree/master)
 	  * [example code of jsondump](https://github.com/zserge/jsmn/blob/master/example/jsondump.c)
+- Stateful serverless functions;
+	+ disable all the writes
