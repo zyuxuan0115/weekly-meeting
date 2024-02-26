@@ -38,7 +38,8 @@ categories: serverless functions
 
 - to check the llvm version of `rustc`
 	+ [webpage for changing the LLVM version](https://rustc-dev-guide.rust-lang.org/backend/updating-llvm.html)
- 
+  + [change the version of rustc](https://users.rust-lang.org/t/how-can-i-revert-to-older-version-of-rust/20497) 
+
 ```bash
 # check the llvm version of rustc
 > rustc --version --verbose
