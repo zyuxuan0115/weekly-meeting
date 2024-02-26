@@ -42,7 +42,7 @@ categories: serverless functions
 ```bash
 # check the llvm version of rustc
 > rustc --version --verbose
-# change rustc to another version, which supports LLVM-10.0
+# change rustc to an older version, which supports LLVM-10.0
 > rustup default 1.46
 ```
 
