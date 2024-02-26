@@ -38,7 +38,14 @@ categories: serverless functions
 
 - to check the llvm version of `rustc`
 	+ [webpage for changing the LLVM version](https://rustc-dev-guide.rust-lang.org/backend/updating-llvm.html)
-
+ 
 ```bash
+# check the llvm version of rustc
 > rustc --version --verbose
+# change rustc to another version, which supports LLVM-10.0
+> rustup default 1.46
 ```
+
+
+- build `rustc` from source: [link](https://rustc-dev-guide.rust-lang.org/building/how-to-build-and-run.html)
+
