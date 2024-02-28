@@ -24,6 +24,14 @@ categories: serverless functions
   + run openfaas
     * `arkade install openfaas`
 
+### change docker permission
+
+```bash
+> sudo groupadd docker 
+> sudo gpasswd -a $USER docker
+> newgrp docker 
+> sudo chmod -R 777 /users/zyuxuan/.docker
+```
 
 ## LLVM support for Rust 
 - [Generate LLVM IR from Rust source code](https://crates.io/crates/llvm-ir)
