@@ -21,6 +21,16 @@ We don't need the FaaS runtime written in C/C++, we only need the serverless fun
 
 ![s1](/assets/2024-02-19/s1.webp)
 
+#### the older example of starting the OpenFaaS
+- The older version of [OpenFaaS' manual](https://ericstoekl.github.io/faas/)
+	+ I think it works with the version with `802461dd025a8cec4784a2e40c7f4d0db501a2c3`
+- [Deploy OpenFaaS to Docker Swarm](https://ericstoekl.github.io/faas/deployment/swarm/)
+  + [Deploy OpenFaaS](https://ericstoekl.github.io/faas/deployment/swarm/#deploy-openfaas)
+    * [the docker compose of docker swarm]()
+	+ [FaaS-swarm](https://github.com/openfaas/faas-swarm/)
+- tried several times but seems like it doesn't work
+
+
 #### ironFunctions 
 - [ironFunction](https://github.com/iron-io)
 	+ [run IronFunction as a scheduler on top of Docker Standalone Swarm cluster](https://github.com/iron-io/functions/tree/master/docs/operating/docker-swarm)

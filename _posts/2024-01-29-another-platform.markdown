@@ -46,6 +46,9 @@ categories: serverless functions
 - nightcore requires all containers to be running on the same machine
 	+ nightcore never resolves the function cold start issue
 	+ the function cold start issue is a larger issue compared with RPC overhead
+		* I feel that the serverless function runs in another way compared with nightcore
+		* in nightcore, every serverless functions ls already loaded and will never be terminated
+		* but according to 
 
 ### Thoughts about MuCache
 - MuCache
