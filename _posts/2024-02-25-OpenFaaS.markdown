@@ -12,7 +12,18 @@ categories: serverless functions
 
 ### the current version of OpenFaaS
 - [tutorial](https://docs.openfaas.com/deployment/kubernetes/)
-- deploy on the local cluster
+- steps for deploying OpenFaaS on the local cluster
+  + first install Docker, golang
+	+ install [arkade](https://github.com/alexellis/arkade)
+	+ then install [KinD](https://kind.sigs.k8s.io/) 
+    * I [installed from a released binary](https://kind.sigs.k8s.io/docs/user/quick-start/#installing-from-release-binaries)
+  + create a cluster quickly
+    * `kind create cluster`	
+	+ [install cli](https://docs.openfaas.com/cli/install/)
+    * `curl -SLsf https://get.arkade.dev/ | sudo sh`
+  + run openfaas
+    * `arkade install openfaas`
+
 
 ## LLVM support for Rust 
 - [Generate LLVM IR from Rust source code](https://crates.io/crates/llvm-ir)
