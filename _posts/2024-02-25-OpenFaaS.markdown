@@ -9,7 +9,9 @@ categories: serverless functions
 - [openfaas](https://github.com/openfaas): there is no tutorial about how to run openfaas at all
 	+ deploy existing containers to OpenFaaS [webpage](https://www.openfaas.com/blog/porting-existing-containers-to-openfaas/)
 	+ [docker support](https://docs.openfaas.com/languages/dockerfile/)
-
+  + [how to deploy functions using OpenFaaS](https://gcore.com/learning/create-serverless-functions-with-openfaas/) - super useful
+	+ [first OpenFaaS Function with Python](https://docs.openfaas.com/tutorials/first-python-function/)
+	
 ### the current version of OpenFaaS
 - [tutorial](https://docs.openfaas.com/deployment/kubernetes/)
 - steps for deploying OpenFaaS on the local cluster
