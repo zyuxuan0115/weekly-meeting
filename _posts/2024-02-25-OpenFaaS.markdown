@@ -55,6 +55,18 @@ categories: serverless functions
 	+ first delete a function and then run `faas-cli remove <function name>`
   + then redeploy it
 
+- to deploy the service
+
+```bash
+> faas-cli deploy -f ./hello-rust.yml
+```
+
+- to invoke the serverless function
+
+```
+> curl 127.0.0.1:8080/function/hello-rust -d "This is Yuxuan."
+```
+
 ## LLVM support for Rust 
 #### Theoretically, any language that can be converted into LLVM IR by its compiler frontend can be merged by the LLVM pass we write
 
@@ -87,6 +99,13 @@ categories: serverless functions
 - What I told the compiler to do
 
 ![d2](/assets/2024-02-25/d2.png)
+
+- tips!
+  + export your rust library by adding the following line to your `~/.bashrc` and then `source ~/.bashrc`
+
+```bash
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/users/zyuxuan/.rustup/toolchains/1.46-x86_64-unknown-linux-gnu/lib
+```
 
 ## Distributed tracing
 ### overall diagram
@@ -121,3 +140,7 @@ categories: serverless functions
 - to send profile to another server 
 
 ![d3](/assets/2024-02-25/d3.png)
+
+### drawbacks
+
+![d5](/assets/2024-02-25/d5.png)
