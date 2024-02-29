@@ -134,13 +134,18 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/users/zyuxuan/.rustup/toolchains/1.46-x
   ] 
 }
 ```
-- drawback: not a trace
+
 
 ### where should we insert the code
 - to send profile to another server 
 
 ![d3](/assets/2024-02-25/d3.png)
 
+### after merge, how the call graph looks like
+
+![d6](/assets/2024-02-25/d6.png)
+
 ### drawbacks
+- drawback: not a trace
 
 ![d5](/assets/2024-02-25/d5.png)
