@@ -52,7 +52,8 @@ categories: serverless functions
   + `kubectl -n openfaas delete deployment gateway`
 
 - to update a function
-	+ first delete a function and then run `faas-cli remove appfleet-hello-world`
+	+ first delete a function and then run `faas-cli remove <function name>`
+  + then redeploy it
 
 ## LLVM support for Rust 
 #### Theoretically, any language that can be converted into LLVM IR by its compiler frontend can be merged by the LLVM pass we write
