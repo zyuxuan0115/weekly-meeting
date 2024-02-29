@@ -90,7 +90,7 @@ categories: serverless functions
 
 ### what profile data should be transfered
 - caller+callee pair
-- the number of caller+callee pair occurs
+- the number of the occurance of each caller+callee pair 
 - the overall execution time of the function
 	+ should not include the overhead for waiting a RPC to return
 
