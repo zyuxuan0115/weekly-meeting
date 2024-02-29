@@ -52,6 +52,8 @@ categories: serverless functions
   + `kubectl -n openfaas delete deployment gateway`
 
 ## LLVM support for Rust 
+#### Theoretically, any language that can be converted into LLVM IR by its compiler frontend can be merged by the LLVM pass we write
+
 - [Generate LLVM IR from Rust source code](https://crates.io/crates/llvm-ir)
 
 ```bash
@@ -73,3 +75,45 @@ categories: serverless functions
 
 - build `rustc` from source: [link](https://rustc-dev-guide.rust-lang.org/building/how-to-build-and-run.html)
 
+### Merge Rust and C functions
+- original code is in seperate files.
+
+![d1](/assets/2024-02-25/d1.png)
+
+- What I told the compiler to do
+
+![d2](/assets/2024-02-25/d2.png)
+
+## Distributed tracing
+### overall diagram
+![d4](/assets/2024-02-25/d4.png)
+
+### what profile data should be transfered
+- caller+callee pair
+- the number of caller+callee pair occurs
+- the overall execution time of the function
+	+ should not include the overhead for waiting a RPC to return
+
+```json
+{
+  "function_exec_time": "0.5ms",
+  "calls": [
+    {
+      "Caller":"Func 1",
+      "Callee":"Func 3",
+      "counts":"1" 
+    },
+    {
+      "Caller":"Func 1",
+      "Callee":"Func 2",
+      "counts":"2"
+    } 
+  ] 
+}
+```
+- drawback: not a trace
+
+### where should we insert the code
+- to send profile to another server 
+
+![d3](/assets/2024-02-25/d3.png)
