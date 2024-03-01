@@ -149,3 +149,8 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/users/zyuxuan/.rustup/toolchains/1.46-x
 - drawback: not a trace
 
 ![d5](/assets/2024-02-25/d5.png)
+
+## Some other knowledge I learned
+- dynamic link library vs. static link library
+  + .so vs. .a
+  + running dynamic link library needs to specify `LD_LIBRARY_PATH`
