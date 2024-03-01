@@ -70,4 +70,18 @@ categories: serverless functions
 ### deploy OpenFaaS on remote cluster with multiple machines
 - [k3sup](https://github.com/alexellis/k3sup)
 
-## C+SoftBound+Rust
+## C + SoftBound + Rust
+
+### concern about merging C and Rust functions
+
+- this is Rust's IR code of a string 
+
+```llvm
+@alloc1 = private unnamed_addr constant <{ [22 x i8] }> <{ [22 x i8] c"Hello, I'm rust code!\0A" }>, align 1
+```
+
+- this is C's IR code of a string
+
+```llvm
+@.str = private unnamed_addr constant [20 x i8] c"Hello, I'm C code!\0A\00", align 1
+```
