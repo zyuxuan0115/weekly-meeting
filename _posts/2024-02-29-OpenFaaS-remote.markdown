@@ -21,7 +21,7 @@ categories: serverless functions
 > sudo chmod -R 777 /users/zyuxuan/.docker
 ```
 	
-### the current version of OpenFaaS
+### deploy OpenFaaS on local clusters
 - [tutorial](https://docs.openfaas.com/deployment/kubernetes/)
 - steps for deploying OpenFaaS on the local cluster
   + first install Docker, golang
@@ -63,6 +63,11 @@ categories: serverless functions
 
 - to invoke the serverless function
 
-```
+```bash
 > curl 127.0.0.1:8080/function/hello-rust -d "This is Yuxuan."
 ```
+
+### deploy OpenFaaS on remote cluster with multiple machines
+- [k3sup](https://github.com/alexellis/k3sup)
+
+## C+SoftBound+Rust
