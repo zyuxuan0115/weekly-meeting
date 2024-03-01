@@ -69,6 +69,7 @@ categories: serverless functions
 
 ### deploy OpenFaaS on remote cluster with multiple machines
 - [k3sup](https://github.com/alexellis/k3sup)
+  + the most important part is [Create a multi-master](https://github.com/alexellis/k3sup?tab=readme-ov-file#create-a-multi-master-ha-setup-with-embedded-etcd) 
 
 ## C + SoftBound + Rust
 
