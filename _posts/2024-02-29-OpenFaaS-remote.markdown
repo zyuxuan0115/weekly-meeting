@@ -10,7 +10,8 @@ categories: serverless functions
 	+ deploy existing containers to OpenFaaS [webpage](https://www.openfaas.com/blog/porting-existing-containers-to-openfaas/)
 	+ [docker support](https://docs.openfaas.com/languages/dockerfile/)
   + [how to deploy functions using OpenFaaS](https://gcore.com/learning/create-serverless-functions-with-openfaas/) - super useful
-	+ [first OpenFaaS Function with Python](https://docs.openfaas.com/tutorials/first-python-function/)
+	+ [Set-up OpenFaaS with Kubernetes](https://github.com/openfaas/workshop/blob/master/lab1b.md#run-on-digitaloceans-kubernetes-service) - super useful
+	+ [first OpenFaaS Function with Python](https://docs.openfaas.com/tutorials/first-python-function/) - super useful
 
 ### change docker permission
 
@@ -31,8 +32,7 @@ categories: serverless functions
     * I [installed from a released binary](https://kind.sigs.k8s.io/docs/user/quick-start/#installing-from-release-binaries)
   + create a cluster quickly
     * `kind create cluster`	
-	+ [install cli](https://docs.openfaas.com/cli/install/)
-    * `curl -SLsf https://get.arkade.dev/ | sudo sh`
+	+ [faas-cli](https://docs.openfaas.com/cli/install/): `curl -sSL https://cli.openfaas.com | sudo -E sh`
   + run openfaas
     * `arkade install openfaas --load-balancer`
       - Note: the `--load-balancer` flag has a default of false, so by passing the flag, the installation will request one from your cloud provider.
@@ -49,8 +49,11 @@ categories: serverless functions
 > echo -n $PASSWORD | faas-cli login --username admin --password-stdin
 ```
 
-- delete a deployment in kubectl
-  + `kubectl -n openfaas delete deployment gateway`
+- delete things in k3s
+	+ a deployment in k3s
+    * `kubectl -n openfaas delete deployment gateway`
+  + a node in k3s
+    * `kubectl delete node <node name>`
 
 - to update a function
 	+ first delete a function and then run `faas-cli remove <function name>`
