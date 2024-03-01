@@ -34,7 +34,8 @@ categories: serverless functions
 	+ [install cli](https://docs.openfaas.com/cli/install/)
     * `curl -SLsf https://get.arkade.dev/ | sudo sh`
   + run openfaas
-    * `arkade install openfaas`
+    * `arkade install openfaas --load-balancer`
+      - Note: the `--load-balancer` flag has a default of false, so by passing the flag, the installation will request one from your cloud provider.
     * to verify if you successfully run openfaas: 
       - `kubectl -n openfaas get deployments -l "release=openfaas, app=openfaas"`
 
@@ -71,6 +72,13 @@ categories: serverless functions
 - [k3sup](https://github.com/alexellis/k3sup)
   + the most important part is [Create a multi-master](https://github.com/alexellis/k3sup?tab=readme-ov-file#create-a-multi-master-ha-setup-with-embedded-etcd) 
 
+- if a function is invoked within kubernetes cluster, to call the function, the REST api is:
+  + `http://gateway.openfaas.svc.cluster.local.:8080`
+  + reference is [here](https://docs.openfaas.com/reference/rest-api/#:~:text=Functions%20can%20be%20invoked%20by,path%20to%20the%20gateway%20URL.&text=If%20no%20namespace%20is%20specified,%2Fasync%2Dfunction%2FNAME.)
+
+- curious about what is a agent in kubernete
+  + [the architecture of k3s](https://docs.k3s.io/architecture)
+
 ## C + SoftBound + Rust
 
 ### concern about merging C and Rust functions
@@ -86,3 +94,5 @@ categories: serverless functions
 ```llvm
 @.str = private unnamed_addr constant [20 x i8] c"Hello, I'm C code!\0A\00", align 1
 ```
+
+
