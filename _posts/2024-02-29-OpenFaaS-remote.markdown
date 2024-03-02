@@ -126,6 +126,13 @@ categories: serverless functions
   + `http://gateway.openfaas.svc.cluster.local.:8080`
   + reference is [here](https://docs.openfaas.com/reference/rest-api/#:~:text=Functions%20can%20be%20invoked%20by,path%20to%20the%20gateway%20URL.&text=If%20no%20namespace%20is%20specified,%2Fasync%2Dfunction%2FNAME.)
 
+#### to stop a service
+
+```bash
+> kubectl get nodes
+> kubectl drain --ignore-daemonsets --delete-emptydir-data <node name>
+> kubectl delete <node name>
+```
 
 ## Kubernetes
 - [Kubernetes Components](https://kubernetes.io/docs/concepts/overview/components/)
