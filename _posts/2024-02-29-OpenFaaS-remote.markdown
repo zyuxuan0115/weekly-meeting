@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "2024-02-29 OpenFaaS remote"
+title:  "2024-02-29 OpenFaaS remote + Kubernete"
 date:   2024-02-29 1:53:46 -0500
 categories: serverless functions
 ---
@@ -129,6 +129,8 @@ categories: serverless functions
 #### to stop a service
 
 ```bash
+> kubectl -n openfaas get deployments -l "release=openfaas, app=openfaas"
+> kubectl -n openfaas delete deployment <name>
 > kubectl get nodes
 > kubectl drain --ignore-daemonsets --delete-emptydir-data <node name>
 > kubectl delete <node name>
