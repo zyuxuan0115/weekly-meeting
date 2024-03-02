@@ -132,6 +132,8 @@ categories: serverless functions
 > kubectl get nodes
 > kubectl drain --ignore-daemonsets --delete-emptydir-data <node name>
 > kubectl delete <node name>
+> sudo lsof -i -P -n | grep LISTEN
+> kill <PID of kubectl which uses port 8080>
 ```
 
 ## Kubernetes
