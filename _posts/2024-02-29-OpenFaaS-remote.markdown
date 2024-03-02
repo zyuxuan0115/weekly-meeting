@@ -50,8 +50,8 @@ categories: serverless functions
 ```
 
 - delete things in k3s
-	+ a deployment in k3s
-    * `kubectl -n openfaas delete deployment gateway`
+  + a deployment in k3s
+    * `kubectl -n openfaas delete deployment gateway` 
   + a node in k3s
     * `kubectl delete node <node name>`
 
@@ -82,10 +82,14 @@ categories: serverless functions
 - curious about what is a agent in kubernete
   + [the architecture of k3s](https://docs.k3s.io/architecture)
 
+## Kubernetes
+- [Kubernetes Components](https://kubernetes.io/docs/concepts/overview/components/)
+
 ## C + SoftBound + Rust
+- works well
 
 ### concern about merging C and Rust functions
-
+- How do they handle strings since we need to transfter strings from caller to callee
 - this is Rust's IR code of a string 
 
 ```llvm
