@@ -71,19 +71,69 @@ categories: serverless functions
 > curl 127.0.0.1:8080/function/hello-rust -d "This is Yuxuan."
 ```
 
+
+
+
 ### deploy OpenFaaS on remote cluster with multiple machines
 - [k3sup](https://github.com/alexellis/k3sup)
-  + the most important part is [Create a multi-master](https://github.com/alexellis/k3sup?tab=readme-ov-file#create-a-multi-master-ha-setup-with-embedded-etcd) 
+  + the most important part is [Create a multi-master](https://github.com/alexellis/k3sup?tab=readme-ov-file#create-a-multi-master-ha-setup-with-embedded-etcd) and [Join some agents to your Kubernetes server](https://github.com/alexellis/k3sup?tab=readme-ov-file#-join-some-agents-to-your-kubernetes-server)
+
+- create server
+
+```bash
+> export SERVER_IP=192.168.0.100
+> export USER=zyuxuan
+> k3sup install --ip $SERVER_IP --user $USER
+```
+
+- create agent
+
+```bash
+> export AGENT_IP=192.168.0.101
+> export USER=zyuxuan
+> k3sup join --ip $AGENT_IP --server-ip $SERVER_IP --user $USER
+```
+
+- try to access
+
+```bash
+> export KUBECONFIG=`pwd`/kubeconfig
+> kubectl get node
+```
+
+- run openfaas
+
+```bash
+> arkade install openfaas --load-balancer
+```
+
+- fowward the gateway to the machine
+
+```bash
+# Forward the gateway to your machine
+> kubectl rollout status -n openfaas deploy/gateway
+> kubectl port-forward -n openfaas svc/gateway 8080:8080 &
+# If you're using a managed cloud Kubernetes service then get the 
+# LoadBalancer's IP address or DNS entry from the EXTERNAL-IP field 
+# from the command below.
+> kubectl get svc -o wide gateway-external -n openfaas
+# If basic auth is enabled, you can now log into your gateway:
+> PASSWORD=$(kubectl get secret -n openfaas basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode; echo)
+> echo -n $PASSWORD | faas-cli login --username admin --password-stdin
+```
 
 - if a function is invoked within kubernetes cluster, to call the function, the REST api is:
   + `http://gateway.openfaas.svc.cluster.local.:8080`
   + reference is [here](https://docs.openfaas.com/reference/rest-api/#:~:text=Functions%20can%20be%20invoked%20by,path%20to%20the%20gateway%20URL.&text=If%20no%20namespace%20is%20specified,%2Fasync%2Dfunction%2FNAME.)
 
-- curious about what is a agent in kubernete
-  + [the architecture of k3s](https://docs.k3s.io/architecture)
 
 ## Kubernetes
 - [Kubernetes Components](https://kubernetes.io/docs/concepts/overview/components/)
+- [Kubernetes cluster has its cluster DNS](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)
+	+ The Domain Name System (DNS) is the phonebook of the Internet. DNS translates domain names to IP addresses so browsers can load Internet resources.
+- curious about what is a agent in kubernete
+	+ [the architecture of k3s](https://docs.k3s.io/architecture)
+
 
 ## C + SoftBound + Rust
 - works well
