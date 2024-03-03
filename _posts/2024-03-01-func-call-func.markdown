@@ -21,12 +21,15 @@ categories: serverless functions
 	+ can we update the function by logging into kubernetes and update local docker directly?
 
 ## Make Rust function call another serverless function
-- From Rust book:
+### From Rust tutorial
   + if not specify, everything is inmutable
   + an associated function is a function that’s implemented on a type: `String::new`
   + `enum` is a type that can be in one of multiple possible states.
     * Result’s variants are `Ok` and `Err`. The `Ok` variant indicates the operation was successful, and inside `Ok` is the successfully generated value. The `Err` variant means the operation failed, and `Err` contains information about how or why the operation failed.
     * expect will cause the program to crash and display the message that you passed as an argument to expect
+  + running the `cargo doc --open` command will build documentation provided by all your dependencies locally and open it in your browser
+  + `let guess: u32 = guess.trim().parse().expect("Please type a number!");`
+    * convert a rust string to an integer
 
 ## C + SoftBound + Rust
 - works well
