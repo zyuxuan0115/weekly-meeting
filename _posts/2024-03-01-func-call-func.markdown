@@ -13,14 +13,20 @@ categories: serverless functions
   + reference is [here](https://docs.openfaas.com/reference/rest-api/#:~:text=Functions%20can%20be%20invoked%20by,path%20to%20the%20gateway%2    0URL.&text=If%20no%20namespace%20is%20specified,%2Fasync%2Dfunction%2FNAME.)
 - test SoftBound on C function with `libcurl`
   + unfortunately, softbound doesn't support callback functions, and libcurl needs callback function
-    * solution 1: not to use libcurl
-    * solution 2: make RPC call a standalone static library and after softbound's pass is run, link the static library for RPC.  
+    * solution 1: not to use `libcurl` - doable but painful
+    * solution 2: make RPC call a standalone static library and after softbound's pass is done, link that static library.  
+      - because the RPC interface is developed by us, so we can guarantee it is always safe.
 
 - the update of function from `faas-cli` command is very slow.
 	+ can we update the function by logging into kubernetes and update local docker directly?
 
 ## Make Rust function call another serverless function
-
+- From Rust book:
+  + if not specify, everything is inmutable
+  + an associated function is a function that’s implemented on a type: `String::new`
+  + `enum` is a type that can be in one of multiple possible states.
+    * Result’s variants are `Ok` and `Err`. The `Ok` variant indicates the operation was successful, and inside `Ok` is the successfully generated value. The `Err` variant means the operation failed, and `Err` contains information about how or why the operation failed.
+    * expect will cause the program to crash and display the message that you passed as an argument to expect
 
 ## C + SoftBound + Rust
 - works well
