@@ -4,7 +4,10 @@ title:  "2024-03-01 make function calls another function"
 date:   2024-03-01 1:53:46 -0500
 categories: serverless functions
 ---
-
+## Make C function call another serverless function 
+### libcurl
+- Using [libcurl](https://curl.se/libcurl/) can easily send http get request in C
+	+ the example of using callback function is [here](https://curl.se/libcurl/c/ftpget.html)
 
 ## C + SoftBound + Rust
 - works well

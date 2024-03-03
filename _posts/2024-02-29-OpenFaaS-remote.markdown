@@ -138,6 +138,13 @@ categories: serverless functions
 > kill <PID of kubectl which uses port 8080>
 ```
 
+also on the server machines
+```bash
+> /usr/local/bin/k3s-killall.sh
+> /usr/local/bin/k3s-agent-uninstall.sh
+> /usr/local/bin/k3s-uninstall.sh
+```
+
 ## Kubernetes
 - [Kubernetes Components](https://kubernetes.io/docs/concepts/overview/components/)
 - [Kubernetes cluster has its cluster DNS](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)
