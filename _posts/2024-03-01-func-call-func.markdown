@@ -11,6 +11,16 @@ categories: serverless functions
 - if a function is invoked within kubernetes cluster, to call the function, the REST api is:
   + `http://gateway.openfaas.svc.cluster.local.:8080`
   + reference is [here](https://docs.openfaas.com/reference/rest-api/#:~:text=Functions%20can%20be%20invoked%20by,path%20to%20the%20gateway%2    0URL.&text=If%20no%20namespace%20is%20specified,%2Fasync%2Dfunction%2FNAME.)
+- test SoftBound on C function with `libcurl`
+  + unfortunately, softbound doesn't support callback functions, and libcurl needs callback function
+    * solution 1: not to use libcurl
+    * solution 2: make RPC call a standalone static library and after softbound's pass is run, link the static library for RPC.  
+
+- the update of function from `faas-cli` command is very slow.
+	+ can we update the function by logging into kubernetes and update local docker directly?
+
+## Make Rust function call another serverless function
+
 
 ## C + SoftBound + Rust
 - works well
