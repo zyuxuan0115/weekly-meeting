@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "2024-03-01 make function calls another function"
-date:   2024-03-01 1:53:46 -0500
+title:  "2024-03-04 Rust.part1"
+date:   2024-03-04 1:53:46 -0500
 categories: serverless functions
 ---
 ### From Rust [tutorial](https://doc.rust-lang.org/book/)
