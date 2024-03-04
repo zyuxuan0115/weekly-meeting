@@ -46,6 +46,40 @@ let a = [3; 5]; // a = [3,3,3,3,3];
 - If you add a semicolon to the end of an expression, you turn it into a statement, and it will then not return a value.
 - For `if` statement, rust only executes the block for the first true condition, and once it finds one, it doesn’t even check the rest.
 - Blocks of code evaluate to the last expression in them
+  + so `let number = if condition { 5 } else { "six" };` is wrong.
+- `loop`: you can add the value you want returned after the break expression you use to stop the loop; that value will be returned out of the loop so you can use it
+
+```rust
+let result = loop {
+  counter += 1;
+
+  if counter == 10 {
+    break counter * 2;
+  }
+};
+```
+
+- You can optionally specify a loop label on a loop that you can then use with `break` or `continue` to specify that those keywords apply to the labeled loop instead of the innermost loop.
+
+```rust
+'counting_up: loop {
+  println!("count = {count}");
+  let mut remaining = 10;
+  loop {
+    println!("remaining = {remaining}");
+    if remaining == 9 {
+      break;
+    }
+    if count == 2 {
+      break 'counting_up;
+    }
+    remaining -= 1;
+  }
+  count += 1;
+}
+```
+
+#### Chapter 4
 
 ### libcurl for rust
 - [The link](https://docs.rs/curl/latest/curl/)
