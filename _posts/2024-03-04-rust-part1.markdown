@@ -88,6 +88,7 @@ let result = loop {
 | String | This type manages data allocated on the heap and as such is able to store an amount of text that is unknown to us at compile time. |
 
 - how copying a string works
+  + To ensure memory safety, after the line let s2 = s1;, Rust considers s1 as no longer valid.
 
 ```rust
 let s1 = String::from("hello");
@@ -95,3 +96,5 @@ let s2 = s1;
 ```
 
 ![pic1](/assets/2024-03-04/trpl04-02.svg)
+
+
