@@ -21,7 +21,8 @@ categories: serverless functions
 	+ can we update the function by logging into kubernetes and update local docker directly?
 
 ## Make Rust function call another serverless function
-### From Rust tutorial
+### From Rust [tutorial](https://doc.rust-lang.org/book/)
+#### Chapter 2
 - if not specify, everything is inmutable
 - an associated function is a function that’s implemented on a type: `String::new`
 - `enum` is a type that can be in one of multiple possible states.
@@ -30,6 +31,19 @@ categories: serverless functions
 - running the `cargo doc --open` command will build documentation provided by all your dependencies locally and open it in your browser
 - `let guess: u32 = guess.trim().parse().expect("Please type a number!");`
   + convert a rust string to an integer
+
+#### Chapter 3
+- You aren’t allowed to use `mut` with constants, and the type of the value must be annotated.
+- By using `let`, we can perform a few transformations on a value but have the variable be immutable after those transformations have been completed.
+- declare an array type
+
+```rust
+let a: [i32; 5] = [1, 2, 3, 4, 5];
+let a = [3; 5]; // a = [3,3,3,3,3];
+```
+
+- In function signatures, you must declare the type of each parameter.
+- If you add a semicolon to the end of an expression, you turn it into a statement, and it will then not return a value.
 
 ### libcurl for rust
 - [The link](https://docs.rs/curl/latest/curl/)
