@@ -1,0 +1,67 @@
+---
+layout: post
+title:  "2024-03-01 make function calls another function"
+date:   2024-03-01 1:53:46 -0500
+categories: serverless functions
+---
+### From Rust [tutorial](https://doc.rust-lang.org/book/)
+#### Chapter 2
+- if not specify, everything is inmutable
+- an associated function is a function that’s implemented on a type: `String::new`
+- `enum` is a type that can be in one of multiple possible states.
+  + Result’s variants are `Ok` and `Err`. The `Ok` variant indicates the operation was successful, and inside `Ok` is the successfully generated value. The `Err` variant means the operation failed, and `Err` contains information about how or why the operation failed.
+  + expect will cause the program to crash and display the message that you passed as an argument to expect
+- running the `cargo doc --open` command will build documentation provided by all your dependencies locally and open it in your browser
+- `let guess: u32 = guess.trim().parse().expect("Please type a number!");`
+  + convert a rust string to an integer
+
+#### Chapter 3
+- You aren’t allowed to use `mut` with constants, and the type of the value must be annotated.
+- By using `let`, we can perform a few transformations on a value but have the variable be immutable after those transformations have been completed.
+- declare an array type
+
+```rust
+let a: [i32; 5] = [1, 2, 3, 4, 5];
+let a = [3; 5]; // a = [3,3,3,3,3];
+```
+
+- In function signatures, you must declare the type of each parameter.
+- If you add a semicolon to the end of an expression, you turn it into a statement, and it will then not return a value.
+- For `if` statement, rust only executes the block for the first true condition, and once it finds one, it doesn’t even check the rest.
+- Blocks of code evaluate to the last expression in them
+  + so `let number = if condition { 5 } else { "six" };` is wrong.
+- `loop`: you can add the value you want returned after the break expression you use to stop the loop; that value will be returned out of the loop so you can use it
+
+```rust
+let result = loop {
+  counter += 1;
+
+  if counter == 10 {
+    break counter * 2;
+  }
+};
+```
+
+- You can optionally specify a loop label on a loop that you can then use with `break` or `continue` to specify that those keywords apply to the labeled loop instead of the innermost loop.
+
+```rust
+'counting_up: loop {
+  println!("count = {count}");
+  let mut remaining = 10;
+  loop {
+    println!("remaining = {remaining}");
+    if remaining == 9 {
+      break;
+    }
+    if count == 2 {
+      break 'counting_up;
+    }
+    remaining -= 1;
+  }
+  count += 1;
+}
+```
+
+#### Chapter 4
+
+
