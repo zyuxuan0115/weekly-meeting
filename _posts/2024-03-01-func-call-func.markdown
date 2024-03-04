@@ -44,6 +44,8 @@ let a = [3; 5]; // a = [3,3,3,3,3];
 
 - In function signatures, you must declare the type of each parameter.
 - If you add a semicolon to the end of an expression, you turn it into a statement, and it will then not return a value.
+- For `if` statement, rust only executes the block for the first true condition, and once it finds one, it doesn’t even check the rest.
+- Blocks of code evaluate to the last expression in them
 
 ### libcurl for rust
 - [The link](https://docs.rs/curl/latest/curl/)
