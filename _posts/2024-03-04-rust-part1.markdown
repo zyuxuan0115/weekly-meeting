@@ -1,11 +1,11 @@
 ---
 layout: post
-title:  "2024-03-04 Rust.part1"
+title:  "2024-03-04 Rust part1"
 date:   2024-03-04 1:53:46 -0500
 categories: serverless functions
 ---
-### From Rust [tutorial](https://doc.rust-lang.org/book/)
-#### Chapter 2
+## From Rust [tutorial](https://doc.rust-lang.org/book/)
+### Chapter 2
 - if not specify, everything is inmutable
 - an associated function is a function that’s implemented on a type: `String::new`
 - `enum` is a type that can be in one of multiple possible states.
@@ -15,7 +15,7 @@ categories: serverless functions
 - `let guess: u32 = guess.trim().parse().expect("Please type a number!");`
   + convert a rust string to an integer
 
-#### Chapter 3
+### Chapter 3
 - You aren’t allowed to use `mut` with constants, and the type of the value must be annotated.
 - By using `let`, we can perform a few transformations on a value but have the variable be immutable after those transformations have been completed.
 - declare an array type
@@ -62,6 +62,36 @@ let result = loop {
 }
 ```
 
-#### Chapter 4
+### Chapter 4
+#### Overview
+<strong>Ownership</strong> is a set of rules that govern how a Rust program manages memory.
+- Rust uses a third approach: memory is managed through a system of ownership with a set of rules that the compiler checks.
+	+ The memory is automatically returned once the variable that owns it goes out of scope.
+- None of the features of ownership will slow down your program while it’s running.
+
+#### Stack vs Heap
+- Pushing to the stack is faster than allocating on the heap because the allocator never has to search for a place to store new data; that location is always at the top of the stack. 
+- Allocating space on the heap requires more work because the allocator must first find a big enough space to hold the data and then perform bookkeeping to prepare for the next allocation.
+- The main purpose of ownership is to manage heap data.
 
 
+#### Ownership Rules
+- Each value in Rust has an owner.
+- There can only be one owner at a time.
+- When the owner goes out of scope, the value will be dropped.
+
+#### Different types of strings
+
+| type | Description |
+| ----------- | ----------- |
+| string literals | a string value is hardcoded into the program |
+| String | This type manages data allocated on the heap and as such is able to store an amount of text that is unknown to us at compile time. |
+
+- how copying a string works
+
+```rust
+let s1 = String::from("hello");
+let s2 = s1;
+```
+
+![pic1](/assets/2024-03-04/trpl04-02.svg)
