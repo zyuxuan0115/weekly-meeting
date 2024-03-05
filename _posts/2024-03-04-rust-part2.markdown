@@ -351,3 +351,10 @@ if let Coin::Quarter(state) = coin {
 - We can include an `else` with an `if let`. The block of code that goes with the `else` is the same as the block of code that would go with the `_` case in the match expression.
 
 ### Chatper 7
+- <strong>Packages</strong>: A Cargo feature that lets you build, test, and share crates
+  + A package contains a `Cargo.toml` file that describes how to build those crates.
+  + A package can contain as many binary crates as you like, but at most only one library crate.
+  + A package can have multiple binary crates by placing files in the `src/bin` directory: each file will be a separate binary crate. 
+- <strong>Crates</strong>: A tree of modules that produces a library or executable
+- <strong>Modules</strong> and use: Let you control the organization, scope, and privacy of paths
+- <strong>Paths</strong>: A way of naming an item, such as a struct, function, or module
