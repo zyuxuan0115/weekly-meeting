@@ -164,4 +164,38 @@ fn main() {
 ```
 
 - We start an `impl` (implementation) block for `Rectangle`. Everything within this `impl` block will be associated with the `Rectangle` type.
-- Methods can take ownership of `self`, borrow `self` immutably, or borrow `self` mutably 
+- Methods can <strong>take ownership</strong> of `self`, <strong>borrow</strong> `self` <strong>immutably</strong>, or <strong>borrow</strong> `self` <strong>mutably</strong>
+
+- when you call a method with object.something(), Rust automatically adds in &, &mut, or * so object matches the signature of the method. In other words, the following are the same: (No C style `object poioner -> mechod`, all in `.`)
+
+```rust
+p1.distance(&p2);
+(&p1).distance(&p2);
+```
+
+#### Associated Functions
+- All functions defined within an impl block are called associated functions because they’re associated with the type named after the `impl`. We can define associated functions that don’t have `self` as their first parameter (and thus are not methods) because they don’t need an instance of the type to work with.
+    + Associated functions that aren’t methods are often used for constructors that will return a new instance of the struct.
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+impl Rectangle {
+    fn square(size: u32) -> Self {
+        Self {
+            width: size,
+            height: size,
+        }
+    }
+}
+
+fn main() {
+    let sq = Rectangle::square(3);
+}
+```
+
+
+### Chapter 6
