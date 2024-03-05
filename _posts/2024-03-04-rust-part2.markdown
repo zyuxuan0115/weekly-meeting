@@ -326,5 +326,28 @@ fn remove_fancy_hat() {}
 
 Nothing else happens on your turn if you roll anything other than a 3 or a 7. We can express that by using the unit value as the code that goes with the `_` arm.
 
+#### if let
+```rust
+let config_max = Some(3u8);
+if let Some(max) = config_max {
+   println!("The maximum is configured to be {}", max);
+}
+```
+ - The syntax `if let` takes a pattern and an expression separated by an equal sign. It works the same way as a `match`, where the expression is given to the match and the pattern is its first arm.
+
+- The code in the `if let` block isn’t run if the value doesn’t match the pattern.
+
+- In other words, you can think of if let as syntax sugar for a match that runs code when the value matches one pattern and then ignores all other values.
+
+```rust
+let mut count = 0;
+if let Coin::Quarter(state) = coin {
+   println!("State quarter from {:?}!", state);
+} else {
+   count += 1;
+}
+```
+
+- We can include an `else` with an `if let`. The block of code that goes with the `else` is the same as the block of code that would go with the `_` case in the match expression.
 
 ### Chatper 7
