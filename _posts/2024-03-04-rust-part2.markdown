@@ -17,6 +17,7 @@ struct User {
 }
 
 fn main() {
+    // the entire instance must be mutable; Rust doesn’t allow us to mark only certain fields as mutable.
     let mut user1 = User {
         active: true,
         username: String::from("someusername123"),
@@ -24,10 +25,15 @@ fn main() {
         sign_in_count: 1,
     };
     user1.email = String::from("anotheremail@example.com");
+    // create one instance from another instance
+    let user2 = User {
+        email: String::from("another@example.com"),
+        ..user1
+    };
 }
 ```
 
-- Note that the entire instance must be mutable; Rust doesn’t allow us to mark only certain fields as mutable.
+- Note that the struct update syntax uses = like an assignment; this is because it moves the data, just as we saw in the “Variables and Data Interacting with Move” section. In this example, we can no longer use user1 as a whole after creating user2 because the String in the username field of user1 was moved into user2.
 
 - a builder function of a struct
 
@@ -41,3 +47,54 @@ fn build_user(email: String, username: String) -> User {
     }
 }
 ```
+
+#### tuple struct
+Tuple structs are useful when you want to give the whole tuple a name and make the tuple a different type from other tuples, and when naming each field as in a regular struct would be verbose or redundant.
+
+```rust
+struct Color(i32, i32, i32);
+struct Point(i32, i32, i32);
+
+fn main() {
+    // the black and origin values are different types
+    let black = Color(0, 0, 0);
+    let origin = Point(0, 0, 0);
+}
+```
+
+#### Unit-Like Structs Without Any Fields
+later we’ll implement behavior for this type such that every instance of AlwaysEqual is always equal to every instance of any other type, perhaps to have a known result for testing purposes.
+
+```rust
+struct AlwaysEqual;
+
+fn main() {
+    let subject = AlwaysEqual;
+}
+```
+
+- Lifetimes ensure that the data referenced by a struct is valid for as long as the struct is.
+- So the following code won't work. 
+
+```rust
+struct User {
+    active: bool,
+    username: &str,
+    email: &str,
+    sign_in_count: u64,
+}
+
+fn main() {
+    let user1 = User {
+        active: true,
+        username: "someusername123",
+        email: "someone@example.com",
+        sign_in_count: 1,
+    };
+}
+```
+
+
+- The `println!` macro can do many kinds of formatting, and by default, the curly brackets tell `println!` to use formatting known as Display: output intended for direct end user consumption.
+	+ structs don’t have a provided implementation of Display to use with println! and the `{}` placeholder.
+  + Rust does include functionality to print out debugging information, but we have to explicitly opt in to make that functionality available for our struct. To do that, we add the outer attribute `#[derive(Debug)]` just before the struct definition
