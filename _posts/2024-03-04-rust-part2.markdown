@@ -199,3 +199,79 @@ fn main() {
 
 
 ### Chapter 6
+
+```rust
+enum IpAddrKind {
+    V4,
+    V6,
+}
+let four = IpAddrKind::V4;
+let six = IpAddrKind::V6;
+```
+
+both values `IpAddrKind::V4` and `IpAddrKind::V6` are of the same type: `IpAddrKind`.
+
+- Rather than an enum inside a struct, we can put data directly into each enum variant.
+
+```rust 
+enum IpAddr {
+   V4(String),
+   V6(String),
+}
+let home = IpAddr::V4(String::from("127.0.0.1"));
+let loopback = IpAddr::V6(String::from("::1"));
+```
+
+- the name of each enum variant that we define also becomes a function that constructs an instance of the `enum`. That is, `IpAddr::V4()` is a function call that takes a String argument and returns an instance of the `IpAddr` type.
+
+- each variant in `enum` can have different types and amounts of associated data.
+
+```rust
+enum IpAddr {
+   V4(u8, u8, u8, u8),
+   V6(String),
+}
+let home = IpAddr::V4(127, 0, 0, 1);
+let loopback = IpAddr::V6(String::from("::1"));
+```
+
+- we’re also able to define methods on enums. 
+
+```rust
+enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(i32, i32, i32),
+}
+impl Message {
+    fn call(&self) {
+    // method body would be defined here
+    }
+}
+let m = Message::Write(String::from("hello"));
+m.call();
+```
+
+#### Option: important enum type
+- The Option type encodes the very common scenario in which a value could be something or it could be nothing.
+- Rust doesn’t have the `null` feature that many other languages have.
+	+ It does have an enum that can encode the concept of a value being present or absent, it is defined by the standard library as follows:
+
+```rust
+enum Option<T> {
+    None,
+    Some(T),
+}
+```
+
+- you can use `Some` and `None` directly without the `Option::` prefix.
+
+```rust
+let some_number = Some(5);
+let some_char = Some('e');
+let absent_number: Option<i32> = None;
+```
+
+#### The match Control Flow Construct
+- values go through each pattern in a match, and at the first pattern the value “fits,” the value falls into the associated code block to be used during execution.
