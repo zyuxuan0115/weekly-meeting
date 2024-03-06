@@ -469,3 +469,64 @@ pub fn eat_at_restaurant() {
 ```
 
 #### Use keyword
+- Adding `use` and a path in a scope is similar to creating a symbolic link in the filesystem.
+- `use` only creates the shortcut for the particular scope in which the `use` occurs.
+- if 2 function from different module has the same name, we can us `as` key word to change one of the function name
+	+ There’s another solution to the problem of bringing two types of the same name into the same scope with `use`: after the path, we can specify `as` and a new local name, or alias, for the type. 
+
+```rust
+use std::fmt::Result;
+use std::io::Result as IoResult;
+fn function1() -> Result {
+    // --snip--
+}
+fn function2() -> IoResult<()> {
+    // --snip--
+}
+```
+
+#### re-exporting
+When we bring a name into scope with the use keyword, the name available in the new scope is private. To enable the code that calls our code to refer to that name as if it had been defined in that code’s scope, we can combine `pub` and `use`.
+
+```rust
+mod front_of_house {
+    pub mod hosting {
+        pub fn add_to_waitlist() {}
+    }
+}
+pub use crate::front_of_house::hosting;
+pub fn eat_at_restaurant() {
+    hosting::add_to_waitlist();
+}
+```
+
+#### Using External Packages
+- Members of the Rust community have made many packages available at `crates.io`
+- Pulling any of them into your package involves these same steps
+	+ listing them in your package’s `Cargo.toml` file 
+	+ using use to bring items from their crates into scope
+
+#### Using Nested Paths to Clean Up Large use Lists
+
+```rust
+use std::io;
+use std::io::Write;
+// is equivalent to
+use std::io::{self, Write};
+```
+
+```rust
+use std::cmp::Ordering;
+use std::io;
+// is equivalent to
+use std::{cmp::Ordering, io};
+```
+
+```rust
+use std::collections::*;
+```
+
+- This use statement brings all public items defined in `std::collections` into the current scope.
+
+- modules can be Separated into different files
+	+ examples in [doc.rust-lang.org/book](https://doc.rust-lang.org/book/ch07-05-separating-modules-into-different-files.html)
