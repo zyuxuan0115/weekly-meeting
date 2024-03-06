@@ -71,7 +71,15 @@ categories: serverless functions
 > curl 127.0.0.1:8080/function/hello-rust -d "This is Yuxuan."
 ```
 
+- using REST api to [update your function](https://docs.openfaas.com/reference/rest-api/#update-a-function)
 
+```bash
+> curl -i \
+> -X PUT \
+> http://admin:$PASSWORD@127.0.0.1:8080/system/functions \
+> -H 'Content-Type: application/json' \
+> -d '{"service":"hello-rust","image":"zyuxuan0115/hello-rust-new:latest","fprocess":"main","labels":{},"annotations":{}}'
+```
 
 
 ### deploy OpenFaaS on remote cluster with multiple machines
@@ -151,7 +159,14 @@ also on the server machines
 	+ The Domain Name System (DNS) is the phonebook of the Internet. DNS translates domain names to IP addresses so browsers can load Internet resources.
 - curious about what is a agent in kubernete
 	+ [the architecture of k3s](https://docs.k3s.io/architecture)
+- [how to create a cluster](https://kubernetes.io/docs/tutorials/kubernetes-basics/create-cluster/)
+- ssh to your kubernete pod
 
+```bash
+> kubectl -n your-namespace exec -it your-pod -- sh
+```
+
+- [how to get your bearer token](https://github.com/openfaas/faas-cli/issues/647)
 
 ## C + SoftBound + Rust
 - works well
