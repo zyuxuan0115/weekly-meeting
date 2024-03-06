@@ -27,6 +27,7 @@ categories: serverless functions
 
 ## C + SoftBound + Rust
 - works well
+- ![d1](/assets/2024-03-06/d1.png)
 
 ### concern about merging C and Rust functions
 - How do they handle strings since we need to transfter strings from caller to callee
