@@ -4,5 +4,33 @@ title:  "2024-03-05 Rust part3"
 date:   2024-03-05 1:53:49 -0500
 categories: serverless functions
 ---
-## From Rust [tutorial](https://doc.rust-lang.org/book/)
-### Chapter 8
+## Chapter 8
+### vector
+#### create a vector
+
+```rust
+let v1: Vec<i32> = Vec::new();
+let v2 = vec![1, 2, 3];
+let mut v3 = Vec::new();
+v3.push(5);
+v3.push(6);
+v3.push(7);
+v3.push(8);
+```
+
+#### Reading Elements of Vectors
+
+- There are two ways to reference a value stored in a vector: via indexing or using the `get` method.
+	+ Using `&` and `[]` gives us a reference to the element at the index value.
+
+```rust
+let v = vec![1, 2, 3, 4, 5];
+let third: &i32 = &v[2];
+println!("The third element is {third}");
+
+let third: Option<&i32> = v.get(2);
+match third {
+   Some(third) => println!("The third element is {third}"),
+   None => println!("There is no third element."),
+}
+```
