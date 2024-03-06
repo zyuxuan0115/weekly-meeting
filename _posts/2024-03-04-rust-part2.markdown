@@ -410,3 +410,62 @@ crate
 ```
 
 - If module A is contained inside module B, we say that module A is the child of module B and that module B is the parent of module A.
+
+#### Paths
+A path can take two forms:
+- <strong>An absolute path</strong> is the full path starting from a crate root; for code from an external crate, the absolute path begins with the crate name, and for code from the current crate, it starts with the literal `crate`.
+- <strong>A relative path</strong> starts from the current module and uses `self`, `super`, or an identifier in the current module.
+
+`pub` keyword
+- <strong>In Rust, all items (functions, methods, structs, enums, modules, and constants) are private to parent modules by default. If you want to make an item like a function or struct private, you put it in a module.</strong>
+- <strong>Items in a parent module can’t use the private items inside child modules, but items in child modules can use the items in their ancestor modules</strong>
+- The `pub` keyword on a module only lets code in its ancestor modules refer to it, not access its inner code.
+
+```rust
+mod front_of_house {
+    pub mod hosting {
+        pub fn add_to_waitlist() {}
+    }
+}
+pub fn eat_at_restaurant() {
+    // Absolute path
+    crate::front_of_house::hosting::add_to_waitlist();
+    // Relative path
+    front_of_house::hosting::add_to_waitlist();
+}
+``` 
+
+- Using `super` allows us to reference an item that we know is in the parent module, which can make rearranging the module tree easier when the module is closely related to the parent. This is like starting a filesystem path with the `..` syntax. 
+
+- `pub` can also be added to `struct` and `enum` or their sub-field
+	+ for `struct`: even the struct is public, it's members may not be public
+	+ for `enum`: if enum is public, all of it's elements are public
+
+```rust
+mod back_of_house {
+    pub struct Breakfast {
+        pub toast: String,
+        seasonal_fruit: String,
+    }
+    impl Breakfast {
+        pub fn summer(toast: &str) -> Breakfast {
+            Breakfast {
+                toast: String::from(toast),
+                seasonal_fruit: String::from("peaches"),
+            }
+        }
+    }
+}
+pub fn eat_at_restaurant() {
+    // Order a breakfast in the summer with Rye toast
+    let mut meal = back_of_house::Breakfast::summer("Rye");
+    // Change our mind about what bread we'd like
+    meal.toast = String::from("Wheat");
+    println!("I'd like {} toast please", meal.toast);
+    // The next line won't compile if we uncomment it; we're not allowed
+    // to see or modify the seasonal fruit that comes with the meal
+    // meal.seasonal_fruit = String::from("blueberries");
+}
+```
+
+#### Use keyword
