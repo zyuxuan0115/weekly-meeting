@@ -42,3 +42,6 @@ categories: serverless functions
 @.str = private unnamed_addr constant [20 x i8] c"Hello, I'm C code!\0A\00", align 1
 ```
 
+## Can we directly change docker image
+- make kubernetes to update the image: [stackoverflow](https://stackoverflow.com/questions/40366192/kubernetes-how-to-make-deployment-to-update-image)
+- [The kubernetes documentation about how to use it to update the image](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-em-restart-em-)
