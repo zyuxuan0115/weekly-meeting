@@ -34,3 +34,19 @@ match third {
    None => println!("There is no third element."),
 }
 ```
+
+#### Iterating over the Values in a Vector
+
+```rust
+let mut v = vec![100, 32, 57];
+for i in &mut v {
+   *i += 50;
+}
+```
+
+here `&mut` means
+
+- We can also iterate over mutable references to each element in a mutable vector in order to make changes to all the elements.
+- We have to use the `*` dereference operator to get to the value in `i` before we can use the `+=` operator. 
+
+#### Combining with enum to store multiple types
