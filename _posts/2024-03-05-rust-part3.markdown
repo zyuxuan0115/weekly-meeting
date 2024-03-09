@@ -67,3 +67,71 @@ let row = vec![
 
 - Like any other struct, a vector is freed when it goes out of scope.
 - When the vector gets dropped, all of its contents are also dropped.
+
+#### String
+The `String` type, which is provided by Rust’s standard library rather than coded into the core language, is a growable, mutable, owned, UTF-8 encoded string type.
+
+`String` is actually implemented as a wrapper around a vector of bytes with some extra guarantees, restrictions, and capabilities.
+
+- convert String literal to String
+
+```rust
+let s = "initial contents".to_string();
+let s = String::from("initial contents");
+```
+
+- Concatenation
+
+```rust
+let mut s = String::from("foo");
+s.push_str("bar");
+
+let mut s = String::from("lo");
+s.push('l');
+
+let s1 = String::from("Hello, ");
+let s2 = String::from("world!");
+let s3 = s1 + &s2; // note s1 has been moved here and can no longer be used
+```
+
+- we can only add a &str to a String; we can’t add two String values together
+
+- the `format!` macro
+
+```rust
+let s1 = String::from("tic");
+let s2 = String::from("tac");
+let s3 = String::from("toe");
+
+let s = format!("{s1}-{s2}-{s3}");
+```
+
+The `format!` macro works like `println!`, but instead of printing the output to the screen, it returns a String with the contents.
+
+- UTF-8
+	+ Rust string is in UTF-8 so each charactor may be 1 byte, 2 bytes ... So It doesn't support string indexing.
+	+ to iterate over strings, the best way is this:
+
+```rust
+for c in "Зд".chars() {
+    println!("{c}");
+}
+// output
+// З
+// д
+```
+
+or
+
+```rust
+for b in "Зд".bytes() {
+    println!("{b}");
+}
+// output
+// 208
+// 151
+// 208
+// 180
+```
+
+#### HashMap
