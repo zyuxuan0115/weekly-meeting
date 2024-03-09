@@ -50,3 +50,20 @@ here `&mut` means
 - We have to use the `*` dereference operator to get to the value in `i` before we can use the `+=` operator. 
 
 #### Combining with enum to store multiple types
+
+```rust
+enum SpreadsheetCell {
+  Int(i32),
+  Float(f64),
+  Text(String),
+}
+
+let row = vec![
+  SpreadsheetCell::Int(3),
+  SpreadsheetCell::Text(String::from("blue")),
+  SpreadsheetCell::Float(10.12),
+];
+```
+
+- Like any other struct, a vector is freed when it goes out of scope.
+- When the vector gets dropped, all of its contents are also dropped.
