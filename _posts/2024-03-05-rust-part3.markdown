@@ -68,19 +68,19 @@ let row = vec![
 - Like any other struct, a vector is freed when it goes out of scope.
 - When the vector gets dropped, all of its contents are also dropped.
 
-#### String
+### String
 The `String` type, which is provided by Rust’s standard library rather than coded into the core language, is a growable, mutable, owned, UTF-8 encoded string type.
 
 `String` is actually implemented as a wrapper around a vector of bytes with some extra guarantees, restrictions, and capabilities.
 
-- convert String literal to String
+#### convert String literal to String
 
 ```rust
 let s = "initial contents".to_string();
 let s = String::from("initial contents");
 ```
 
-- Concatenation
+#### Concatenation
 
 ```rust
 let mut s = String::from("foo");
@@ -96,7 +96,7 @@ let s3 = s1 + &s2; // note s1 has been moved here and can no longer be used
 
 - we can only add a &str to a String; we can’t add two String values together
 
-- the `format!` macro
+#### the `format!` macro
 
 ```rust
 let s1 = String::from("tic");
@@ -108,7 +108,7 @@ let s = format!("{s1}-{s2}-{s3}");
 
 The `format!` macro works like `println!`, but instead of printing the output to the screen, it returns a String with the contents.
 
-- UTF-8
+#### UTF-8
 	+ Rust string is in UTF-8 so each charactor may be 1 byte, 2 bytes ... So It doesn't support string indexing.
 	+ to iterate over strings, the best way is this:
 
@@ -134,10 +134,10 @@ for b in "Зд".bytes() {
 // 180
 ```
 
-#### HashMap
+### HashMap
 The type `HashMap<K, V>` stores a mapping of keys of type K to values of type V using a hashing function, which determines how it places these keys and values into memory.
 
-- Creating a New Hash Map
+#### Creating a New Hash Map
 
 ```rust
 use std::collections::HashMap;
@@ -146,7 +146,7 @@ scores.insert(String::from("Blue"), 10);
 scores.insert(String::from("Yellow"), 50);
 ```
 
-- Accessing Values in a Hash Map
+#### Accessing Values in a Hash Map
 
 ```rust
 scores.insert(String::from("Blue"), 10);
@@ -169,7 +169,7 @@ for (key, value) in &scores {
 }
 ```
 
-- Ownership 
+#### Ownership 
 
 For owned values like String, the values will be moved and the hash map will be the owner of those values
 
@@ -187,4 +187,34 @@ map.insert(field_name, field_value);
 
 We aren’t able to use the variables `field_name` and `field_value` after they’ve been moved into the hash map with the call to insert.
 
-- Adding a Key and Value Only If a Key Isn’t Present
+#### Adding a Key and Value Only If a Key Isn’t Present
+
+```rust
+let mut scores = HashMap::new();
+scores.insert(String::from("Blue"), 10);
+
+scores.entry(String::from("Yellow")).or_insert(50);
+scores.entry(String::from("Blue")).or_insert(50);
+
+println!("{:?}", scores);
+```
+
+#### Updating a Value Based on the Old Value
+
+```rust
+let text = "hello world wonderful world";
+
+let mut map = HashMap::new();
+
+for word in text.split_whitespace() {
+   let count = map.entry(word).or_insert(0);
+   *count += 1;
+}
+
+println!("{:?}", map);
+```
+
+note: The `or_insert` method returns a mutable reference `(&mut V)` to the value for the specified key.
+
+
+## Chapter 9
