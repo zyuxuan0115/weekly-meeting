@@ -1,0 +1,6 @@
+---
+layout: post
+title:  "2024-03-10 Rust part4"
+date:   2024-03-10 1:53:49 -0500
+categories: serverless functions
+---
