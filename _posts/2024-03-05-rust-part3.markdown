@@ -135,3 +135,56 @@ for b in "Зд".bytes() {
 ```
 
 #### HashMap
+The type `HashMap<K, V>` stores a mapping of keys of type K to values of type V using a hashing function, which determines how it places these keys and values into memory.
+
+- Creating a New Hash Map
+
+```rust
+use std::collections::HashMap;
+let mut scores = HashMap::new();
+scores.insert(String::from("Blue"), 10);
+scores.insert(String::from("Yellow"), 50);
+```
+
+- Accessing Values in a Hash Map
+
+```rust
+scores.insert(String::from("Blue"), 10);
+scores.insert(String::from("Yellow"), 50);
+
+let team_name = String::from("Blue");
+let score = scores.get(&team_name).copied().unwrap_or(0);
+```
+
+The get method returns an `Option<&V>`; if there’s no value for that key in the hash map, get will return `None`. This program handles the `Option` by calling copied to get an `Option<i32>` rather than an `Option<&i32>`, then `unwrap_or` to set score to zero if scores doesn't have an entry for the key.
+
+- iterate over each key/value pair in a hash map 
+
+```rust
+scores.insert(String::from("Blue"), 10);
+scores.insert(String::from("Yellow"), 50);
+
+for (key, value) in &scores {
+  println!("{key}: {value}");
+}
+```
+
+- Ownership 
+
+For owned values like String, the values will be moved and the hash map will be the owner of those values
+
+```rust
+use std::collections::HashMap;
+
+let field_name = String::from("Favorite color");
+let field_value = String::from("Blue");
+
+let mut map = HashMap::new();
+map.insert(field_name, field_value);
+// field_name and field_value are invalid at this point, try using them and
+// see what compiler error you get!
+```
+
+We aren’t able to use the variables `field_name` and `field_value` after they’ve been moved into the hash map with the call to insert.
+
+- Adding a Key and Value Only If a Key Isn’t Present
