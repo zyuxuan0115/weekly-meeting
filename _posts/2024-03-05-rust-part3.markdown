@@ -651,3 +651,82 @@ fn returns_summarizable() -> impl Summary {
 ```
 
 However, you can only use `impl Trait` if you’re returning a single type. 
+
+<strong> Using Trait Bounds to Conditionally Implement Methods </strong>
+
+In the last `impl` block, `Pair<T>` only implements the `cmp_display` method if its inner type `T` implements the `PartialOrd` trait that enables comparison and the `Display` trait that enables printing.
+
+```rust
+use std::fmt::Display;
+
+struct Pair<T> {
+    x: T,
+    y: T,
+}
+
+impl<T> Pair<T> {
+    fn new(x: T, y: T) -> Self {
+        Self { x, y }
+    }
+}
+
+impl<T: Display + PartialOrd> Pair<T> {
+    fn cmp_display(&self) {
+        if self.x >= self.y {
+            println!("The largest member is x = {}", self.x);
+        } else {
+            println!("The largest member is y = {}", self.y);
+        }
+    }
+}
+```
+
+- We can also conditionally implement a trait for any type that implements another trait.
+	+ for example, implement `ToString` trait to every type that has `Display` trait
+
+```rust
+impl<T: Display> ToString for T {
+    // --snip--
+}
+```
+
+### Lifetimes
+
+lifetimes ensure that references are valid as long as we need them to be.
+
+#### Preventing Dangling References with Lifetimes
+
+```rust
+fn main() {
+    let r;                // ---------+-- 'a
+                          //          |
+    {                     //          |
+        let x = 5;        // -+-- 'b  |
+        r = &x;           //  |       |
+    }                     // -+       |
+                          //          |
+    println!("r: {}", r); //          |
+}                         // ---------+
+```
+
+#### Generic Lifetimes in Functions
+
+- If we try to implement the longest function as shown
+
+```rust
+fn main() {
+    let string1 = String::from("abcd");
+    let string2 = "xyz";
+
+    let result = longest(string1.as_str(), string2);
+    println!("The longest string is {}", result);
+}
+
+fn longest(x: &str, y: &str) -> &str {
+    if x.len() > y.len() {
+        x
+    } else {
+        y
+    }
+}
+```
