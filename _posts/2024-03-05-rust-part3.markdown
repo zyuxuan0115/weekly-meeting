@@ -471,3 +471,183 @@ fn main() {
 Some generic parameters are declared with `impl` and some are declared with the method definition. Here, the generic parameters `X1` and `Y1` are declared after `impl` because they go with the struct definition. The generic parameters `X2` and `Y2` are declared after fn mixup, because they’re only relevant to the method.
 
 ### Traits 
+Trait definitions are a way to group method signatures together to define a set of behaviors necessary to accomplish some purpose.
+
+```rust
+pub trait Summary {
+    fn summarize(&self) -> String;
+}
+
+pub struct NewsArticle {
+    pub headline: String,
+    pub location: String,
+    pub author: String,
+    pub content: String,
+}
+
+impl Summary for NewsArticle {
+    fn summarize(&self) -> String {
+        format!("{}, by {} ({})", self.headline, self.author, self.location)
+    }
+}
+
+pub struct Tweet {
+    pub username: String,
+    pub content: String,
+    pub reply: bool,
+    pub retweet: bool,
+}
+
+impl Summary for Tweet {
+    fn summarize(&self) -> String {
+        format!("{}: {}", self.username, self.content)
+    }
+}
+```
+
+users of the crate can call the trait methods on instances of `NewsArticle` and `Tweet` in the same way we call regular methods. The only difference is that the user must bring the trait into scope as well as the types.
+
+```rust
+use aggregator::{Summary, Tweet};
+
+fn main() {
+    let tweet = Tweet {
+        username: String::from("horse_ebooks"),
+        content: String::from(
+            "of course, as you probably already know, people",
+        ),
+        reply: false,
+        retweet: false,
+    };
+
+    println!("1 new tweet: {}", tweet.summarize());
+}
+```
+
+One restriction to note is that we can implement a trait on a type only if at least one of the trait or the type is <strong>local</strong> to our crate.
+
+#### Default Implementations
+
+```rust
+pub trait Summary {
+    fn summarize(&self) -> String {
+        String::from("(Read more...)")
+    }
+}
+```
+
+Even though we’re no longer defining the `summarize` method on `NewsArticle` directly, we’ve provided a default implementation and specified that `NewsArticle` implements the `Summary` trait.
+
+```rust
+    let article = NewsArticle {
+        headline: String::from("Penguins win the Stanley Cup Championship!"),
+        location: String::from("Pittsburgh, PA, USA"),
+        author: String::from("Iceburgh"),
+        content: String::from(
+            "The Pittsburgh Penguins once again are the best \
+             hockey team in the NHL.",
+        ),
+    };
+
+    println!("New article available! {}", article.summarize());
+```
+
+This code will print `New article available! (Read more...)`
+
+- Default implementations can call other methods in the same trait, even if those other methods don’t have a default implementation.
+
+```rust
+pub trait Summary {
+    fn summarize_author(&self) -> String;
+
+    fn summarize(&self) -> String {
+        format!("(Read more from {}...)", self.summarize_author())
+    }
+}
+
+impl Summary for Tweet {
+    fn summarize_author(&self) -> String {
+        format!("@{}", self.username)
+    }
+}
+
+let tweet = Tweet {
+    username: String::from("horse_ebooks"),
+    content: String::from(
+       "of course, as you probably already know, people",
+    ),
+    reply: false,
+    retweet: false,
+};
+
+println!("1 new tweet: {}", tweet.summarize());
+```
+
+#### Traits as Parameters
+
+```rust
+pub fn notify(item: &impl Summary) {
+    println!("Breaking news! {}", item.summarize());
+}
+```
+
+Instead of a concrete type for the item parameter, we specify the `impl` keyword and the trait name. <strong>This parameter accepts any type that implements the specified trait. </strong>
+- We can call notify and pass in any instance of `NewsArticle` or `Tweet`.
+- Code that calls the function with any other type, such as a `String` or an `i32`, won’t compile because those types don’t implement Summary.
+
+syntax sugar for traits as parameters
+
+```rust
+pub fn notify<T: Summary>(item: &T) {
+    println!("Breaking news! {}", item.summarize());
+}
+```
+
+<strong> Specifying Multiple Trait Bounds with the + Syntax </strong>
+
+We can also specify more than one trait bound. Say we wanted notify to use display formatting as well as summarize on item: we specify in the notify definition that item must implement both `Display` and `Summary`.
+
+```rust
+pub fn notify(item: &(impl Summary + Display)) {
+```
+
+or 
+
+```rust
+pub fn notify<T: Summary + Display>(item: &T) {
+```
+
+- Clearer Trait Bounds with `where` Clauses
+
+```rust
+fn some_function<T: Display + Clone, U: Clone + Debug>(t: &T, u: &U) -> i32 {
+```
+
+can be written in 
+
+```rust
+fn some_function<T, U>(t: &T, u: &U) -> i32
+where
+    T: Display + Clone,
+    U: Clone + Debug,
+{
+```
+
+<strong> Returning Types that Implement Traits </strong>
+
+By using `impl Summary` for the return type, we specify that the `returns_summarizable` function returns some type that implements the `Summary` trait without naming the concrete type.
+
+```rust
+fn returns_summarizable() -> impl Summary {
+    Tweet {
+        username: String::from("horse_ebooks"),
+        content: String::from(
+            "of course, as you probably already know, people",
+        ),
+        reply: false,
+        retweet: false,
+    }
+}
+```
+
+However, you can only use `impl Trait` if you’re returning a single type. 
