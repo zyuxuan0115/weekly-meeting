@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "2024-03-05 Rust part3"
+title:  "2024-03-05 Rust part3 (trait)"
 date:   2024-03-05 1:53:49 -0500
 categories: serverless functions
 ---

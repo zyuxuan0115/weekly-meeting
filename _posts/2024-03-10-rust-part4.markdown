@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "2024-03-10 Rust part4"
+title:  "2024-03-10 Rust part4 (closure)"
 date:   2024-03-10 1:53:49 -0500
 categories: serverless functions
 ---
@@ -84,4 +84,59 @@ let expensive_closure = |num: u32| -> u32 {
   thread::sleep(Duration::from_secs(2));
   num
 };
+```
+
+<strong>fn vs. closure</strong>
+
+```rust
+fn  add_one_v1   (x: u32) -> u32 { x + 1 }
+let add_one_v2 = |x: u32| -> u32 { x + 1 };
+let add_one_v3 = |x|             { x + 1 };
+let add_one_v4 = |x|               x + 1  ;
+```
+
+`add_one_v3` and `add_one_v4` lines require compiler to infer the type of `x` when `add_one_v3` and `add_one_v4` are called.
+
+#### Capturing References or Moving Ownership
+Closures can capture values from their environment in three ways:
+- borrowing immutably
+- borrowing mutably
+- taking ownership
+	+ If you want to force the closure to take ownership of the values it uses in the environment even though the body of the closure doesn’t strictly need ownership, you can use the `move` keyword before the parameter list. 
+
+```rust
+use std::thread;
+
+fn main() {
+    let list = vec![1, 2, 3];
+    println!("Before defining closure: {:?}", list);
+
+    thread::spawn(move || println!("From thread: {:?}", list))
+        .join()
+        .unwrap();
+}
+```
+
+We spawn a new thread, giving the thread a closure to run as an argument.
+
+#### Moving Captured Values Out of Closures and the Fn Traits
+
+- Closures will automatically implement one, two, or all three of these `Fn` traits
+	+ `FnOnce` applies to closures that can be called once. 
+		* A closure that moves captured values out of its body will only implement `FnOnce` and none of the other `Fn` traits, because it can only be called once.
+	+ `FnMut` applies to closures that don’t move captured values out of their body, but that might mutate the captured values. These closures can be called more than once.
+	+ `Fn` applies to closures that don’t move captured values out of their body and that don’t mutate captured values, as well as closures that capture nothing from their environment. These closures can be called more than once without mutating their environment, which is important in cases such as calling a closure multiple times concurrently.
+
+```rust
+impl<T> Option<T> {
+    pub fn unwrap_or_else<F>(self, f: F) -> T
+    where
+        F: FnOnce() -> T
+    {
+        match self {
+            Some(x) => x,
+            None => f(),
+        }
+    }
+}
 ```
