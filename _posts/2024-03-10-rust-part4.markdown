@@ -304,3 +304,18 @@ mod tests {
     }
 }
 ```
+
+
+## Chapter 15 
+<strong>Smart pointers</strong> are data structures that act like a pointer but also have additional metadata and capabilities.
+
+- Rust has an additional difference between references and smart pointers: while references only borrow data, in many cases, smart pointers own the data they point to.
+
+- Smart pointers are usually implemented using structs.
+	+ Unlike an ordinary struct, smart pointers implement the `Deref` and `Drop` traits.
+		* The `Deref` trait allows an instance of the smart pointer struct to behave like a reference.
+		* The `Drop` trait allows you to customize the code that’s run when an instance of the smart pointer goes out of scope.
+
+### Box - Box<T>
+
+- Boxes allow you to store data on the heap rather than the stack.
