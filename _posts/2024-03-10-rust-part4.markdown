@@ -237,4 +237,70 @@ We aren’t allowed to use `v1_iter` after the call to `sum` because `sum` takes
 
 Instead, they produce different iterators by changing some aspect of the original iterator.
 
+```rust
+let v1: Vec<i32> = vec![1, 2, 3];
+let v2: Vec<_> = v1.iter().map(|x| x + 1).collect();
+assert_eq!(v2, vec![2, 3, 4]);
+```
 
+- <strong>map method </strong>
+Map takes a closure to call on each item as the items are iterated through. The map method returns a new iterator that produces the modified items.
+
+To consume the new iterator, we’ll use the `collect` method
+
+#### Using Closures that Capture Their Environment
+
+- <strong>filter method</strong>
+
+The closure gets an item from the iterator and returns a `bool`. If the closure returns `true`, the value will be included in the iteration produced by filter. If the closure returns `false`, the value won’t be included.
+
+```rust
+#[derive(PartialEq, Debug)]
+struct Shoe {
+    size: u32,
+    style: String,
+}
+
+fn shoes_in_size(shoes: Vec<Shoe>, shoe_size: u32) -> Vec<Shoe> {
+    shoes.into_iter().filter(|s| s.size == shoe_size).collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn filters_by_size() {
+        let shoes = vec![
+            Shoe {
+                size: 10,
+                style: String::from("sneaker"),
+            },
+            Shoe {
+                size: 13,
+                style: String::from("sandal"),
+            },
+            Shoe {
+                size: 10,
+                style: String::from("boot"),
+            },
+        ];
+
+        let in_my_size = shoes_in_size(shoes, 10);
+
+        assert_eq!(
+            in_my_size,
+            vec![
+                Shoe {
+                    size: 10,
+                    style: String::from("sneaker")
+                },
+                Shoe {
+                    size: 10,
+                    style: String::from("boot")
+                },
+            ]
+        );
+    }
+}
+```
