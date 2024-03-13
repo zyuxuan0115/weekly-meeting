@@ -359,7 +359,7 @@ fn main() {
 }
 ```
 
-### Treating Smart Pointers Like Regular References with the Deref Trait
+### Deref Trait of Box
 
 ```rust
 fn main() {
@@ -405,3 +405,140 @@ When we entered `*y`, behind the scenes Rust actually ran this code:
 ```rust
 *(y.deref())
 ```
+
+#### Implicit Deref Coercions with Functions and Methods
+
+Deref coercion is a convenience Rust performs on arguments to functions and methods, and works only on types that implement the Deref trait. 
+
+It happens automatically when we pass a reference to a particular type’s value as an argument to a function or method that doesn’t match the parameter type in the function or method definition.
+
+Deref coercion was added to Rust so that programmers writing function and method calls don’t need to add as many explicit references and dereferences with `&` and `*`. 
+
+The deref coercion feature also lets us write more code that can work for either references or smart pointers.
+
+```rust
+fn main() {
+    let m = MyBox::new(String::from("Rust"));
+    hello(&m);
+}
+```
+
+without deref coercion, we will have to use this: 
+
+```rust
+fn main() {
+    let m = MyBox::new(String::from("Rust"));
+    hello(&(*m)[..]);
+}
+```
+
+When the Deref trait is defined for the types involved, Rust will analyze the types and use `Deref::deref` as many times as necessary to get a reference to match the parameter’s type.
+
+### Drop trait of Box
+
+Drop trait lets you customize what happens when a value is about to go out of scope.
+
+```rust
+struct CustomSmartPointer {
+    data: String,
+}
+
+impl Drop for CustomSmartPointer {
+    fn drop(&mut self) {
+        println!("Dropping CustomSmartPointer with data `{}`!", self.data);
+    }
+}
+
+fn main() {
+    let c = CustomSmartPointer {
+        data: String::from("my stuff"),
+    };
+    let d = CustomSmartPointer {
+        data: String::from("other stuff"),
+    };
+    println!("CustomSmartPointers created.");
+}
+```
+
+Variables are dropped in the reverse order of their creation.
+
+#### Dropping a Value Early with std::mem::drop
+
+Rust doesn’t let you call the Drop trait’s drop method manually; instead you have to call the `std::mem::drop` function provided by the standard library if you want to force a value to be dropped before the end of its scope.
+
+The `std::mem::drop` function is different from the `drop` method in the `Drop` trait. We call it by passing as an argument the value we want to force drop.
+
+```rust
+fn main() {
+    let c = CustomSmartPointer {
+        data: String::from("some data"),
+    };
+    println!("CustomSmartPointer created.");
+    drop(c);
+    println!("CustomSmartPointer dropped before the end of main.");
+}
+```
+
+### Rc
+- there are cases when a single value might have multiple owners
+- You have to enable multiple ownership explicitly by using the Rust type `Rc<T>`
+	+ which is an abbreviation for reference counting.
+	+ The `Rc<T>` type keeps track of the number of references to a value to determine whether or not the value is still in use.
+	+ Note that `Rc<T>` is only for use in single-threaded scenarios. 
+
+#### Using Rc to Share Data
+
+![d1](/assets/2024-03-10/trpl15-03.svg)
+
+we’ll change our definition of List to use `Rc<T>` in place of `Box<T>`
+
+```rust
+enum List {
+    Cons(i32, Rc<List>),
+    Nil,
+}
+
+use crate::List::{Cons, Nil};
+use std::rc::Rc;
+
+fn main() {
+    let a = Rc::new(Cons(5, Rc::new(Cons(10, Rc::new(Nil)))));
+    let b = Cons(3, Rc::clone(&a));
+    let c = Cons(4, Rc::clone(&a));
+}
+```
+
+When we create `b`, instead of taking ownership of `a`, we’ll clone the `Rc<List>` that `a` is holding, thereby increasing the number of references.
+
+The implementation of `Rc::clone` doesn’t make a deep copy of all the data like most types’ implementations of clone do. The call to `Rc::clone` only increments the reference count, which doesn’t take much time.
+
+- How the counting works
+
+```rust
+fn main() {
+    let a = Rc::new(Cons(5, Rc::new(Cons(10, Rc::new(Nil)))));
+    println!("count after creating a = {}", Rc::strong_count(&a));
+    let b = Cons(3, Rc::clone(&a));
+    println!("count after creating b = {}", Rc::strong_count(&a));
+    {
+        let c = Cons(4, Rc::clone(&a));
+        println!("count after creating c = {}", Rc::strong_count(&a));
+    }
+    println!("count after c goes out of scope = {}", Rc::strong_count(&a));
+}
+```
+
+the output should be:
+
+```bash
+> count after creating a = 1
+> count after creating b = 2
+> count after creating c = 3
+> count after c goes out of scope = 2
+```
+
+### RefCell
+
+Interior mutability is a design pattern in Rust that allows you to mutate data even when there are immutable references to that data; normally, this action is disallowed by the borrowing rules. To mutate data, the pattern uses unsafe code inside a data structure to bend Rust’s usual rules that govern mutation and borrowing.
+
+
