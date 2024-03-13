@@ -316,6 +316,92 @@ mod tests {
 		* The `Deref` trait allows an instance of the smart pointer struct to behave like a reference.
 		* The `Drop` trait allows you to customize the code that’s run when an instance of the smart pointer goes out of scope.
 
-### Box - Box<T>
-
+### Box 
+- `Box<T>`
 - Boxes allow you to store data on the heap rather than the stack.
+- When do you want to use `Box`:
+	+ When you have a type whose size can’t be known at compile time and you want to use a value of that type in a context that requires an exact size
+	+ When you have a large amount of data and you want to transfer ownership but ensure the data won’t be copied when you do so
+	+ When you want to own a value and you care only that it’s a type that implements a particular trait rather than being of a specific type
+
+```rust
+fn main() {
+    let b = Box::new(5);
+    println!("b = {}", b);
+}
+```
+
+We define the variable b to have the value of a `Box` that points to the value 5, which is allocated on the heap.
+
+- when a box goes out of scope, it will be deallocated.
+	+ The deallocation happens both for the box (stored on the stack) and the data it points to (stored on the heap).
+
+#### Enabling Recursive Types with Boxes
+
+A value of <strong>recursive type</strong> can have another value of the same type as part of itself.
+
+Because a `Box<T>` is a pointer, Rust always knows how much space a `Box<T>` needs: a pointer’s size doesn’t change based on the amount of data it’s pointing to. This means we can put a `Box<T>` inside the Cons variant instead of another List value directly.
+
+- Why is `Box<T>` a pointer? 
+	+ Because Box is a struct (tuple struct) with only one element.
+	+ <strong>a struct returns a pointer! </strong> (think about C struct!!!)
+
+```rust
+enum List {
+    Cons(i32, Box<List>),
+    Nil,
+}
+
+use crate::List::{Cons, Nil};
+
+fn main() {
+    let list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
+}
+```
+
+### Treating Smart Pointers Like Regular References with the Deref Trait
+
+```rust
+fn main() {
+    let x = 5;
+    let y = Box::new(x);
+
+    assert_eq!(5, x);
+    assert_eq!(5, *y);
+}
+```
+
+#### How Box is defined
+
+The `Box<T>` type is ultimately defined as a <strong>tuple struct</strong> with one element.
+
+```rust
+// MyBox is similiar to Box
+struct MyBox<T>(T);
+
+impl<T> MyBox<T> {
+    fn new(x: T) -> MyBox<T> {
+        MyBox(x)
+    }
+}
+```
+
+To enable dereferencing with the `*` operator, we implement the `Deref` trait.
+
+```rust
+use std::ops::Deref;
+
+impl<T> Deref for MyBox<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+```
+
+When we entered `*y`, behind the scenes Rust actually ran this code:
+
+```rust
+*(y.deref())
+```
