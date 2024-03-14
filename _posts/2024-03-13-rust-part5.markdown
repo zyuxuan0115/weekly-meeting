@@ -222,7 +222,9 @@ fn main() {
 
 ### Allowing Transference of Ownership Between Threads with Send
 
-`Rc<T>` cannot be Send because if you cloned an `Rc<T>` value and tried to transfer ownership of the clone to another thread, both threads might update the reference count at the same time. 
+- The `Send` marker trait indicates that ownership of values of the type implementing `Send` can be transferred between threads. 
+	+ Almost every Rust type is Send, but there are some exceptions	
+		* `Rc<T>` cannot be Send because if you cloned an `Rc<T>` value and tried to transfer ownership of the clone to another thread, both threads might update the reference count at the same time. 
 
 ### Allowing Access from Multiple Threads with Sync
 
@@ -233,3 +235,10 @@ fn main() {
 	+ The `RefCell<T>` type and the family of related `Cell<T>` types are not `Sync`.
 
 - Manually implementing `send` & `sync` traits involves implementing unsafe Rust code.
+
+
+## Chapter 17 Object-Oriented Programming
+- feature
+	+ objects
+	+ encapsulation
+	+ inheritance 
