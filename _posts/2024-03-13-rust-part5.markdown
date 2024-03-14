@@ -242,3 +242,6 @@ fn main() {
 	+ objects
 	+ encapsulation
 	+ inheritance 
+		* You would choose inheritance for two main reasons
+			- reuse that implementation for a different type: rust - trait
+      - polymorphism: to enable a child type to be used in the same places as the parent type
