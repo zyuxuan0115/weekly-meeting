@@ -238,10 +238,146 @@ fn main() {
 
 
 ## Chapter 17 Object-Oriented Programming
-- feature
-	+ objects
-	+ encapsulation
-	+ inheritance 
-		* You would choose inheritance for two main reasons
-			- reuse that implementation for a different type: rust - trait
-      - polymorphism: to enable a child type to be used in the same places as the parent type
+### OOP feature
+- objects
+- encapsulation
+- inheritance 
+	+ You would choose inheritance for two main reasons
+	+ reuse that implementation for a different type: rust - trait
+	+ polymorphism: to enable a child type to be used in the same places as the parent type
+
+## Chapter 18 
+### match Arms
+
+```rust
+match x {
+    None => None,
+    Some(i) => Some(i + 1),
+}
+```
+
+### Conditional if let Expressions
+
+```rust
+fn main() {
+    let favorite_color: Option<&str> = None;
+    let is_tuesday = false;
+    let age: Result<u8, _> = "34".parse();
+
+    if let Some(color) = favorite_color {
+        println!("Using your favorite color, {color}, as the background");
+    } else if is_tuesday {
+        println!("Tuesday is green day!");
+    } else if let Ok(age) = age {
+        if age > 30 {
+            println!("Using purple as the background color");
+        } else {
+            println!("Using orange as the background color");
+        }
+    } else {
+        println!("Using blue as the background color");
+    }
+}
+```
+
+The downside of using `if let` expressions is that the compiler doesn’t check for exhaustiveness, whereas with `match` expressions it does.
+
+### while let Conditional Loops
+
+```rust
+let mut stack = Vec::new();
+
+stack.push(1);
+stack.push(2);
+stack.push(3);
+
+while let Some(top) = stack.pop() {
+   println!("{}", top);
+}
+```
+
+### for Loops
+
+```rust
+let v = vec!['a', 'b', 'c'];
+
+for (index, value) in v.iter().enumerate() {
+   println!("{} is at index {}", value, index);
+} 
+```
+
+### let statement
+
+```rust
+let (x, y, z) = (1, 2, 3);
+```
+
+### Function Parameters
+
+```rust
+fn print_coordinates(&(x, y): &(i32, i32)) {
+    println!("Current location: ({}, {})", x, y);
+}
+
+fn main() {
+    let point = (3, 5);
+    print_coordinates(&point);
+}
+```
+
+### Refutability: Whether a Pattern Might Fail to Match
+- Patterns that will match for any possible value passed are <strong>irrefutable</strong>.
+	+ for example: `let x = 5;`
+- Patterns that can fail to match for some possible value are <strong>refutable</strong>.
+	+ `let Some(x) = some_option_value;` doesn't work.
+	+ `if let x = 5 {println!("{}",x;)}` doesn't work.
+- but this works
+
+```rust
+if let Some(x) = some_option_value {
+  println!("{}", x);
+}
+```
+
+### Matching Named Variables
+
+```rust
+let x = Some(5);
+let y = 10;
+
+match x {
+  Some(50) => println!("Got 50"),
+  Some(y) => println!("Matched, y = {y}"),
+  _ => println!("Default case, x = {:?}", x),
+}
+
+println!("at the end: x = {:?}, y = {y}", x);
+```
+
+- `Some(y)` is different from `let y=10`
+
+- match multiple patterns using the `|` syntax
+
+```rust
+let x = 1;
+
+match x {
+  1 | 2 => println!("one or two"),
+  3 => println!("three"),
+  _ => println!("anything"),
+}
+```
+
+- The `..=` syntax allows us to match to an inclusive range of values.
+
+```rust
+    let x = 'c';
+
+    match x {
+        'a'..='j' => println!("early ASCII letter"),
+        'k'..='z' => println!("late ASCII letter"),
+        _ => println!("something else"),
+    }
+```
+
+
