@@ -21,6 +21,6 @@ A concrete example of compiling a single library and a single executable using t
 - [How to compile Rust to LLVM bitcode including dependencies?](https://stackoverflow.com/questions/69042049/how-to-compile-rust-to-llvm-bitcode-including-dependencies)
 
 ```bash
-> RUSTFLAGS="--emit=llvm-ir" cargo build --release
-> llvm-link target/release/deps/*.bc > withdeps.bc
+> RUSTFLAGS="--emit=llvm-ir" cargo build
+> llvm-link target/release/deps/*.ll > withdeps.ll
 ```
