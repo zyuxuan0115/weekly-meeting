@@ -6,7 +6,10 @@ categories: serverless functions
 ---
 
 ### libcurl for Rust
-- [trait Handler](https://docs.rs/curl/latest/curl/easy/trait.Handler.html)
+- [Easy](https://docs.rs/curl/latest/curl/easy/struct.Easy.html)
+- [Easy2 trait Handler](https://docs.rs/curl/latest/curl/easy/trait.Handler.html)
+- using libcurl to build RPC for serverless function in Rust
+	+ done. code is [here]()
 
 ### how to use rustc to compile files from other crate
 - [stackoverflow](https://stackoverflow.com/questions/61987049/why-building-with-rustc-command-cannot-see-crates)
@@ -24,3 +27,7 @@ A concrete example of compiling a single library and a single executable using t
 > RUSTFLAGS="--emit=llvm-ir" cargo build
 > llvm-link target/release/deps/*.ll > withdeps.ll
 ```
+
+### LLVM17 & new LLVM pass manager
+- [llvm17's webpage](https://github.com/llvm/llvm-project/releases/tag/llvmorg-17.0.5)
+- [new llvm pass tutorial](https://llvm.org/docs/WritingAnLLVMNewPMPass.html)
