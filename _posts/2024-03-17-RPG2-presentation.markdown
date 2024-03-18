@@ -11,3 +11,19 @@ categories: serverless functions
 
 #### When to prefetch?
 - prefetch timeliness
+	+ too early: kick out of the cache by the new data
+	+ too late:
+ 
+```c
+for (int i=0; i<1024; i++){
+  a[i] = b[i] * c[i];
+}
+```
+
+```c
+for (int i=0; i<N; i++){
+  for (int j=0; j<M; j++){
+    a[i] = b[c[i]+j];
+  }
+}
+```
