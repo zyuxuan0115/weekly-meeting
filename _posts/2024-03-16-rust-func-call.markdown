@@ -31,3 +31,15 @@ A concrete example of compiling a single library and a single executable using t
 ### LLVM17 & new LLVM pass manager
 - [llvm17's webpage](https://github.com/llvm/llvm-project/releases/tag/llvmorg-17.0.5)
 - [new llvm pass tutorial](https://llvm.org/docs/WritingAnLLVMNewPMPass.html)
+
+### How to add LLVM Instrincs
+- [llvm.memcpy intrincs](https://llvm.org/docs/LangRef.html#id2102)
+- [stackoverflow example](https://stackoverflow.com/questions/11985247/llvm-insert-intrinsic-function-cos)
+- [sample code to create IR builder](https://gist.github.com/seven1m/2ca74265cca9ef6f493ef1de87e9252d#file-hello_world_llvm-cpp-L14)
+
+### Merge 2 Rust serverless functions
+![d1](/assets/2024-03-16/d1.png)
+
+### the version number conflict
+rustc version 1.46 is based on LLVM 10 (for SoftBound)
+rustc version 1.76 (the current version) is based on LLVM 17 (for libcurl - to construct the RPC)

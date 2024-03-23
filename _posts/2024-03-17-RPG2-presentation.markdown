@@ -11,8 +11,8 @@ categories: serverless functions
 
 #### When to prefetch?
 - prefetch timeliness
-	+ too early: kick out of the cache by the new data
-	+ too late:
+	+ <strong>too early</strong>: prefetch a lot useless data and will finally be kicked out of the cache by the new data
+	+ <strong>too late</strong>: when the data is needed by the processor, the data has not been brought to the cache
  
 ```c
 for (int i=0; i<1024; i++){
@@ -27,3 +27,11 @@ for (int i=0; i<N; i++){
   }
 }
 ```
+
+#### How to insert prefetch at runtime?
+- if prefetch is inserted, all the PC dependent instructions will need to be updated 
+
+#### useful figures are at 
+- 2023-04-21
+- 2024-05-05
+- 2024-05-22 
