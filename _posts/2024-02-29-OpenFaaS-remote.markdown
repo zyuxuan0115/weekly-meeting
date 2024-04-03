@@ -106,7 +106,8 @@ categories: serverless functions
 
 ```bash
 > export KUBECONFIG=`pwd`/kubeconfig
-> kubectl get node
+> kubectl config use-context default
+> kubectl get node -o wide
 ```
 
 - run openfaas
