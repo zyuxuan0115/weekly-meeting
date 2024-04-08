@@ -44,14 +44,14 @@ categories: serverless functions
 
 #### The processor in apache thrift - handle incoming request
 
-From [this book](https://livebook.manning.com/concept/apache-thrift/processor), I know
+From [this book](https://drive.google.com/file/d/11ZcqoKKuy_eCtQEUJvDP6FMH1t5e3J1a), I know
 
 - Once a client does connect, we need to process RPC calls made over the connection. The inner while loop uses the processor `process()` method to process client RPC requests. The `process()` method takes care of everything required to process one RPC request. The `process()` method will read the client’s RPC message from the network, determine which handler method to call, unpack the parameters using the I/O stack, and call the handler. When the handler returns with a result, the processor serializes the result back to the client using the I/O stack. The inner loop breaks when the client disconnects, which causes the `process()` method to return 0.
 
 - Note that the TProcessor `process()` method takes three parameters, `proc.process (proto, proto, and nullptr)`. In this example, we pass the protocol twice. The processor uses the first parameter for reading and the second for writing. We’ll look at in/out protocol stacks in detail in section 10.4, “Using factories.” The third parameter to the `process()` method is the Processor context, which we’re not supporting in our simple server. This parameter works in conjunction with an optional TProcessorEventHandler. Processor event handlers allow us to hook processor events (pre/post I/O stack read/write operations) without hacking the Apache Thrift source code. 
 
 
-#### The client in apache thrift - send request to downstream functions
+#### The client in apache thrift - class that allow other service to connect to the server
 - For example, in [UniqueIDService](https://github.com/delimitrou/DeathStarBench/blob/master/socialNetwork/gen-cpp/UniqueIdService.cpp#L291), they have:
 
 ```cpp
