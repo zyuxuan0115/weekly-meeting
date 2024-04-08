@@ -77,8 +77,42 @@ void UniqueIdServiceClient::send_ComposeUniqueId(const int64_t req_id, const Pos
 	+ like `UniqueIdServiceClient` connected to `UniqueIdServiceServer`
 	+ but this client won't be used in `UniqueIdService` but in `ComposePostService`
 
+#### the RPC in DeathStarBench
+- in one service, run client of another service.  
+	+ For example, in [ComposePostService](https://github.com/delimitrou/DeathStarBench/blob/master/socialNetwork/src/ComposePostService/ComposePostHandler.h#L374)
 
-- the RPC in [DeathStarBench](https://github.com/delimitrou/DeathStarBench/blob/master/socialNetwork/gen-cpp/UniqueIdService.h#L224)
+```c++
+  auto text_future =
+      std::async(std::launch::async, &ComposePostHandler::_ComposeTextHelper,
+                 this, req_id, text, writer_text_map);
+  auto creator_future =
+      std::async(std::launch::async, &ComposePostHandler::_ComposeCreaterHelper,
+                 this, req_id, user_id, username, writer_text_map);
+  auto media_future =
+      std::async(std::launch::async, &ComposePostHandler::_ComposeMediaHelper,
+                 this, req_id, media_types, media_ids, writer_text_map);
+  auto unique_id_future = std::async(
+      std::launch::async, &ComposePostHandler::_ComposeUniqueIdHelper, this,
+      req_id, post_type, writer_text_map);
+
+  Post post;
+  auto timestamp =
+      duration_cast<milliseconds>(system_clock::now().time_since_epoch())
+          .count();
+  post.timestamp = timestamp;
+
+  post.post_id = unique_id_future.get();
+  post.creator = creator_future.get();
+  post.media = media_future.get();
+  auto text_return = text_future.get();
+  post.text = text_return.text;
+  post.urls = text_return.urls;
+  post.user_mentions = text_return.user_mentions;
+  post.req_id = req_id;
+  post.post_type = post_type;
+```
+
+### JSON parser
 - If we want to convert C++ code to C, we need some good JSON parser in C
 	+ the [json parser library](https://www.json.org/json-en.html) in C
 	+ <strong>another useful json parser</strong> [jsmn](https://github.com/zserge/jsmn/tree/master)
