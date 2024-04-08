@@ -20,16 +20,39 @@ categories: serverless functions
 	* [here](https://github.com/apache/thrift/tree/master/tutorial/cpp) is an example
   * I also have an example [here](https://github.com/zyuxuan0115/faas-cpp-test/tree/main/apache_thrift_example)
 
-#### The processor in apache thrift
+#### The overall structure
+
+- When you generate C++ code for an Apache Thrift service, the IDL compiler creates
+  + a client
+  + a processor
+  + an interface (serviceIF) for the service. 
+- It also creates a `TProcessorFactory` subclass and an interface factory for the service. 
+	+ The processor factory is implemented, but the interface factory is abstract and must be implemented by the user.
+- Multiplexed processors and multiplexed protocols allow a single server to host multiple services
+
+#### The server
+
+- The derive classes of `TServer`
+
+![t0](/assets/2024-04-07/t0.png)
+
+- Detail about different derive classes
+
+![t1](/assets/2024-04-07/t1.png)
+
+- The `main()` function in this example implements the server behavior. <strong>The IDL compiler-generated Processor class takes care of reading network requests from clients and dispatching calls to the correct handler method.</strong> In the example, the Processor class, MessageProcessor, is constructed with an instance of the MessageHandler service. As always, the C++ framework wants all objects wrapped in a `shared_ptr`. 
+
+#### The processor in apache thrift - handle incoming request
+
+From [this book](https://livebook.manning.com/concept/apache-thrift/processor), I know
+
+- Once a client does connect, we need to process RPC calls made over the connection. The inner while loop uses the processor `process()` method to process client RPC requests. The `process()` method takes care of everything required to process one RPC request. The `process()` method will read the client’s RPC message from the network, determine which handler method to call, unpack the parameters using the I/O stack, and call the handler. When the handler returns with a result, the processor serializes the result back to the client using the I/O stack. The inner loop breaks when the client disconnects, which causes the `process()` method to return 0.
+
+- Note that the TProcessor `process()` method takes three parameters, `proc.process (proto, proto, and nullptr)`. In this example, we pass the protocol twice. The processor uses the first parameter for reading and the second for writing. We’ll look at in/out protocol stacks in detail in section 10.4, “Using factories.” The third parameter to the `process()` method is the Processor context, which we’re not supporting in our simple server. This parameter works in conjunction with an optional TProcessorEventHandler. Processor event handlers allow us to hook processor events (pre/post I/O stack read/write operations) without hacking the Apache Thrift source code. 
 
 
-- Once a client does connect, we need to process RPC calls made over the connection. The inner while loop uses the processor `process()` method to process client RPC requests 6. The `process()` method takes care of everything required to process one RPC request. The `process()` method will read the client’s RPC message from the network, determine which handler method to call, unpack the parameters using the I/O stack, and call the handler. When the handler returns with a result, the processor serializes the result back to the client using the I/O stack. The inner loop breaks when the client disconnects, which causes the `process()` method to return 0 6.
-
-- Note that the TProcessor `process()` method takes three parameters, `proc.process (proto, proto, and nullptr)`. In this example, we pass the protocol twice. The processor uses the first parameter for reading and the second for writing. We’ll look at in/out protocol stacks in detail in section 10.4, “Using factories.” The third parameter to the `process()` method is the Processor context, which we’re not supporting in our simple server. This parameter works in conjunction with an optional TProcessorEventHandler. Processor event handlers allow us to hook processor events (pre/post I/O stack read/write operations) without hacking the Apache Thrift source code. You can find a processor event handler example in chapter 8, “Implementing services.”
-
-
-#### How does one function call another function
-- For example [UniqueIDService](https://github.com/delimitrou/DeathStarBench/blob/master/socialNetwork/gen-cpp/UniqueIdService.cpp#L291)
+#### The client in apache thrift - send request to downstream functions
+- For example, in [UniqueIDService](https://github.com/delimitrou/DeathStarBench/blob/master/socialNetwork/gen-cpp/UniqueIdService.cpp#L291), they have:
 
 ```cpp
 void UniqueIdServiceClient::send_ComposeUniqueId(const int64_t req_id, const PostType::type post_type, const std::map<std::string, std::string> & carrier)
@@ -48,6 +71,12 @@ void UniqueIdServiceClient::send_ComposeUniqueId(const int64_t req_id, const Pos
   oprot_->getTransport()->flush();
 }
 ```
+
+- I think client is the client code that teach you how to connect to the server.
+	+ the other microservice can use your client code to send request to your server
+	+ like `UniqueIdServiceClient` connected to `UniqueIdServiceServer`
+	+ but this client won't be used in `UniqueIdService` but in `ComposePostService`
+
 
 - the RPC in [DeathStarBench](https://github.com/delimitrou/DeathStarBench/blob/master/socialNetwork/gen-cpp/UniqueIdService.h#L224)
 - If we want to convert C++ code to C, we need some good JSON parser in C
