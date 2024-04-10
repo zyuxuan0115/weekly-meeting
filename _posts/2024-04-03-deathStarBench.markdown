@@ -112,6 +112,13 @@ void UniqueIdServiceClient::send_ComposeUniqueId(const int64_t req_id, const Pos
   post.post_type = post_type;
 ```
 
+#### Make OpenFaaS connect to MongoDB
+- the post about how to do this is [here](https://www.openfaas.com/blog/get-started-with-python-mongo/)
+- Manual: [mongodb sync client api in rust](https://docs.rs/mongodb/latest/mongodb/index.html#using-the-sync-api)
+- [rust mongodb example from github](https://github.com/mehmetsefabalik/rust-mongodb-example/tree/master)
+- [mongodb C client api](https://mongoc.org/libmongoc/current/mongoc_client_get_collection.html)
+- JSON for rust - [serde](https://serde.rs/data-model.html)
+
 ### JSON parser
 - If we want to convert C++ code to C, we need some good JSON parser in C
 	+ the [json parser library](https://www.json.org/json-en.html) in C
