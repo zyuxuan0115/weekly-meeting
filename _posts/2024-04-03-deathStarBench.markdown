@@ -119,6 +119,23 @@ void UniqueIdServiceClient::send_ComposeUniqueId(const int64_t req_id, const Pos
 - [mongodb C client api](https://mongoc.org/libmongoc/current/mongoc_client_get_collection.html)
 - JSON for rust - [serde](https://serde.rs/data-model.html)
 
+#### rust serverless version
+- <strong>UniqueIdService</strong>
+- <strong>UrlShortenService</strong>
+
+```bash
+curl 127.0.0.1:8080/function/url-shorten-service -d "[\"http://google.com\",\"http://kate0115.net\"]"
+```
+
+- <strong>TextService</strong>
+
+```bash
+???
+```
+
+#### can rust run multithread from another function?
+- [stackoverflow](https://stackoverflow.com/questions/33938547/cannot-call-a-function-in-a-spawned-thread-because-it-does-not-fulfill-the-requ)
+
 ### JSON parser
 - If we want to convert C++ code to C, we need some good JSON parser in C
 	+ the [json parser library](https://www.json.org/json-en.html) in C
