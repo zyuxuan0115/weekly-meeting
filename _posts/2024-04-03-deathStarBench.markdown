@@ -27,7 +27,7 @@ categories: serverless functions
   + a processor
   + an interface (serviceIF) for the service. 
 
-![t3](/assets/2024-04-07/s3.png)
+![t3](/assets/2024-04-07/t3.png)
 
 - It also creates a `TProcessorFactory` subclass and an interface factory for the service. 
 	+ The processor factory is implemented, but the interface factory is abstract and must be implemented by the user.
