@@ -26,6 +26,9 @@ categories: serverless functions
   + a client
   + a processor
   + an interface (serviceIF) for the service. 
+
+![t3](/assets/2024-04-07/s3.png)
+
 - It also creates a `TProcessorFactory` subclass and an interface factory for the service. 
 	+ The processor factory is implemented, but the interface factory is abstract and must be implemented by the user.
 - Multiplexed processors and multiplexed protocols allow a single server to host multiple services
@@ -118,13 +121,35 @@ void UniqueIdServiceClient::send_ComposeUniqueId(const int64_t req_id, const Pos
 - [rust mongodb example from github](https://github.com/mehmetsefabalik/rust-mongodb-example/tree/master)
 - [mongodb C client api](https://mongoc.org/libmongoc/current/mongoc_client_get_collection.html)
 - JSON for rust - [serde](https://serde.rs/data-model.html)
+- [how to send query to mongodb server from rust program](https://www.mongodb.com/docs/drivers/rust/current/fundamentals/crud/read-operations/query/)
 
-#### rust serverless version
+#### Make OpenFaaS connect to Memcached
+- [Deploying Memcached on Kubernetes Engine](https://cloud.google.com/kubernetes-engine/docs/tutorials/deploying-memcached-on-kubernetes-engine)
+
+```bash
+HELM_VERSION=3.14.3
+wget https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz
+```
+#### Convert DeathStarBench to Rust serverless functions 
+
+![t2](/assets/2024-04-07/t2.png)
+
 - <strong>UniqueIdService</strong>
+
+```bash
+curl 127.0.0.1:8080/function/url-shorten-service -d ""
+```
+
 - <strong>UrlShortenService</strong>
 
 ```bash
 curl 127.0.0.1:8080/function/url-shorten-service -d "[\"http://google.com\",\"http://kate0115.net\"]"
+```
+
+- <strong>UserMentionService</strong>
+
+```bash
+curl 127.0.0.1:8080/function/url-shorten-service -d "[\"Alice\",\"Bob\"]"
 ```
 
 - <strong>TextService</strong>
