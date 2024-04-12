@@ -38,6 +38,9 @@ categories: serverless functions
       - Note: the `--load-balancer` flag has a default of false, so by passing the flag, the installation will request one from your cloud provider.
     * to verify if you successfully run openfaas: 
       - `kubectl -n openfaas get deployments -l "release=openfaas, app=openfaas"`
+  + install helm
+    * `HELM_VERSION=3.14.3`
+    * `wget https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz`
 
 ```bash
 # Forward the gateway to your machine
