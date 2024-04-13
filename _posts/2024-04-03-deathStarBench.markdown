@@ -161,7 +161,13 @@ curl 127.0.0.1:8080/function/text-service -d "Hey, this is @Yuxuan! Nice to meet
 - <strong>MediaService</strong>
 
 ```bash
-curl 127.0.0.1:8080/function/media-service -d "{[11081,11082], [\"p1.png\", \"t2.jpg\"]}"
+curl 127.0.0.1:8080/function/media-service -d "{\"media_id\":[111,222],\"media_type\":[\"png\",\"jpg\"]}"
+```
+
+- <strong>RegisterUserWithId</strong>
+
+```bash
+curl 127.0.0.1:8080/function/register-user-with-id -d "{\"first_name\":\"Tom\",\"last_name\":\"Wenisch\",\"username\":\"twenisch\",\"password\":\"umichandgoogle\",\"user_id\":11028}"
 ```
 
 #### can rust run multithread from another function?
