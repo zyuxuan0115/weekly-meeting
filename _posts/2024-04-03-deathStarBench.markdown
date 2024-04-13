@@ -137,7 +137,7 @@ wget https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz
 - <strong>UniqueIdService</strong>
 
 ```bash
-curl 127.0.0.1:8080/function/url-shorten-service -d ""
+curl 127.0.0.1:8080/function/unique-id-service -d ""
 ```
 
 - <strong>UrlShortenService</strong>
@@ -156,6 +156,12 @@ curl 127.0.0.1:8080/function/user-mention-service -d "[\"Alice\",\"Bob\"]"
 
 ```bash
 curl 127.0.0.1:8080/function/text-service -d "Hey, this is @Yuxuan! Nice to meet you and will come to my personal web: https://kate0115.net @tomwenisch "
+```
+
+- <strong>MediaService</strong>
+
+```bash
+curl 127.0.0.1:8080/function/media-service -d ""
 ```
 
 #### can rust run multithread from another function?
