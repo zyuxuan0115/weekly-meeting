@@ -170,6 +170,12 @@ curl 127.0.0.1:8080/function/media-service -d "{\"media_id\":[111,222],\"media_t
 curl 127.0.0.1:8080/function/register-user-with-id -d "{\"first_name\":\"Tom\",\"last_name\":\"Wenisch\",\"username\":\"twenisch\",\"password\":\"umichandgoogle\",\"user_id\":11028}"
 ```
 
+- <strong>RegisterUser</strong>
+
+```bash
+curl 127.0.0.1:8080/function/register-user-with-id -d "{\"first_name\":\"Yuxuan\",\"last_name\":\"Zhang\",\"username\":\"zyuxuan\",\"password\":\"umichandupenn\"}"
+```
+
 #### can rust run multithread from another function?
 - [stackoverflow](https://stackoverflow.com/questions/33938547/cannot-call-a-function-in-a-spawned-thread-because-it-does-not-fulfill-the-requ)
 
