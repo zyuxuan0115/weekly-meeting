@@ -188,6 +188,12 @@ curl 127.0.0.1:8080/function/compose-creator-with-username -d "zyuxuan"
 curl 127.0.0.1:8080/function/compose-creator-with-userid -d "{\"user_id\":11028,\"username\":\"twenisch\"}"
 ```
 
+- <strong>GetUserId</strong>
+
+```bash
+curl 127.0.0.1:8080/function/get-user-id -d "???"
+```
+
 #### can rust run multithread from another function?
 - [stackoverflow](https://stackoverflow.com/questions/33938547/cannot-call-a-function-in-a-spawned-thread-because-it-does-not-fulfill-the-requ)
 
