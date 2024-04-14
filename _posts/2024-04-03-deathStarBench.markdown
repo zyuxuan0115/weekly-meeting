@@ -173,7 +173,19 @@ curl 127.0.0.1:8080/function/register-user-with-id -d "{\"first_name\":\"Tom\",\
 - <strong>RegisterUser</strong>
 
 ```bash
-curl 127.0.0.1:8080/function/register-user-with-id -d "{\"first_name\":\"Yuxuan\",\"last_name\":\"Zhang\",\"username\":\"zyuxuan\",\"password\":\"umichandupenn\"}"
+curl 127.0.0.1:8080/function/register-user -d "{\"first_name\":\"Yuxuan\",\"last_name\":\"Zhang\",\"username\":\"zyuxuan\",\"password\":\"umichandupenn\"}"
+```
+
+- <strong>ComposeCreatorWithUsername</strong>
+
+```bash
+curl 127.0.0.1:8080/function/compose-creator-with-username -d "zyuxuan"
+```
+
+- <strong>ComposeCreatorWithUserId</strong>
+
+```bash
+curl 127.0.0.1:8080/function/compose-creator-with-userid -d "{\"user_id\":11028,\"username\":\"twenisch\"}"
 ```
 
 #### can rust run multithread from another function?
