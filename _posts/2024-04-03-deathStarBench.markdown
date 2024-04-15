@@ -191,7 +191,19 @@ curl 127.0.0.1:8080/function/compose-creator-with-userid -d "{\"user_id\":11028,
 - <strong>GetUserId</strong>
 
 ```bash
-curl 127.0.0.1:8080/function/get-user-id -d "???"
+curl 127.0.0.1:8080/function/get-user-id -d "zyuxuan"
+```
+
+- <strong>UserLogin</strong>
+
+```bash
+curl 127.0.0.1:8080/function/user-login -d "{\"username\":\"zyuxuan\",\"password\":\"umichandupenn\",\"secret\":\"idon'tknowwhatshouldbesecret\"}"
+```
+
+- <strong>SocialGraphInsertUser<strong>
+
+```bash
+curl 127.0.0.1:8080/function/social-graph-insert-user -d "???"
 ```
 
 #### can rust run multithread from another function?
