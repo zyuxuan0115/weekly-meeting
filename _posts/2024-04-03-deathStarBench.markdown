@@ -130,6 +130,13 @@ void UniqueIdServiceClient::send_ComposeUniqueId(const int64_t req_id, const Pos
 HELM_VERSION=3.14.3
 wget https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz
 ```
+
+#### Make OpenFaaS connect to Redis
+- tutorial from [github](https://gist.github.com/alexellis/e05a7b573ae22b209f0214d5766ff07e)
+  + doesn't work
+- Install Redis to Kubernetes using [helm](https://bitnami.com/stack/redis/helm)
+- [Using Rust to run Redis client](https://redis.io/lp/redis-enterprise-rust/) 
+
 #### Convert DeathStarBench to Rust serverless functions 
 
 ![t2](/assets/2024-04-07/t2.png)
@@ -168,6 +175,7 @@ curl 127.0.0.1:8080/function/media-service -d "{\"media_id\":[111,222],\"media_t
 
 ```bash
 curl 127.0.0.1:8080/function/register-user-with-id -d "{\"first_name\":\"Tom\",\"last_name\":\"Wenisch\",\"username\":\"twenisch\",\"password\":\"umichandgoogle\",\"user_id\":11028}"
+curl 127.0.0.1:8080/function/register-user-with-id -d "{\"first_name\":\"Joe\",\"last_name\":\"Devietti\",\"username\":\"devietti\",\"password\":\"uwandupenn\",\"user_id\":11029}"
 ```
 
 - <strong>RegisterUser</strong>
@@ -203,8 +211,16 @@ curl 127.0.0.1:8080/function/user-login -d "{\"username\":\"zyuxuan\",\"password
 - <strong>SocialGraphInsertUser<strong>
 
 ```bash
-curl 127.0.0.1:8080/function/social-graph-insert-user -d "???"
+curl 127.0.0.1:8080/function/social-graph-insert-user -d "11028"
 ```
+
+- <strong>SocialGraphFollow<strong>
+
+```bash
+curl 127.0.0.1:8080/function/social-graph-follow -d "{\"user_id\":11028,\"followee_id\":11029}"
+```
+
+
 
 #### can rust run multithread from another function?
 - [stackoverflow](https://stackoverflow.com/questions/33938547/cannot-call-a-function-in-a-spawned-thread-because-it-does-not-fulfill-the-requ)
