@@ -228,6 +228,11 @@ curl 127.0.0.1:8080/function/social-graph-follow -d "{\"user_id\":11028,\"follow
 curl 127.0.0.1:8080/function/social-graph-unfollow -d "{\"user_id\":11028,\"followee_id\":11029}"
 ```
 
+- <strong>SocialGraphFollowWithUsername</strong>
+
+```bash
+curl 127.0.0.1:8080/function/social-graph-follow-with-username -d "???"
+```
 
 #### can rust run multithread from another function?
 - [stackoverflow](https://stackoverflow.com/questions/33938547/cannot-call-a-function-in-a-spawned-thread-because-it-does-not-fulfill-the-requ)
