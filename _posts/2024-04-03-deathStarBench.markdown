@@ -282,9 +282,16 @@ curl 127.0.0.1:8080/function/read-posts -d "[1722,1723]"
 ```
 
 - <strong>WriteHomeTimeline</strong>
+  + I was thinking of using redis pipe to insert data, but it doesn't work (for now)
 
 ```bash
-curl 127.0.0.1:8080/function/write-home-timeline -d "???"
+curl 127.0.0.1:8080/function/write-home-timeline -d "{\"post_id\":1722,\"user_id\":11029,\"timestamp\":12343242,\"user_mentions_id\":[11028]}"
+```
+
+- <strong>ReadHomeTimeline</strong>
+
+```bash
+curl 127.0.0.1:8080/function/read-home-timeline -d
 ```
 
 #### can rust run multithread from another function?
