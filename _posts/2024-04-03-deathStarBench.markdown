@@ -136,6 +136,7 @@ wget https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz
   + doesn't work
 - Install Redis to Kubernetes using [helm](https://bitnami.com/stack/redis/helm)
 - [Using Rust to run Redis client](https://redis.io/lp/redis-enterprise-rust/) 
+- [Rust redis query example](https://www.linkedin.com/pulse/using-redis-rust-amit-nadiger/)
 
 #### Convert DeathStarBench to Rust serverless functions 
 
@@ -241,18 +242,40 @@ curl 127.0.0.1:8080/function/social-graph-unfollow-with-username -d "{\"user_nam
 ```
 
 - <strong>SocialGraphGetFollowers</strong>
+  + didn't test writing mongodb's data back to redis part
 
 ```bash
-curl 127.0.0.1:8080/function/social-graph-get-followers -d "???"
+curl 127.0.0.1:8080/function/social-graph-get-followers -d "11029"
 ```
 
 - <strong>SocialGraphGetFollowees</strong>
+  + didn't test writing mongodb's data back to redis part
 
 ```bash
-curl 127.0.0.1:8080/function/social-graph-get-followees -d "???"
+curl 127.0.0.1:8080/function/social-graph-get-followees -d "11028"
 ```
 
+- <strong>StorePost</strong>
 
+```bash
+curl 127.0.0.1:8080/function/store-post -d "{\"post_id\":1723,\"creator\": {\"user_id\":11028,\"username\":\"twenisch\"},\"req_id\":7795,\"text\":\"Hey, this is @devietti! Nice to meet you and welcome to my personal web: https://kate0115.net @tomwenisch \",\"user_mentions\": [{\"user_id\":11029,\"username\":\"devietti\"},{\"user_id\":11028,\"username\":\"twenisch\"}],\"media\":[],\"urls\":[{\"shortened_url\":\"http://shortened.com/we2dcwAR1r\",\"expanded_url\":\"https://kate0115.net\"}],\"timestamp\":12343242,\"post_type\":\"POST\"}"
+```
+
+```bash
+curl 127.0.0.1:8080/function/store-post -d "{\"post_id\":1723,\"creator\": {\"user_id\":11028,\"username\":\"twenisch\"},\"req_id\":7795,\"text\":\"Hey, this is @devietti! Nice to meet you and welcome to my personal web: https://kate0115.net @tomwenisch \",\"user_mentions\": [],\"media\":[],\"urls\":[],\"timestamp\":12343242,\"post_type\":\"POST\"}"
+```
+
+- <strong>ReadPost</strong>
+
+```bash
+curl 127.0.0.1:8080/function/read-post -d "1723"
+```
+
+- <strong>ReadPosts</strong>
+
+```bash
+curl 127.0.0.1:8080/function/read-posts -d "???"
+```
 
 #### can rust run multithread from another function?
 - [stackoverflow](https://stackoverflow.com/questions/33938547/cannot-call-a-function-in-a-spawned-thread-because-it-does-not-fulfill-the-requ)
