@@ -265,6 +265,10 @@ curl 127.0.0.1:8080/function/store-post -d "{\"post_id\":1723,\"creator\": {\"us
 curl 127.0.0.1:8080/function/store-post -d "{\"post_id\":1723,\"creator\": {\"user_id\":11028,\"username\":\"twenisch\"},\"req_id\":7795,\"text\":\"Hey, this is @devietti! Nice to meet you and welcome to my personal web: https://kate0115.net @tomwenisch \",\"user_mentions\": [],\"media\":[],\"urls\":[],\"timestamp\":12343242,\"post_type\":\"POST\"}"
 ```
 
+```bash
+curl 127.0.0.1:8080/function/store-post -d "{\"post_id\":1722,\"creator\": {\"user_id\":11029,\"username\":\"devietti\"},\"req_id\":7798,\"text\":\"Hey, this is @devietti! Nice to meet you and welcome to my personal web: https://kate0115.net @tomwenisch \",\"user_mentions\": [],\"media\":[],\"urls\":[],\"timestamp\":12343242,\"post_type\":\"POST\"}"
+```
+
 - <strong>ReadPost</strong>
 
 ```bash
@@ -274,7 +278,13 @@ curl 127.0.0.1:8080/function/read-post -d "1723"
 - <strong>ReadPosts</strong>
 
 ```bash
-curl 127.0.0.1:8080/function/read-posts -d "???"
+curl 127.0.0.1:8080/function/read-posts -d "[1722,1723]"
+```
+
+- <strong>WriteHomeTimeline</strong>
+
+```bash
+curl 127.0.0.1:8080/function/write-home-timeline -d "???"
 ```
 
 #### can rust run multithread from another function?
