@@ -294,6 +294,12 @@ curl 127.0.0.1:8080/function/write-home-timeline -d "{\"post_id\":1722,\"user_id
 curl 127.0.0.1:8080/function/read-home-timeline -d "{\"user_id\":11028,\"start\":0,\"stop\":1}"
 ```
 
+- <strong>ReadUserTimeline</strong>
+
+```bash
+curl 127.0.0.1:8080/function/read-home-timeline -d "???"
+```
+
 - <strong>ComposePost</strong>
 
 ```bash
