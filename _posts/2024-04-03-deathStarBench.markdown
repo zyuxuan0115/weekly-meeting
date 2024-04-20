@@ -297,13 +297,13 @@ curl 127.0.0.1:8080/function/read-home-timeline -d "{\"user_id\":11028,\"start\"
 - <strong>WriteUserTimeline</strong>
 
 ```bash
-curl 127.0.0.1:8080/function/write-user-timeline -d "???"
+curl 127.0.0.1:8080/function/write-user-timeline -d "{\"post_id\":1722,\"user_id\":11029,\"timestamp\":12343242}"
 ```
 
 - <strong>ReadUserTimeline</strong>
 
 ```bash
-curl 127.0.0.1:8080/function/read-user-timeline -d "???"
+curl 127.0.0.1:8080/function/read-user-timeline -d "{\"user_id\":11029,\"start\":0,\"stop\":1}"
 ```
 
 - <strong>ComposePost</strong>
