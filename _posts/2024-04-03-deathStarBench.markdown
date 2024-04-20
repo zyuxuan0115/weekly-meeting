@@ -297,7 +297,7 @@ curl 127.0.0.1:8080/function/read-home-timeline -d "{\"user_id\":11028,\"start\"
 - <strong>ReadUserTimeline</strong>
 
 ```bash
-curl 127.0.0.1:8080/function/read-home-timeline -d "???"
+curl 127.0.0.1:8080/function/read-user-timeline -d "???"
 ```
 
 - <strong>ComposePost</strong>
