@@ -309,7 +309,8 @@ curl 127.0.0.1:8080/function/read-user-timeline -d "{\"user_id\":11029,\"start\"
 - <strong>ComposePost</strong>
 
 ```bash
-curl 127.0.0.1:8080/function/compose-post -d "???"
+curl 127.0.0.1:8080/function/compose-post -d "{\"username\":\"twenisch\",\"user_id\":11028,\"text\":\"Hey, this is @devietti! Nice to meet you and welcome to my personal web: https://kate0115.net @tomwenisch \",\"media_ids\":[],\"media_types\":[],\"post_type\":\"POST\"}"
+
 ```
 
 #### can rust run multithread from another function?
