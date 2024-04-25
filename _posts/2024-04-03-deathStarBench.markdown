@@ -80,6 +80,9 @@ void UniqueIdServiceClient::send_ComposeUniqueId(const int64_t req_id, const Pos
 	+ like `UniqueIdServiceClient` connected to `UniqueIdServiceServer`
 	+ but this client won't be used in `UniqueIdService` but in `ComposePostService`
 
+#### a little bit knowledge about rust
+[rust star (dereference)](https://micouy.github.io/rust-dereferencing/)
+
 #### the RPC in DeathStarBench
 - in one service, run client of another service.  
 	+ For example, in [ComposePostService](https://github.com/delimitrou/DeathStarBench/blob/master/socialNetwork/src/ComposePostService/ComposePostHandler.h#L374)
