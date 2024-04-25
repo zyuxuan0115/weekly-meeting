@@ -7,6 +7,7 @@ categories: serverless functions
 
 ### Finish converting SocialNetwork to serverless
 #### Done
+- 28 functions in total: github repo [here](https://github.com/zyuxuan0115/faas-test/tree/main/DeathStarBench/social_network_rust)
 - tested the functionality for inputs
 
 #### Remained

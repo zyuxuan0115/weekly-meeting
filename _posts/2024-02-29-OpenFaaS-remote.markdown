@@ -28,6 +28,7 @@ categories: serverless functions
   + first install Docker, golang
 	+ install [arkade](https://github.com/alexellis/arkade)
   + install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
+  + install [helm](https://helm.sh/docs/intro/install/)
 	+ then install [KinD](https://kind.sigs.k8s.io/) 
     * I [installed from a released binary](https://kind.sigs.k8s.io/docs/user/quick-start/#installing-from-release-binaries)
   + create a cluster quickly
