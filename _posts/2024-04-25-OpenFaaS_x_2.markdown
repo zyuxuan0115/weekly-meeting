@@ -1,0 +1,25 @@
+---
+layout: post
+title:  "2024-04-25 OpenFaaS x 2?"
+date:   2024-04-25 1:53:49 -0500
+categories: serverless functions
+---
+
+### Finish converting SocialNetwork to serverless
+#### Done
+- tested the functionality for inputs
+
+#### Remained
+- all RPCs are synchronized
+- all accesses to data store (mongodb, redis, memcached) are synchronized 
+
+#### Question
+- should we make the function call like the original microservice?
+
+
+### The possible issue for deploying 2 openfaas runtime
+- 
+
+### What do we want to achieve?
+#### Performance improvement?
+
