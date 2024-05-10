@@ -8,19 +8,88 @@ categories: serverless functions
 ### Finish converting SocialNetwork to serverless
 #### Done
 - 28 functions in total: github repo [here](https://github.com/zyuxuan0115/faas-test/tree/main/DeathStarBench/social_network_rust)
-- tested the functionality for inputs
+- tested the basic functionality for the rust serverless functions
+	+ mainly tested whether the data store is correct
 
 #### Remained
 - all RPCs are synchronized
 - all accesses to data store (mongodb, redis, memcached) are synchronized 
 
 #### Question
+- Consistency
+	+ register user A, user B
+  + user B follows user A
+  + user A post things
+  + user B read A's TL
+  + register user C
+  + user B post things
+  + user C follows user B
+  + user B read home TL
+  + user C follows user A
+  + user C read home TL
 - should we make the function call like the original microservice?
+	+ [DeathStarBench code](https://github.com/delimitrou/DeathStarBench/blob/master/socialNetwork/src/SocialGraphService/SocialGraphHandler.h#L104 )
+  + [rust serverless function](https://github.com/delimitrou/DeathStarBench/blob/master/socialNetwork/src/SocialGraphService/SocialGraphHandler.h#L104)
 
+```rust
+#[derive(Debug, Serialize, Deserialize)]
+pub struct social_graph_follow_get {
+  pub user_id: i64,
+  pub followee_id: i64,
+}
+```
 
 ### The possible issue for deploying 2 openfaas runtime
-- 
+- to expose Mongodb, Memcached, Redis to the external port? 
 
 ### What do we want to achieve?
 #### Performance improvement?
+- should we first measure how much performance improvement we can achieve when we merge calls
+- also need to measure the execution time of functions
 
+### Performance measurements
+#### Invoke an empty function
+- 8.814456 ms
+
+#### Time spent on calling an empty Rust function
+
+| function name   | execution time | datastore | callee functions     |
+| :----:          |    :----:   |  :----: | :----: |
+| UniqueIdService |  94.3598 μs | - | - |
+| MediaService    |  55.6854 μs | - | - |
+| ComposeCreatorWithUserId | 32.8 μs | - | - |
+| SocialGraphFollowWithUsername | 37.472 μs | - | GetUserId x 2 <br> SocialGraphFollow |
+| SocialGraphUnfollowWithUsername | 32.538 μs | - | GetUserId x 2 <br> SocialGraphUnfollow |
+| SocialGraphGetFollowers | 5.203 ms | redis <br> (mongodb) | - |
+| SocialGraphGetFollowees | 4.227 ms | redis <br> (mongodb) | - |
+| WriteHomeTimeline | 3.24 ms | redis | SocialGraphGetFollowers |
+| ReadHomeTimeline |  10.1976648 | redis | ReadPosts |
+| ComposeCreatorWithUsername | <strong> 4.1 ms <br> 430 ms </strong> | redis <br> (mongodb) | - | 
+| ReadPosts | <strong>13 ms <br> 432 ms</strong> | memcached <br> mongodb | - | 
+| RegisterUserWithId | 425.37 ms | redis <br> mongodb | - |
+| GetUserId | 429.21 ms | redis <br> mongodb | - |
+| UserLogin | 423.77 ms | mongodb | SocialGraphInsertUser | 
+| SocialGraphFollow | 426.69 ms | redis <br> mongodb | - |
+| SocialGraphUnfollow | 454.61 ms | redis <br> mongodb | - |
+| SocialGraphInsertUser | 425.21 ms | redis <br> mongodb | - | 
+| UrlShortenService | 423.32 ms | redis <br> mongodb | - | 
+| UserMentionService | 418.40 ms | redis <br> mongodb | - | 
+| RegisterUser | 427.81 ms | redis <br> mongodb | - | 
+| StorePost | 417.75 ms | mongodb | - | 
+| ReadPost | 442.24 ms | mongodb<br>memcached | - | 
+| WriteUserTimeline |  | redis <br> mongodb | - |
+| ReadUserTimeline |  | redis <br> mongodb | - |
+| TextService |  | - | UrlShortenService <br> UserMentionService |
+| ComposePost |  | - | UniqueIdService <br> ComposeCreatorWithUserid<br>TextService<br>MediaService<br>StorePost<br>WriteUserTimeline<br>WriteHomeTimeline | 
+
+#### Time spent on different serverless function bodies
+
+| description of the part | execution time | 
+| :----: | :----: |
+| before mongodb | 45.264 µs |
+| connecting mongodb | 4.221613 ms |
+| first mongodb query | <strong>422.212947</strong> ms |
+| second mongodb query | 1.241315 ms |
+| connecting redis | 3.433101 ms |
+| first redis query | 6.476 µs |
+| second reids query | 1.006285ms |
