@@ -1,0 +1,62 @@
+---
+layout: post
+title:  "2024-05-11 Faster DB"
+date:   2024-05-11 1:53:49 -0500
+categories: serverless functions
+---
+### how to compose a query for redis 
+- [stackoverflow solution](https://stackoverflow.com/questions/76809413/using-redis-as-a-key-value-store)
+- [Azure redis rust driver example](https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/azure-cache-for-redis/cache-rust-get-started.md)
+
+### Performance measurements
+#### Invoke an empty function
+- 8.814456 ms
+
+![call-graph](/assets/2024-05-16/call-graph.png)
+
+#### Time spent on different serverless function bodies
+
+| description of the part | execution time | 
+| :----: | :----: |
+| before mongodb | 45.264 µs |
+| connecting mongodb | 4.221613 ms |
+| first mongodb query | <strong>422.212947</strong> ms |
+| second mongodb query | 1.241315 ms |
+| connecting redis | 3.433101 ms |
+| first redis query | 6.476 µs |
+| second reids query | 1.006285ms |
+
+### After switching to a faster DB
+
+| function name   | original exec time | new exec time | 
+| :----:          |    :----:   |  :----: | :----: |
+| UniqueIdService |  94.3598 μs | - | 
+| MediaService    |  55.6854 μs | - | 
+| ComposeCreatorWithUserId | 32.8 μs | - |
+| SocialGraphFollowWithUsername | 37.472 μs | - | 
+| SocialGraphUnfollowWithUsername | 32.538 μs | - | 
+| TextService | 2.716 ms  | - |
+| ComposePost |  | - | 
+| | | |
+| SocialGraphGetFollowers | 5.203 ms | 5.69 ms |
+| SocialGraphGetFollowees | 4.227 ms | 5.519 ms |
+| WriteHomeTimeline | 3.24 ms | 6.015 ms |
+| ReadHomeTimeline |  10.198 ms | 3.792 ms |
+| ComposeCreatorWithUsername | <strong> 4.1 ms <br> 430 ms </strong> | 10.367 ms | 
+| ReadPosts | <strong>13 ms <br> 432 ms</strong> | 8.015 ms | 
+| | | |
+| RegisterUserWithId | 425.37 ms | 6.52 ms |
+| GetUserId | 429.21 ms | 19.22 ms |
+| UserLogin | 423.77 ms | 11.36 ms | 
+| SocialGraphFollow | 426.69 ms | 8.78 ms |
+| SocialGraphUnfollow | 454.61 ms | 11.39 ms |
+| SocialGraphInsertUser | 425.21 ms | 5.501 ms | 
+| UrlShortenService | 423.32 ms | 4.3196 ms | 
+| UserMentionService | 418.40 ms | 8.1449 ms | 
+| RegisterUser | 427.81 ms | 9.04 ms | 
+| StorePost | 417.75 ms | 6.452 ms | 
+| ReadPost | 442.24 ms | 9.896 ms | 
+| WriteUserTimeline | 431.84 ms |  |
+| ReadUserTimeline | 4.74 ms | |
+
+
