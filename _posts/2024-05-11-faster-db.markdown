@@ -10,7 +10,7 @@ categories: serverless functions
 
 ### Performance measurements
 #### Invoke an empty function
-- 8.814456 ms
+- <strong>Function invocation overhead</strong>: 8.814456 ms
 
 ![call-graph](/assets/2024-05-16/call-graph.png)
 
