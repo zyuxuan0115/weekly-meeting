@@ -67,3 +67,4 @@ categories: serverless functions
 - link is [here](https://github.com/ut-osa/nightcore-benchmarks/tree/master/misc/wrk2)
 - nightcore's [compose-post lua](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/wrk2_scripts/compose-post.lua)
 - [lua reference manual](https://www.lua.org/manual/5.3/manual.html)
+- [stackoverflow: write lua for wrk](https://stackoverflow.com/questions/68465947/wrk-with-lua-script-generating-multiple-post-requests-with-different-body)
