@@ -7,6 +7,7 @@ categories: serverless functions
 ### how to compose a query for redis 
 - [stackoverflow solution](https://stackoverflow.com/questions/76809413/using-redis-as-a-key-value-store)
 - [Azure redis rust driver example](https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/azure-cache-for-redis/cache-rust-get-started.md)
+- [get start with rust and redis](https://medium.com/swlh/tutorial-getting-started-with-rust-and-redis-69041dd38279)
 
 ### Performance measurements
 #### Invoke an empty function
@@ -36,7 +37,7 @@ categories: serverless functions
 | SocialGraphFollowWithUsername | 37.472 μs | - | 
 | SocialGraphUnfollowWithUsername | 32.538 μs | - | 
 | TextService | 2.716 ms  | - |
-| ComposePost |  | - | 
+| ComposePost | 200 μs | - | 
 | | | |
 | SocialGraphGetFollowers | 5.203 ms | 5.69 ms |
 | SocialGraphGetFollowees | 4.227 ms | 5.519 ms |
@@ -56,7 +57,11 @@ categories: serverless functions
 | RegisterUser | 427.81 ms | 9.04 ms | 
 | StorePost | 417.75 ms | 6.452 ms | 
 | ReadPost | 442.24 ms | 9.896 ms | 
-| WriteUserTimeline | 431.84 ms |  |
-| ReadUserTimeline | 4.74 ms | |
+| WriteUserTimeline | 431.84 ms | 7.395 ms |
+| ReadUserTimeline | 4.74 ms | 3.75 ms |
 
+### deploy service on 2 different machines
+ ![call-graph-2](/assets/2024-05-16/call-graph-2.png)
 
+### Nightcore's wrk2
+- link is [here](https://github.com/ut-osa/nightcore-benchmarks/tree/master/misc/wrk2)
