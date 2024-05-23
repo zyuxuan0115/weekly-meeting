@@ -60,11 +60,23 @@ categories: serverless functions
 | WriteUserTimeline | 431.84 ms | 7.395 ms |
 | ReadUserTimeline | 4.74 ms | 3.75 ms |
 
-### deploy service on 2 different machines
+### deploy service on 2 different clusters
  ![call-graph-2](/assets/2024-05-16/call-graph-2.png)
+
+- blue: 
+  + db: social-graph 
+  + db: user-timeline
+  + db: post
+- white:
+  + db: user
 
 ### Nightcore's wrk2
 - link is [here](https://github.com/ut-osa/nightcore-benchmarks/tree/master/misc/wrk2)
 - nightcore's [compose-post lua](https://github.com/ut-osa/nightcore-benchmarks/blob/master/workloads/DeathStarBench/socialNetwork/wrk2_scripts/compose-post.lua)
 - [lua reference manual](https://www.lua.org/manual/5.3/manual.html)
 - [stackoverflow: write lua for wrk](https://stackoverflow.com/questions/68465947/wrk-with-lua-script-generating-multiple-post-requests-with-different-body)
+
+
+### Latency
+
+- 9 RPCs + 10 functions = 9 * 9 ms + 10 * 7 (average) = 151 ms
