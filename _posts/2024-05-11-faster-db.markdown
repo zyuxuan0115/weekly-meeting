@@ -82,7 +82,7 @@ categories: serverless functions
 
 - <strong>compose post function</strong>: 9 RPCs + 10 functions = 9 * 9 ms + 10 * 7 (average) = 151 ms
 
-- <strong>#thread = 4, #connections = 48</strong>
+- <strong>#thread = 4, #connections = 48</strong> (wrk -t 4 -c 48)
 
 ```
   Detailed Percentile spectrum:
@@ -109,7 +109,7 @@ Requests/sec:     79.37
 Transfer/sec:     23.20KB
 ```
 
-- <strong>#thread = 2, #connections = 16 </strong>
+- <strong>#thread = 2, #connections = 16 </strong> (wrk -t 2 -c 16)
 
 ```
   Detailed Percentile spectrum:
@@ -136,7 +136,7 @@ Requests/sec:     56.82
 Transfer/sec:     16.60KB
 ```
 
-- <strong>#threads = 1, #connections = 1</strong>
+- <strong>#threads = 1, #connections = 1</strong> (wrk -t 1 -c 1)
 
 ```
   Detailed Percentile spectrum:
@@ -164,7 +164,102 @@ Transfer/sec:      1.64KB
 
 ### How to merge functions in a container
 
+#### Merging 2 real serverless functions
+
+![d3](/assets/2024-05-16/call-graph-3.png)
+
+- the functions being chosen: write-home-timeline & social-graph-get-followers
+
+#### The step to build a merged function
+
 ![d1](/assets/2024-05-16/d1.png)
+
+#### Issue 1
+
+- The building process takes a very long time: about 20 minutes
+	+ and this is just for merging 2 functions
+	+ merging all `.ll` files 
+- The building process needs at least 30GB
+	+ can merge functions on another machine
+	+ since the final thing we need is just a docker image on docker hub
+
+![s1](/assets/2024-05-16/s1.png)
+
+all these IRs contains more than 500 thousands of lines
+
+#### Issue 2
+We have 2 clusters and each cluster has a redis DB
+- Before merge
+	+ <strong>Caller</strong>: on cluster 1, load/store things on DB 1
+		* redis internal access: `@sn-redis-master.openfaas-fn.svc.cluster.local:6379`
+	+ <strong>Callee</strong>: on cluster 2, load/store things on DB 2
+		* redis internal access: `@sn-redis-master.openfaas-fn.svc.cluster.local:6379`
+- After merge
+	+ Caller + Callee: on cluster 1
+		* <strong>Caller</strong>: still internal access 
+		* <strong>Callee</strong>: external redis access
+			- `@130.127.133.16:6379`
+
+#### Issue 3
+
+#### write-home-timeline calls social-graph-get-followers (RPC)
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+       6.031     0.000000            1         1.00
+       9.391     0.100000          181         1.11
+      11.399     0.500000          899         2.00
+      11.615     0.800000         1436         5.00
+      11.847     0.900000         1620        10.00
+      13.631     0.990625         1779       106.67
+      43.551     0.999023         1794      1024.00
+      43.551     0.999121         1794      1137.78
+      43.551     0.999219         1794      1280.00
+      43.551     0.999316         1794      1462.86
+      45.535     0.999512         1795      2048.00
+      45.535     1.000000         1795          inf
+#[Mean    =       11.098, StdDeviation   =        1.950]
+#[Max     =       45.504, Total count    =         1795]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  2690 requests in 30.01s, 627.84KB read
+Requests/sec:     89.65
+```
+
+#### write-home-timeline calls social-graph-get-followers (merged)
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+      25.359     0.000000            1         1.00
+      25.839     0.100000           83         1.11
+      26.367     0.500000          360         2.00
+      27.007     0.800000          573         5.00
+      27.631     0.900000          644        10.00
+      45.311     0.990625          709       106.67
+     256.255     0.996484          713       284.44
+     256.255     0.996875          713       320.00
+     258.943     0.997266          714       365.71
+     258.943     0.997656          714       426.67
+     258.943     0.998437          714       640.00
+     279.039     0.998633          715       731.43
+     279.039     1.000000          715          inf
+#[Mean    =       27.860, StdDeviation   =       15.613]
+#[Max     =      278.784, Total count    =          715]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  1089 requests in 30.01s, 254.17KB read
+Requests/sec:     36.29
+Transfer/sec:      8.47KB
+```
+
+
+### How to merge when there are more than 2 functions
+
+![d2](/assets/2024-05-16/d2.png)
 
 ### cargo get all libs
 
