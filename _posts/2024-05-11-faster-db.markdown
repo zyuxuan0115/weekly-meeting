@@ -80,7 +80,87 @@ categories: serverless functions
 
 #### Latency from wrk2
 
-- 9 RPCs + 10 functions = 9 * 9 ms + 10 * 7 (average) = 151 ms
+- <strong>compose post function</strong>: 9 RPCs + 10 functions = 9 * 9 ms + 10 * 7 (average) = 151 ms
+
+- <strong>#thread = 4, #connections = 48</strong>
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+     204.927     0.000000            1         1.00
+     310.783     0.100000          158         1.11
+     490.495     0.500000          788         2.00
+     599.551     0.800000         1264         5.00
+    1296.383     0.900000         1420        10.00
+    1904.639     0.990625         1562       106.67
+    1992.703     0.999023         1575      1024.00
+    1992.703     0.999121         1575      1137.78
+    1992.703     0.999219         1575      1280.00
+    1992.703     0.999316         1575      1462.86
+    2002.943     0.999414         1576      1706.67
+    2002.943     1.000000         1576          inf
+#[Mean    =      605.520, StdDeviation   =      393.919]
+#[Max     =     2001.920, Total count    =         1576]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  2386 requests in 30.06s, 697.51KB read
+Requests/sec:     79.37
+Transfer/sec:     23.20KB
+```
+
+- <strong>#thread = 2, #connections = 16 </strong>
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+     140.799     0.000000            1         1.00
+     177.407     0.100000          115         1.11
+     202.879     0.500000          573         2.00
+     337.919     0.800000          917         5.00
+     500.991     0.900000         1032        10.00
+     833.535     0.984375         1129        64.00
+     834.047     0.985938         1130        71.11
+     926.207     0.990625         1136       106.67
+    1125.375     0.998047         1144       512.00
+    1125.375     0.998242         1144       568.89
+    1130.495     0.998437         1146       640.00
+    1130.495     1.000000         1146          inf
+#[Mean    =      279.652, StdDeviation   =      168.863]
+#[Max     =     1129.472, Total count    =         1146]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  1707 requests in 30.04s, 498.70KB read
+Requests/sec:     56.82
+Transfer/sec:     16.60KB
+```
+
+- <strong>#threads = 1, #connections = 1</strong>
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+     145.151     0.000000            1         1.00
+     147.071     0.100000           12         1.11
+     151.423     0.500000           56         2.00
+     196.991     0.800000           90         5.00
+     289.535     0.900000          101        10.00
+     425.983     0.985938          111        71.11
+     425.983     0.987500          111        80.00
+     425.983     0.989062          111        91.43
+     425.983     0.990625          111       106.67
+     436.479     0.992188          112       128.00
+     436.479     1.000000          112          inf
+#[Mean    =      178.266, StdDeviation   =       60.748]
+#[Max     =      436.224, Total count    =          112]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  169 requests in 30.00s, 49.32KB read
+Requests/sec:      5.63
+Transfer/sec:      1.64KB
+```
 
 ### How to merge functions in a container
 
