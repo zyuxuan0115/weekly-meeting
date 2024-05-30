@@ -1,0 +1,44 @@
+---
+layout: post
+title:  "2024-05-28 CS61 notes"
+date:   2024-05-28 1:53:49 -0500
+categories: algorithm
+---
+### Algorithm Lecture 1
+
+- If you want to search the man pages for a command that pertains to a keyword:
+  + `man -k single_keyword | less`
+
+- java code example
+
+```java
+public class Dog {
+    public int weightInPounds;
+
+    public Dog(int w) {
+        weightInPounds = w;
+    }
+
+    public void makeNoise() {
+        if (weightInPounds < 10) {
+            System.out.println("yipyipyip!");
+        } else if (weightInPounds < 30) {
+            System.out.println("bark. bark.");
+        } else {
+            System.out.println("woof!");
+        }    
+    }
+}
+
+public class DogLauncher {
+    public static void main(String[] args) {
+        Dog d = new Dog(20);
+        d.makeNoise();
+    }
+}
+```
+
+### OS Lecture 1
+
+When creating a file, the third argument, `mode`, is used to attempt to set the permissions.
+The reason it is "attempt" is because there is a default permissions mask, called `umask`, that limits the permissions. `umask` has a similar octal value to the permissions, although if a bit is set in the umask, then trying to set that bit with the mode parameter will not be allowed. The umask can be set with the following system call:
