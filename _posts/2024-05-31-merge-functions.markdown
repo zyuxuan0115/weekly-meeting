@@ -155,6 +155,24 @@ Requests/sec:     37.43
 Transfer/sec:     12.93KB
 ```
 
+| | reported by wrk | reported by function |
+|:---: | :---: | :---: |
+| original write-home-timeline | 31.567 ms | 23.5 ms |
+| merged write-home-timeline | 35.423 ms | 15 ms |
+| original empty | 8.559 ms | close to 0 ms |
+| merged empty | 19.583 ms | close to 0 ms |
+
+<strong>caller + callee </strong> -- reported by merged function
+overhead: 15.5 ms
+
+<strong>original write-home-timeline </strong> 
+overhead of empty function invocation (8.6) + caller + RPC (8.6) + callee = 31.5 ms
+8.6 * 2 + 15.5 = 32.7 ms
+
+<strong>merged write-home-timeline </strong>
+overhead of empty function invocation (19.6) + caller + callee = 35.4 ms
+19.6 + 8.6 = 35.1 ms
+
 ### more about dynamic linking 
 I guess the reason why there is a delay is because in our code, we need to dynamically load dynamic linked library to the program and then execute the function in the functions in those libraries. 
 [make-static](https://www.ucc.asn.au/~dagobah/things/make-static.html)
@@ -198,3 +216,30 @@ Transfer/sec:      37.38B
 ```
 
 ### Merging 3 functions
+
+![d1](/assets/2024-05-31/d1.png)
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+      32.735     0.000000            1         1.00
+      34.463     0.100000           49         1.11
+      36.415     0.500000          241         2.00
+      37.695     0.800000          382         5.00
+      37.855     0.825000          393         5.71
+      38.527     0.900000          428        10.00 
+     198.911     0.990625          471       106.67
+     200.959     0.996094          474       256.00
+     200.959     0.996484          474       284.44
+     200.959     0.997656          474       426.67
+     212.607     0.998047          475       512.00
+     212.607     1.000000          475          inf
+#[Mean    =       41.620, StdDeviation   =       24.743]
+#[Max     =      212.480, Total count    =          475]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  714 requests in 30.01s, 835.79KB read
+Requests/sec:     23.79
+Transfer/sec:     27.85KB
+```
