@@ -4,17 +4,107 @@ title:  "2024-05-31 merge functions"
 date:   2024-05-31 1:53:49 -0500
 categories: serverless
 ---
-I guess the reason why there is a delay is because in our code, we need to dynamically load dynamic linked library to the program and then execute the function in the functions in those libraries. 
-[make-static](https://www.ucc.asn.au/~dagobah/things/make-static.html)
 
+### the reversed results
 
+#### original write-home-timeline
 
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
 
-#### Immediate exit after function is called
-- exit code `-1`
+      28.143     0.000000            1         1.00
+      30.511     0.100000           55         1.11
+      31.567     0.500000          274         2.00
+      32.431     0.800000          437         5.00
+      33.311     0.900000          490        10.00
+     195.455     0.990625          538       106.67
+     195.583     0.992188          540       128.00
+     195.583     0.992969          540       142.22
+     195.583     0.993750          540       160.00
+     197.247     0.995313          541       213.33
+     199.039     0.996484          543       284.44                                                                    199.039     1.000000          543          inf
+#[Mean    =       36.751, StdDeviation   =       23.434]
+#[Max     =      198.912, Total count    =          543]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  813 requests in 30.01s, 290.46KB read
+Requests/sec:     27.09
+Transfer/sec:      9.68KB
+```
+
+#### merged write-home-timeline (callee: social-graph-get-followers)
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+      31.839     0.000000            1         1.00
+      33.503     0.100000           49         1.11
+      35.423     0.500000          240         2.00
+      37.983     0.800000          382         5.00
+      45.119     0.900000          430        10.00
+     195.711     0.990625          473       106.67
+     196.095     0.992188          474       128.00
+     198.143     0.996094          476       256.00
+     198.783     0.998047          477       512.00
+     198.783     1.000000          477          inf
+#[Mean    =       41.792, StdDeviation   =       23.274]
+#[Max     =      198.656, Total count    =          477]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  712 requests in 30.01s, 254.38KB read
+Requests/sec:     23.73
+Transfer/sec:      8.48KB
+```
+
+#### the result of merging 2 functions
+- caller: write-home-timeline
+- callee: social-graph-get-followers
+
+| | reported by wrk | reported by function |
+|:---: | :---: | :---: |
+| original | 31.567 ms | 23.5 ms |
+| merged | 35.423 ms | 15 ms |
+
+### Immediate exit after function is called
+
+![s4](/assets/2024-05-31/s4.png)
+
+#### Unmerged function (like calling an empty function)
+
+![s2](/assets/2024-05-31/s2.png)
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+       5.439     0.000000            1         1.00
+       8.119     0.100000          232         1.11
+       8.559     0.500000         1192         2.00
+       8.695     0.800000         1851         5.00
+       8.855     0.900000         2075        10.00
+      10.127     0.990625         2280       106.67
+      44.159     0.999023         2299      1024.00
+      49.279     0.999609         2301      2560.00
+      49.279     1.000000         2301          inf
+#[Mean    =        8.620, StdDeviation   =        1.767]
+#[Max     =       49.248, Total count    =         2301]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  3452 requests in 30.01s, 1.16MB read
+Requests/sec:    115.05
+Transfer/sec:     39.72KB
+```
+
+#### Merged fucntion v1 & v2
+
+![s3](/assets/2024-05-31/s3.png)
+
+- exit code `0` (or `1` -- terminate the program with error)
 - no `-flto` (link time optimization)
-- have `-Oz` compile time optimization, similiar to `-O2`, but also reduce code size
-- binary size: `37MB`
+- have `-O2` (compile time optimization)
+- binary size: `20MB`
 
 ```
   Detailed Percentile spectrum:
@@ -36,40 +126,12 @@ Requests/sec:     48.76
 Transfer/sec:     16.84KB
 ```
 
-- exit code `0`
-- no `-flto`
-- have `-Oz`
-- binary size: `37MB`
-
-```
-  Detailed Percentile spectrum:
-       Value   Percentile   TotalCount 1/(1-Percentile)
-
-      17.871     0.000000            1         1.00
-      18.639     0.100000           99         1.11
-      19.503     0.500000          495         2.00
-      20.431     0.800000          784         5.00
-      21.615     0.900000          882        10.00
-      40.927     0.990625          971       106.67
-      41.631     0.992188          973       128.00
-      42.175     0.992969          974       142.22
-      42.175     0.993750          974       160.00
-      50.687     0.994531          975       182.86
-      61.215     0.999023          980      1024.00
-      61.215     1.000000          980          inf
-#[Mean    =       20.325, StdDeviation   =        3.701]
-#[Max     =       61.184, Total count    =          980]
-#[Buckets =           27, SubBuckets     =         2048]
-----------------------------------------------------------
-  1462 requests in 30.01s, 504.99KB read
-Requests/sec:     48.72
-Transfer/sec:     16.83KB
-```
+#### Merged function v3
 
 - exit code `0`
 - have `-flto`
-- have `-Oz`
-- binary size: `37MB`
+- have `-O2`
+- binary size: `20MB`
 
 ```
   Detailed Percentile spectrum:
@@ -92,6 +154,10 @@ Transfer/sec:     16.83KB
 Requests/sec:     37.43
 Transfer/sec:     12.93KB
 ```
+
+### more about dynamic linking 
+I guess the reason why there is a delay is because in our code, we need to dynamically load dynamic linked library to the program and then execute the function in the functions in those libraries. 
+[make-static](https://www.ucc.asn.au/~dagobah/things/make-static.html)
 
 #### Is static linking faster than dynamic linking?
 - [here](https://stackoverflow.com/questions/4667882/is-a-statically-linked-executable-faster-than-a-dynamically-linked-executable) is a stackoverflow answer:
@@ -130,3 +196,5 @@ Transfer/sec:     12.93KB
 Requests/sec:      0.10
 Transfer/sec:      37.38B
 ```
+
+### Merging 3 functions
