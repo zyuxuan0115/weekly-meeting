@@ -1,0 +1,7 @@
+---
+layout: post
+title:  "2024-06-08 merge 3 functions"
+date:   2024-06-08 1:53:49 -0500
+categories: serverless
+---
+
