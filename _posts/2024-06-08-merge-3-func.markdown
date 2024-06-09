@@ -4,4 +4,106 @@ title:  "2024-06-08 merge 3 functions"
 date:   2024-06-08 1:53:49 -0500
 categories: serverless
 ---
+### Performance of Merging
 
+#### text-service (merged)
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+      38.271     0.000000            1         1.00
+      43.231     0.100000           42         1.11
+      46.335     0.500000          196         2.00
+      49.183     0.800000          315         5.00
+      51.551     0.900000          353        10.00
+     197.887     0.990625          389       106.67
+     197.887     0.992188          389       128.00
+     199.423     0.992969          390       142.22
+     201.855     0.996094          391       256.00
+     201.855     0.996875          391       320.00
+     297.727     0.997656          392       426.67
+     297.727     1.000000          392          inf
+#[Mean    =       50.556, StdDeviation   =       22.302]
+#[Max     =      297.472, Total count    =          392]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  586 requests in 30.01s, 1.00MB read
+Requests/sec:     19.53
+Transfer/sec:     34.10KB
+```
+
+#### text-service (original)
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+      45.823     0.000000            1         1.00
+      49.375     0.100000           34         1.11
+      53.727     0.500000          169         2.00
+      56.735     0.800000          270         5.00
+      58.655     0.900000          305        10.00
+     200.191     0.990625          334       106.67
+     227.967     0.995313          336       213.33
+     227.967     0.996094          336       256.00
+     302.335     0.997266          337       365.71
+     302.335     1.000000          337          inf
+#[Mean    =       58.950, StdDeviation   =       25.925]
+#[Max     =      302.080, Total count    =          337]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  504 requests in 30.01s, 0.86MB read
+Requests/sec:     16.80
+Transfer/sec:     29.25KB
+```
+
+#### write-home-timeline (merged)
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+      29.679     0.000000            1         1.00
+      31.359     0.100000           56         1.11
+      33.279     0.500000          274         2.00
+      35.263     0.800000          441         5.00
+      39.967     0.900000          494        10.00
+     101.439     0.990625          544       106.67
+     103.103     0.996875          547       320.00
+     103.103     0.997266          547       365.71
+     113.791     0.998242          548       568.89
+     113.791     1.000000          548          inf
+#[Mean    =       36.417, StdDeviation   =       12.476]
+#[Max     =      113.728, Total count    =          548]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  815 requests in 30.01s, 291.14KB read
+Requests/sec:     27.16
+Transfer/sec:      9.70KB
+```
+
+
+#### write-home-timeline (original)
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+      28.063     0.000000            1         1.00
+      29.215     0.100000           58         1.11
+      30.639     0.500000          291         2.00
+      33.311     0.800000          464         5.00
+      34.783     0.900000          522        10.00
+      50.143     0.950000          551        20.00
+     120.703     0.990625          575       106.67
+     200.191     0.996875          580       320.00
+     200.191     1.000000          580          inf
+#[Mean    =       34.459, StdDeviation   =       17.794]
+#[Max     =      200.064, Total count    =          580]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  866 requests in 30.01s, 309.28KB read
+Requests/sec:     28.86
+Transfer/sec:     10.31KB
+```
