@@ -7,7 +7,7 @@ categories: serverless
 
 ### the reversed results
 
-#### original write-home-timeline
+#### original write-home-timeline (on cluster 1)
 
 ```
   Detailed Percentile spectrum:
@@ -219,6 +219,8 @@ Transfer/sec:      37.38B
 
 ![d1](/assets/2024-05-31/d1.png)
 
+#### original text-service (on cluster 2)
+
 ```
   Detailed Percentile spectrum:
        Value   Percentile   TotalCount 1/(1-Percentile)
@@ -243,3 +245,4 @@ Transfer/sec:      37.38B
 Requests/sec:     23.79
 Transfer/sec:     27.85KB
 ```
+

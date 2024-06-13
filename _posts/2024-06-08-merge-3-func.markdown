@@ -4,9 +4,9 @@ title:  "2024-06-08 merge 3 functions"
 date:   2024-06-08 1:53:49 -0500
 categories: serverless
 ---
-### Performance of Merging
+## Performance of Merging
 
-#### text-service (merged)
+### text-service (merged)
 
 ```
   Detailed Percentile spectrum:
@@ -33,7 +33,7 @@ Requests/sec:     19.53
 Transfer/sec:     34.10KB
 ```
 
-#### text-service (original)
+### text-service (original)
 
 ```
   Detailed Percentile spectrum:
@@ -58,7 +58,9 @@ Requests/sec:     16.80
 Transfer/sec:     29.25KB
 ```
 
-#### write-home-timeline (merged)
+
+
+### write-home-timeline (merged)
 
 ```
   Detailed Percentile spectrum:
@@ -83,8 +85,7 @@ Requests/sec:     27.16
 Transfer/sec:      9.70KB
 ```
 
-
-#### write-home-timeline (original)
+### write-home-timeline (original)
 
 ```
   Detailed Percentile spectrum:
@@ -106,4 +107,100 @@ Transfer/sec:      9.70KB
   866 requests in 30.01s, 309.28KB read
 Requests/sec:     28.86
 Transfer/sec:     10.31KB
+```
+
+
+### compose-post (merged)
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+      42.015     0.000000            1         1.00
+      46.847     0.100000           33         1.11
+      52.223     0.500000          158         2.00
+      56.639     0.800000          247         5.00
+      61.823     0.900000          278        10.00
+      97.343     0.950000          293        20.00
+     400.127     0.990625          306       106.67
+     496.639     0.996875          308       320.00
+     496.639     1.000000          308          inf
+#[Mean    =       64.421, StdDeviation   =       56.500]
+#[Max     =      496.384, Total count    =          308]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  469 requests in 30.00s, 515.00KB read
+Requests/sec:     15.63                                                                                   Transfer/sec:     17.17KB
+```
+
+### compose-post (original)
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+ 
+     129.151     0.000000            1         1.00
+     134.911     0.100000           12         1.11
+     143.999     0.500000           62         2.00
+     162.943     0.800000           96         5.00
+     193.919     0.900000          108        10.00
+     462.079     0.990625          118       106.67
+     494.079     1.000000          119          inf
+
+#[Mean    =      167.563, StdDeviation   =       73.999]
+#[Max     =      493.824, Total count    =          119]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  179 requests in 30.01s, 196.02KB read
+Requests/sec:      5.97
+Transfer/sec:      6.53KB
+```
+
+
+### Summary
+
+|        | 2 functions | 3 functions | 11 functions |
+| :----: | :----: | :----: | :----: |
+| original time (ms) | 30.639 | 53.727 | 143.999 |
+| merged time (ms) | 33.279 | 46.335 | 52.223 |
+
+
+## linker flags
+
+From `man ld` or [this webpage](https://www.man7.org/linux/man-pages/man1/ld.1.html)
+
+- linker flag 1: `--as-needed`
+  + --as-needed
+  + --no-as-needed
+    * This option affects `ELF DT_NEEDED` tags for dynamic libraries mentioned on the command line after the `--as-needed` option. Normally the linker will add a `DT_NEEDED` tag for each dynamic library mentioned on the command line, regardless of whether the library is actually needed or not.  `--as-needed` causes a `DT_NEEDED` tag to only be emitted for a library that at that point in the link satisfies a non-weak undefined symbol reference from a regular object file or, if the library is not found in the `DT_NEEDED` lists of other needed libraries, a non-weak undefined symbol reference from another needed dynamic library.  Object files or libraries appearing on the command line after the library in question do not affect whether the library is seen as needed.  This is similar to the rules for extraction of object files from archives. `--no-as-needed` restores the default behaviour.
+
+
+- linker flag 2: `-Wl,--gc-sections`
+  + this flag must be using with `-ffunction-sections -fdata-sections` at compile time
+    * [reference](https://gcc.gnu.org/onlinedocs/gnat_ugn/Compilation-options.html)
+    * [reference 2](https://stackoverflow.com/questions/18115598/how-to-remove-all-unused-symbols-from-a-shared-library)
+    * Note: for clang the flag is `$LLVM_DIR/llc -filetype=obj --function-sections --data-sections function.ll -o function.o` 
+  + the size of the new binary: 9.8 MB (original 45 MB)
+    * ![s1](/assets/2024-06-08/s1.png)
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+      60.511     0.000000            1         1.00
+      64.319     0.100000           24         1.11
+      68.351     0.500000          119         2.00
+      70.975     0.800000          191         5.00
+      74.879     0.900000          215        10.00
+     400.639     0.990625          236       106.67
+     403.711     0.992188          237       128.00
+     599.039     0.996094          238       256.00
+     599.039     1.000000          238          inf
+#[Mean    =       83.668, StdDeviation   =       67.288]
+#[Max     =      598.528, Total count    =          238]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  357 requests in 30.01s, 390.33KB read
+Requests/sec:     11.90
+Transfer/sec:     13.01KB
 ```
