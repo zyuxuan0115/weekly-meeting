@@ -6,6 +6,8 @@ categories: serverless
 ---
 ## Performance of Merging
 
+![diagram](/assets/2024-06-08/call-graph-new.png)
+
 ### text-service (merged)
 
 ```
@@ -172,13 +174,26 @@ From `man ld` or [this webpage](https://www.man7.org/linux/man-pages/man1/ld.1.h
 ### --as-needed
 
 - linker flag 1: `-Wl,--as-needed`
-  + --as-needed
-  + --no-as-needed
-    * This option affects `ELF DT_NEEDED` tags for dynamic libraries mentioned on the command line after the `--as-needed` option. Normally the linker will add a `DT_NEEDED` tag for each dynamic library mentioned on the command line, regardless of whether the library is actually needed or not.  `--as-needed` causes a `DT_NEEDED` tag to only be emitted for a library that at that point in the link satisfies a non-weak undefined symbol reference from a regular object file or, if the library is not found in the `DT_NEEDED` lists of other needed libraries, a non-weak undefined symbol reference from another needed dynamic library.  Object files or libraries appearing on the command line after the library in question do not affect whether the library is seen as needed.  This is similar to the rules for extraction of object files from archives. `--no-as-needed` restores the default behaviour.
+  + This option affects `ELF DT_NEEDED` tags for dynamic libraries mentioned on the command line after the `--as-needed` option. Normally the linker will add a `DT_NEEDED` tag for each dynamic library mentioned on the command line, regardless of whether the library is actually needed or not.  `--as-needed` causes a `DT_NEEDED` tag to only be emitted for a library that at that point in the link satisfies a non-weak undefined symbol reference from a regular object file or, if the library is not found in the `DT_NEEDED` lists of other needed libraries, a non-weak undefined symbol reference from another needed dynamic library.  Object files or libraries appearing on the command line after the library in question do not affect whether the library is seen as needed.
+
+```bash
+LINKER_FLAGS="-lstd$RUST_LIBSTD_LINKER_FLAG -lcurl -lcrypto -lm 
+-lssl -lz -lpthread -lrustc_driver$RUST_LIBRUSTC_LINKER_FLAG 
+-ltest$RUST_LIBTEST_LINKER_FLAG "
+```
+
+- before `--as-needed`
+
+![s3](/assets/2024-06-08/s2.png)
+
+- after `--as-needed`
+
+![s3](/assets/2024-06-08/s3.png)
 
 ### --gc-setions
 
 - linker flag 2: `-Wl,--gc-sections`
+  + Enable garbage collection of unused input sections.
   + this flag must be using with `-ffunction-sections -fdata-sections` at compile time
     * [reference](https://gcc.gnu.org/onlinedocs/gnat_ugn/Compilation-options.html)
     * [reference 2](https://stackoverflow.com/questions/18115598/how-to-remove-all-unused-symbols-from-a-shared-library)
@@ -189,7 +204,7 @@ From `man ld` or [this webpage](https://www.man7.org/linux/man-pages/man1/ld.1.h
 ### --strip-debug
 
 - linker flag 3: `-Wl,--strip-debug`
-
+	+ Omit debugger symbol information (but not all symbols) from the output file
 
 ### Merged 11 functions: after adding the linker flags
 
@@ -343,7 +358,27 @@ Transfer/sec:     20.26KB
 ### Merged 2 functions: after adding the linker flags
 
 ```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
 
+      25.983     0.000000            1         1.00
+      27.903     0.100000           57         1.11
+      29.871     0.500000          284         2.00
+      32.559     0.800000          452         5.00
+      36.799     0.900000          508        10.00
+      95.807     0.950000          536        20.00
+     103.935     0.990625          559       106.67
+     200.703     0.996875          563       320.00
+     200.703     0.998047          563       512.00
+     221.439     0.998242          564       568.89
+     221.439     1.000000          564          inf
+#[Mean    =       35.358, StdDeviation   =       21.201]
+#[Max     =      221.312, Total count    =          564]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  851 requests in 30.01s, 198.62KB read
+Requests/sec:     28.36
+Transfer/sec:      6.62KB
 ```
 
 ### Merged 2 functions: without adding linker flags
@@ -400,8 +435,31 @@ Transfer/sec:      6.91KB
 
 ### Results
 
-| function name | original | merge  | merge with linker opt flags |
+#### Execution time
+
+| function name | original | merge  | merge with linker opt |
 | :----: | :----:   | :----: | :----: |
 | <strong>compose post</strong> <br> (11 functions)  | 154.239 ms | 67.967 ms | 53.087 ms |
 | <strong>text service</strong> <br> (3 functions) | 48.831 ms | 36.895 ms | 36.703 ms |
-| <strong>write home timeline</strong> <br> (2 functions) |  | | |
+| <strong>write home timeline</strong> <br> (2 functions) | 28.095 ms | 31.343 ms | 29.871 ms |
+
+#### Binary size
+
+| function name | original (1 caller function) | merge  | merge with linker opt |
+| :----: | :----:   | :----: | :----: |
+| <strong>compose post</strong> <br> (11 functions)  | 11 MB | 45 MB | 9.8 MB |
+| <strong>text service</strong> <br> (3 functions) | 27 MB | 24 MB | 7 MB |
+| <strong>write home timeline</strong> <br> (2 functions) | 29 MB | 35 MB | 4.3 MB |
+
+#### Number of dynamically linked libraries
+
+| function name | original (1 caller function) | merge  | merge with linker opt |
+| :----: | :----:   | :----: | :----: |
+| <strong>compose post</strong> <br> (11 functions)  | 10 | 51  | 51 |
+| <strong>text service</strong> <br> (3 functions) | 10 | 51 | 51 |
+| <strong>write home timeline</strong> <br> (2 functions) | 10 | 51 | 51 |
+
+### Maybe an alternative way?
+
+using Rust linker? 
+- the [manual of rust](https://doc.rust-lang.org/rustc/linker-plugin-lto.html)
