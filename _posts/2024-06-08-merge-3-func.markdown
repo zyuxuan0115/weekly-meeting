@@ -169,11 +169,14 @@ Transfer/sec:      6.53KB
 
 From `man ld` or [this webpage](https://www.man7.org/linux/man-pages/man1/ld.1.html)
 
-- linker flag 1: `--as-needed`
+### --as-needed
+
+- linker flag 1: `-Wl,--as-needed`
   + --as-needed
   + --no-as-needed
     * This option affects `ELF DT_NEEDED` tags for dynamic libraries mentioned on the command line after the `--as-needed` option. Normally the linker will add a `DT_NEEDED` tag for each dynamic library mentioned on the command line, regardless of whether the library is actually needed or not.  `--as-needed` causes a `DT_NEEDED` tag to only be emitted for a library that at that point in the link satisfies a non-weak undefined symbol reference from a regular object file or, if the library is not found in the `DT_NEEDED` lists of other needed libraries, a non-weak undefined symbol reference from another needed dynamic library.  Object files or libraries appearing on the command line after the library in question do not affect whether the library is seen as needed.  This is similar to the rules for extraction of object files from archives. `--no-as-needed` restores the default behaviour.
 
+### --gc-setions
 
 - linker flag 2: `-Wl,--gc-sections`
   + this flag must be using with `-ffunction-sections -fdata-sections` at compile time
@@ -183,24 +186,222 @@ From `man ld` or [this webpage](https://www.man7.org/linux/man-pages/man1/ld.1.h
   + the size of the new binary: 9.8 MB (original 45 MB)
     * ![s1](/assets/2024-06-08/s1.png)
 
+### --strip-debug
+
+- linker flag 3: `-Wl,--strip-debug`
+
+
+### Merged 11 functions: after adding the linker flags
+
 ```
   Detailed Percentile spectrum:
        Value   Percentile   TotalCount 1/(1-Percentile)
 
-      60.511     0.000000            1         1.00
-      64.319     0.100000           24         1.11
-      68.351     0.500000          119         2.00
-      70.975     0.800000          191         5.00
-      74.879     0.900000          215        10.00
-     400.639     0.990625          236       106.67
-     403.711     0.992188          237       128.00
-     599.039     0.996094          238       256.00
-     599.039     1.000000          238          inf
-#[Mean    =       83.668, StdDeviation   =       67.288]
-#[Max     =      598.528, Total count    =          238]
+      43.743     0.000000            1         1.00
+      47.807     0.100000           31         1.11
+      52.031     0.400000          121         1.67
+      53.087     0.500000          152         2.00
+      57.791     0.800000          242         5.00
+      64.543     0.900000          271        10.00
+     102.079     0.950000          286        20.00
+     400.383     0.990625          299       106.67
+     499.199     0.996484          300       284.44
+     502.783     1.000000          301          inf
+#[Mean    =       66.038, StdDeviation   =       59.188]
+#[Max     =      502.528, Total count    =          301]
 #[Buckets =           27, SubBuckets     =         2048]
 ----------------------------------------------------------
-  357 requests in 30.01s, 390.33KB read
-Requests/sec:     11.90
-Transfer/sec:     13.01KB
+  455 requests in 30.01s, 499.36KB read
+Requests/sec:     15.16
+Transfer/sec:     16.64KB
 ```
+
+
+### Merged 11 functions: without adding linker flags
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+      61.215     0.000000            1         1.00
+      64.575     0.100000           25         1.11
+      67.327     0.400000          101         1.67
+      67.967     0.500000          121         2.00
+      70.399     0.800000          194         5.00
+      73.535     0.900000          218        10.00
+     115.775     0.950000          230        20.00
+     403.455     0.990625          240       106.67
+     485.887     0.992188          241       128.00
+     500.479     1.000000          242          inf
+#[Mean    =       82.219, StdDeviation   =       64.579]
+#[Max     =      500.224, Total count    =          242]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  361 requests in 30.01s, 394.57KB read
+Requests/sec:     12.03
+Transfer/sec:     13.15KB
+```
+
+
+### Original 11 functions (without merging)
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+     140.287     0.000000            1         1.00
+     145.151     0.100000           12         1.11
+     154.239     0.500000           56         2.00
+     169.599     0.800000           90         5.00
+     191.615     0.900000          101        10.00
+     398.079     0.950000          107        20.00
+     494.335     0.990625          111       106.67
+     524.799     1.000000          112          inf
+#[Mean    =      178.449, StdDeviation   =       75.363]
+#[Max     =      524.288, Total count    =          112]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  167 requests in 30.01s, 182.73KB read
+Requests/sec:      5.57
+Transfer/sec:      6.09KB
+```
+
+### Merged 3 functions: after adding the linker flags
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+      30.079     0.000000            1         1.00
+      33.023     0.100000           45         1.11
+      36.127     0.400000          180         1.67
+      36.703     0.500000          222         2.00
+      40.095     0.800000          355         5.00
+      43.071     0.900000          399        10.00
+      96.447     0.950000          421        20.00
+     202.367     0.990625          439       106.67
+     300.799     0.996484          442       284.44
+     301.567     0.998047          443       512.00
+     301.567     1.000000          443          inf
+#[Mean    =       45.075, StdDeviation   =       35.426]
+#[Max     =      301.312, Total count    =          443]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  678 requests in 30.01s, 792.24KB read
+Requests/sec:     22.59
+Transfer/sec:     26.40KB
+```
+
+### Merged 3 functions: without adding linker flags
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+      30.239     0.000000            1         1.00
+      33.375     0.100000           45         1.11
+      36.895     0.500000          223         2.00
+      39.775     0.800000          358         5.00
+      43.871     0.900000          402        10.00
+     102.399     0.950000          424        20.00
+     201.343     0.990625          442       106.67
+     202.367     0.996094          445       256.00
+     204.031     0.998047          446       512.00
+     204.031     1.000000          446          inf
+#[Mean    =       44.427, StdDeviation   =       30.612]
+#[Max     =      203.904, Total count    =          446]
+#[Buckets =           27, SubBuckets     =         2048]
+```
+
+### Original 3 functions (without merging)
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+      42.079     0.000000            1         1.00
+      45.247     0.100000           35         1.11
+      48.319     0.400000          139         1.67
+      48.831     0.500000          172         2.00
+      52.095     0.800000          276         5.00
+      74.943     0.900000          310        10.00
+     117.311     0.950000          327        20.00
+     200.831     0.990625          341       106.67
+     201.343     0.993750          342       160.00
+     201.471     0.994531          343       182.86
+     202.623     0.997266          344       365.71
+     202.623     1.000000          344          inf
+#[Mean    =       57.735, StdDeviation   =       31.385]
+#[Max     =      202.496, Total count    =          344]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  524 requests in 30.01s, 607.97KB read
+Requests/sec:     17.46
+Transfer/sec:     20.26KB
+```
+
+### Merged 2 functions: after adding the linker flags
+
+```
+
+```
+
+### Merged 2 functions: without adding linker flags
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+      27.279     0.000000            1         1.00
+      29.135     0.100000           31         1.11
+      31.343     0.500000          155         2.00
+      33.919     0.800000          244         5.00
+      37.311     0.900000          275        10.00
+      73.407     0.950000          290        20.00
+     198.399     0.990625          303       106.67
+     199.295     0.996484          304       284.44
+   18956.287     0.996875          305       320.00
+   18956.287     1.000000          305          inf
+#[Mean    =       98.198, StdDeviation   =     1081.320]
+#[Max     =    18939.904, Total count    =          305]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  306 requests in 30.00s, 71.42KB read
+  Socket errors: connect 0, read 0, write 0, timeout 9
+Requests/sec:     10.20
+Transfer/sec:      2.38KB
+```
+
+
+### Original 2 functions (without merging)
+
+```
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+      23.935     0.000000            1         1.00
+      26.511     0.100000           61         1.11
+      28.095     0.500000          300         2.00
+      29.903     0.800000          477         5.00
+      33.503     0.900000          537        10.00
+      94.015     0.950000          567        20.00
+     105.151     0.990625          591       106.67
+     193.151     0.998047          595       512.00
+     194.047     0.998437          596       640.00
+     194.047     1.000000          596          inf
+#[Mean    =       33.430, StdDeviation   =       19.632]
+#[Max     =      193.920, Total count    =          596]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  888 requests in 30.00s, 207.26KB read
+Requests/sec:     29.60
+Transfer/sec:      6.91KB
+```
+
+### Results
+
+| function name | original | merge  | merge with linker opt flags |
+| :----: | :----:   | :----: | :----: |
+| <strong>compose post</strong> <br> (11 functions)  | 154.239 ms | 67.967 ms | 53.087 ms |
+| <strong>text service</strong> <br> (3 functions) | 48.831 ms | 36.895 ms | 36.703 ms |
+| <strong>write home timeline</strong> <br> (2 functions) |  | | |
