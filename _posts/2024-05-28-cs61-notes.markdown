@@ -10,6 +10,8 @@ categories: algorithm
 
 ### Algorithm Lecture 1 & 2
 
+#### Java basics
+
 - If you want to search the man pages for a command that pertains to a keyword:
   + `man -k single_keyword | less`
 
@@ -46,4 +48,4 @@ public class DogLauncher {
  
 - `weightInPounds` is a instance variable; `makeNoise` is a instance method.
 
-
+#### Interactive debugging tool for Java
