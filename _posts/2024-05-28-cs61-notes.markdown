@@ -4,7 +4,7 @@ title:  "2024-05-28 CS61 notes"
 date:   2024-05-28 1:53:49 -0500
 categories: algorithm
 ---
-### Algorithm Lecture 1
+### Algorithm Lecture 1 & 2
 
 - If you want to search the man pages for a command that pertains to a keyword:
   + `man -k single_keyword | less`
@@ -37,6 +37,10 @@ public class DogLauncher {
     }
 }
 ```
+
+- `static` keyword before a function in a class means that this method can be directly called from another class without specifying a instance of that class.
+ 
+- `weightInPounds` is a instance variable; `makeNoise` is a instance method.
 
 ### OS Lecture 1
 
