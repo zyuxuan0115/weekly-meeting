@@ -4,6 +4,10 @@ title:  "2024-05-28 Berkeley CS61 notes"
 date:   2024-05-28 1:53:49 -0500
 categories: algorithm
 ---
+## Berkeley CS61 
+
+- course website: [https://sp24.datastructur.es/](https://sp24.datastructur.es/)
+
 ### Algorithm Lecture 1 & 2
 
 - If you want to search the man pages for a command that pertains to a keyword:
@@ -42,19 +46,4 @@ public class DogLauncher {
  
 - `weightInPounds` is a instance variable; `makeNoise` is a instance method.
 
-### OS Lecture 1
-
-```c++
-int open(const char* pathname, int flags);
-int open(const char* pathname, int flags, mode_t mode);
-```
-
-When creating a file, the third argument, `mode`, is used to attempt to set the permissions.
-The reason it is "attempt" is because there is a default permissions mask, called `umask`, that limits the permissions. `umask` has a similar octal value to the permissions, although if a bit is set in the umask, then trying to set that bit with the mode parameter will not be allowed. The umask can be set with the following system call:
-
-```c++
-mode_t umask(mode_t mask); 
-```
-
-the return value of `umask()` is old mask (the one that was already set)
 

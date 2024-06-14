@@ -1,0 +1,22 @@
+---
+layout: post
+title:  "2024-05-29 Stanford CS61 notes"
+date:   2024-05-29 1:53:49 -0500
+categories: algorithm
+---
+## Stanford CS110 
+
+```c++
+int open(const char* pathname, int flags);
+int open(const char* pathname, int flags, mode_t mode);
+```
+
+When creating a file, the third argument, `mode`, is used to attempt to set the permissions.
+The reason it is "attempt" is because there is a default permissions mask, called `umask`, that limits the permissions. `umask` has a similar octal value to the permissions, although if a bit is set in the umask, then trying to set that bit with the mode parameter will not be allowed. The umask can be set with the following system call:
+
+```c++
+mode_t umask(mode_t mask); 
+```
+
+the return value of `umask()` is old mask (the one that was already set)
+
