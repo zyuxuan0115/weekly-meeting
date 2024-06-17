@@ -51,6 +51,9 @@ rustc version 1.76 (the current version) is based on LLVM 17 (for libcurl - to c
 - If invoke is done, it will jump to another basic block based on whether the invoke is successful or not.
 - `InvokeInst` must be a terminator of a basic block
 
+### Link 2 Rust function
+- [manually linking rust binaries to support out of tree llvm passes](https://medium.com/@squanderingtime/manually-linking-rust-binaries-to-support-out-of-tree-llvm-passes-8776b1d037a4)
+
 #### GDB tricks 
 [use gdb's GUI](https://stackoverflow.com/questions/53167123/assembly-gdb-switch-between-gui-tables)
 - `ctrl+x`, then `2`
