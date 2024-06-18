@@ -19,5 +19,27 @@ categories: serverless
     * loads wrapped library on first call to any of its functions
     * redirects calls to library symbols
 
+#### TODO
+- delete unused function from IR
+  + starting from `main` function, check the call graph to find all functions that are never visited
+  + delete those unvisited functions
+
+#### 50th latency
+
+| function name<br> (result in millisec) | original | merge  | merge<br> linker opt | merge <br>linker opt<br> delay DLL loading | 
+| :----: | :----:   | :----: | :----: | :----: |
+| <strong>compose post</strong> <br> (11 functions)  | 154.239 | 67.967 | 53.087  | 43.551 |  
+| <strong>text service</strong> <br> (3 functions) | 48.831 | 36.895  | 36.703 | 25.311 |
+| <strong>write home timeline</strong> <br> (2 functions) | 28.095 | 31.343 | 29.871 |  20.207 |
+
+#### merging time
+
+| function name<br> | function merging time | 
+| :----: | :----:   | 
+| <strong>compose post</strong> <br> (11 functions)  | 19min30s | 
+| <strong>text service</strong> <br> (3 functions) |  | 
+| <strong>write home timeline</strong> <br> (2 functions) | 11m23.050s | 
+
+
 ### Distributed tracing on OpenFaaS
 [openfaas-tracing-walkthrough](https://github.com/LucasRoesler/openfaas-tracing-walkthrough)
