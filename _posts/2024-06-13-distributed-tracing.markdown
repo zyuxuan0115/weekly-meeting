@@ -37,7 +37,7 @@ categories: serverless
 | function name<br> | function merging time | 
 | :----: | :----:   | 
 | <strong>compose post</strong> <br> (11 functions)  | 19min30s | 
-| <strong>text service</strong> <br> (3 functions) |  | 
+| <strong>text service</strong> <br> (3 functions) | 10m5.605s | 
 | <strong>write home timeline</strong> <br> (2 functions) | 11m23.050s | 
 
 

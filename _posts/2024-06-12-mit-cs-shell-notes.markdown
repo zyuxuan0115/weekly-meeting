@@ -14,6 +14,18 @@ categories: algorithm
 - `^`: the start of the line
 - `$`: the end of the line
 
+#### GDB split screen
+- `layout asm`
+- `layout reg`
+
+![gdb](/assets/2024-06-12/gdb.png)
+
+- gdb program exec:
+  + single step：`step` or `s`
+  + next breaking point: `next` or `n`
+  + run all program until hit the breaking point: `run` or `r`
+
+
 
 #### How to edit a binary file by vim
 - command `%!xxd` allows you to view files by vim in hex format. 
