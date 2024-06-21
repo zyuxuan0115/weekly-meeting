@@ -87,7 +87,8 @@ According to [openfaas-tracing-walkthrough](https://github.com/LucasRoesler/open
 - Have <strong>auto instrumentation framework</strong>, but we might need to manually add the instrumentation code
 - [Language supported](https://opentelemetry.io/docs/languages/): Rust and C++ included
   + in Rust.io, they have [opentelemetry_otlp](https://docs.rs/opentelemetry-otlp/0.16.0/opentelemetry_otlp/) & [opentelemetry-http](https://crates.io/crates/opentelemetry-http)
-  + an example of `opentelemetry_otlp`
+  + [official example](https://github.com/open-telemetry/opentelemetry-rust/tree/main/opentelemetry-otlp/examples/basic-otlp) from open-telemetry's documentation
+  + an simple example of `opentelemetry_otlp`
 
 ```rust
 use opentelemetry::global;
@@ -114,6 +115,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
   + Need to deploy both `OTLP Receiver` and `collector`
   + The collector need to be connected to <strong>Tempo</strong> as the backend exporter 
     * see this example: [End-to-End Distributed Tracing in Kubernetes with Grafana Tempo and OpenTelemetry](https://www.civo.com/learn/distributed-tracing-kubernetes-grafana-tempo-opentelemetry)
+    * another example: [Kubernetes deployment](https://opentelemetry.io/docs/demo/kubernetes-deployment/)
 
 ```yaml
 config:
