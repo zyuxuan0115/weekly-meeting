@@ -7,17 +7,16 @@ categories: serverless
 
 ### Kubernetes Ingress
 
-- [Kubernetes Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
+- <strong> [Kubernetes Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)</strong>
 
 ![ingress](/assets/2024-06-21/ingress.svg)
 
-- [Install the ingress-nginx IngressController locally](https://docs.openfaas.com/tutorials/local-kind-ingress/)
-- [install openfaas using helm](https://artifacthub.io/packages/helm/openfaas/openfaas)
 
 - The real correct way to install [ingress-nginx](https://github.com/kubernetes/ingress-nginx/blob/main/docs/deploy/index.md)
   + expecially install to a <strong>bare metal cluster</strong>.
   + `kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.1/deploy/static/provider/baremetal/deploy.yaml`
 
+#### Some useful kubectl commands
 
 ```bash
 # Get the detail of a pod for the ingress-nginx
@@ -30,12 +29,14 @@ NODE_PORT="$(kubectl get services/gateway-external -n openfaas -o go-template='{
 echo $NODE_PORT
 # get ingress
 kubectl get ingress -n openfaas
+# get all namespace in kubernetes
+kubectl get ns
+kubectl describe ns
 ```
 
 - Can also set the type of service to be `LoadBalancer`
   + this way, the port of nginx server will be fixed to 80 (http) & 443 (https)
-  + If you don't want your service's external-IP field to be pending (this step is not necessary)
-    * you can explicitly assign an external IP for it
+  + you must explicitly assign an external IP for it
     * reference is [here](https://paul-boone.medium.com/kubernetes-loadbalancer-ip-stuck-in-pending-6ddea72b8ff5)
 
 ```yaml
@@ -66,6 +67,10 @@ NODE_PORT="$(kubectl get svc/ingress-nginx-controller -n ingress-nginx -o go-tem
 
 ![s1](/assets/2024-06-21/s1.png)
 
+
+### other topics related to OpenFaaS or Kubernetes
+- [install openfaas using helm](https://artifacthub.io/packages/helm/openfaas/openfaas)
+- [Kubernetes wait for secret to be created](https://stackoverflow.com/questions/71384532/kubernetes-wait-for-secret-to-be-created)
 
 ### OpenFaaS's function ingress using nginx
 - example about how to add ingress for function: [OpenFaaS's function ingress operator](https://github.com/openfaas/ingress-operator)
