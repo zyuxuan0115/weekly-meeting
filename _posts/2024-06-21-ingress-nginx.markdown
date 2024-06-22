@@ -65,3 +65,7 @@ NODE_PORT="$(kubectl get svc/ingress-nginx-controller -n ingress-nginx -o go-tem
 [use open-telemetry for ingress-nginx](https://kubernetes.github.io/ingress-nginx/user-guide/third-party-addons/opentelemetry/)
 
 ![s1](/assets/2024-06-21/s1.png)
+
+
+### OpenFaaS's function ingress using nginx
+- example about how to add ingress for function: [OpenFaaS's function ingress operator](https://github.com/openfaas/ingress-operator)
