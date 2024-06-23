@@ -7,6 +7,7 @@ categories: serverless
 
 ### Kubernetes Ingress
 
+#### How Ingress-Nginx works
 - <strong> [Kubernetes Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)</strong>
 
 ![ingress](/assets/2024-06-21/ingress.svg)
@@ -32,12 +33,15 @@ kubectl get ingress -n openfaas
 # get all namespace in kubernetes
 kubectl get ns
 kubectl describe ns
+# see the log of a pod
+kubectl logs <pod-name> 
 ```
 
 - Can also set the type of service to be `LoadBalancer`
   + this way, the port of nginx server will be fixed to 80 (http) & 443 (https)
   + you must explicitly assign an external IP for it
     * reference is [here](https://paul-boone.medium.com/kubernetes-loadbalancer-ip-stuck-in-pending-6ddea72b8ff5)
+  + when creating `LoadBalancer` type of service, sometimes it will fail. 
 
 ```yaml
 apiVersion: v1
@@ -62,11 +66,20 @@ spec:
 NODE_PORT="$(kubectl get svc/ingress-nginx-controller -n ingress-nginx -o go-template='{{(index .spec.ports 0).nodePort}}')"
 ```
 
+#### OpenFaaS's log vs Ingress-Nginx's log
+- OpenFaaS  (when function make RPCs)
+  + cannot see the caller info
+
+![s2](/assets/2024-06-21/s2.png)
+
+- Ingress-Nginx (when function make RPCs)
+
 ### Open-tracing for ingress-nginx
 [use open-telemetry for ingress-nginx](https://kubernetes.github.io/ingress-nginx/user-guide/third-party-addons/opentelemetry/)
 
 ![s1](/assets/2024-06-21/s1.png)
 
+[Tempo query: Query with TraceQL](https://grafana.com/docs/tempo/latest/traceql/)
 
 ### other topics related to OpenFaaS or Kubernetes
 - [install openfaas using helm](https://artifacthub.io/packages/helm/openfaas/openfaas)
@@ -74,3 +87,4 @@ NODE_PORT="$(kubectl get svc/ingress-nginx-controller -n ingress-nginx -o go-tem
 
 ### OpenFaaS's function ingress using nginx
 - example about how to add ingress for function: [OpenFaaS's function ingress operator](https://github.com/openfaas/ingress-operator)
+- openfaas's yaml files is [here](https://github.com/openfaas/faas-netes/tree/master/chart/openfaas/templates)
