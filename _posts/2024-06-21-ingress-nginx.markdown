@@ -10,7 +10,7 @@ categories: serverless
 #### How Ingress-Nginx works
 - <strong> [Kubernetes Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)</strong>
 
-![ingress](/assets/2024-06-21/ingress.svg)
+![ingress](/assets/2024-06-21/d1.png)
 
 
 - The real correct way to install [ingress-nginx](https://github.com/kubernetes/ingress-nginx/blob/main/docs/deploy/index.md)
