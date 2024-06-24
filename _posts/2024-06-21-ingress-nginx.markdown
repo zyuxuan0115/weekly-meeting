@@ -5,9 +5,9 @@ date:   2024-06-20 1:53:49 -0500
 categories: serverless
 ---
 
-### Kubernetes Ingress
+## Kubernetes Ingress
 
-#### How Ingress-Nginx works
+### How Ingress-Nginx works
 - <strong> [Kubernetes Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)</strong>
 
 ![ingress](/assets/2024-06-21/d1.png)
@@ -17,7 +17,7 @@ categories: serverless
   + expecially install to a <strong>bare metal cluster</strong>.
   + `kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.1/deploy/static/provider/baremetal/deploy.yaml`
 
-#### Some useful kubectl commands
+### Some useful kubectl commands
 
 ```bash
 # Get the detail of a pod for the ingress-nginx
@@ -66,13 +66,28 @@ spec:
 NODE_PORT="$(kubectl get svc/ingress-nginx-controller -n ingress-nginx -o go-template='{{(index .spec.ports 0).nodePort}}')"
 ```
 
-#### OpenFaaS's log vs Ingress-Nginx's log
-- OpenFaaS  (when function make RPCs)
+### OpenFaaS's log vs Ingress-Nginx's log
+![no-ingress](/assets/2024-06-21/d2.png)
+
+#### OpenFaaS  (when function make RPCs)
   + cannot see the caller info
+  + `kubectl logs <pod's name>` 
 
 ![s2](/assets/2024-06-21/s2.png)
 
-- Ingress-Nginx (when function make RPCs)
+#### Ingress-Nginx (when function make RPCs)
+
+![s3](/assets/2024-06-21/s3.png)
+
+- How do we know it's caller's IP?
+
+```bash
+kubectl -n openfaas-fn get pods
+kubectl -n openfaas-fn describe pod <pod's name>
+```
+
+![s4](/assets/2024-06-21/s4.png)
+
 
 ### Open-tracing for ingress-nginx
 [use open-telemetry for ingress-nginx](https://kubernetes.github.io/ingress-nginx/user-guide/third-party-addons/opentelemetry/)
