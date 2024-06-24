@@ -35,6 +35,8 @@ kubectl get ns
 kubectl describe ns
 # see the log of a pod
 kubectl logs <pod-name> 
+# execute a pod
+kubectl exec <pod-name> -- <shell command>
 ```
 
 - Can also set the type of service to be `LoadBalancer`
@@ -66,6 +68,8 @@ spec:
 NODE_PORT="$(kubectl get svc/ingress-nginx-controller -n ingress-nginx -o go-template='{{(index .spec.ports 0).nodePort}}')"
 ```
 
+
+
 ### OpenFaaS's log vs Ingress-Nginx's log
 ![no-ingress](/assets/2024-06-21/d2.png)
 
@@ -79,7 +83,7 @@ NODE_PORT="$(kubectl get svc/ingress-nginx-controller -n ingress-nginx -o go-tem
 
 ![s3](/assets/2024-06-21/s3.png)
 
-- How do we know it's caller's IP?
+- How do we know its caller's IP?
 
 ```bash
 kubectl -n openfaas-fn get pods
@@ -94,11 +98,26 @@ kubectl -n openfaas-fn describe pod <pod's name>
 
 ![s1](/assets/2024-06-21/s1.png)
 
+- To enable `open-telemetry`'s instrumentation in `ingress-nginx`
+  + [referenc](https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md)
+  + [referenc2](https://kubernetes.github.io/ingress-nginx/user-guide/third-party-addons/opentelemetry/)
+  + In `Kind: ConfigMap` add 
+
+```
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/enable-opentelemetry: "true"
+    nginx.ingress.kubernetes.io/opentelemetry-trust-incoming-span: "true"
+```
+
 [Tempo query: Query with TraceQL](https://grafana.com/docs/tempo/latest/traceql/)
 
-### other topics related to OpenFaaS or Kubernetes
+### other topics related to OpenFaaS or Kubernetes or Grafana/Tempo
 - [install openfaas using helm](https://artifacthub.io/packages/helm/openfaas/openfaas)
 - [Kubernetes wait for secret to be created](https://stackoverflow.com/questions/71384532/kubernetes-wait-for-secret-to-be-created)
+- When I changed `Grafana`'s log, I saw this error
+  + 
+  + But according to Grafana staff, this is not a big issue and we can ignore it -- [reference](https://community.grafana.com/t/grafana-gossip-ring-service-seems-to-have-wrong-ip-addresses/56197)
 
 ### OpenFaaS's function ingress using nginx
 - example about how to add ingress for function: [OpenFaaS's function ingress operator](https://github.com/openfaas/ingress-operator)
