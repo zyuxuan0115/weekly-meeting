@@ -115,10 +115,9 @@ metadata:
 ### other topics related to OpenFaaS or Kubernetes or Grafana/Tempo
 - [install openfaas using helm](https://artifacthub.io/packages/helm/openfaas/openfaas)
 - [Kubernetes wait for secret to be created](https://stackoverflow.com/questions/71384532/kubernetes-wait-for-secret-to-be-created)
-- When I changed `Grafana`'s log, I saw this error
-  + 
-  + But according to Grafana staff, this is not a big issue and we can ignore it -- [reference](https://community.grafana.com/t/grafana-gossip-ring-service-seems-to-have-wrong-ip-addresses/56197)
+- [yaml has its offical website](https://yaml.org/), we can check the spec of yaml's syntax and also the library that supports reading yaml
 
 ### OpenFaaS's function ingress using nginx
 - example about how to add ingress for function: [OpenFaaS's function ingress operator](https://github.com/openfaas/ingress-operator)
 - openfaas's yaml files is [here](https://github.com/openfaas/faas-netes/tree/master/chart/openfaas/templates)
+- generate a yaml file for `helm` to install `OpenFaaS` is [here](https://github.com/openfaas/faas-netes/blob/master/chart/openfaas/README.md#deployment-with-helm-template)
