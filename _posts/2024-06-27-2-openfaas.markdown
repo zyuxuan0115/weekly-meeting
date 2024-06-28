@@ -1,9 +1,10 @@
 ---
 layout: post
-title:  "2024-06-20 ingress nginx"
+title:  "2024-06-20 2 OpenFaaS in 1 kubernetes"
 date:   2024-06-20 1:53:49 -0500
 categories: serverless
 ---
+#### Command that can be used for getting IP:function 
 
 ```bash
 kubectl get -n openfaas-fn pods -o yaml
