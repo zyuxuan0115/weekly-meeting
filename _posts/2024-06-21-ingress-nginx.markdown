@@ -5,7 +5,9 @@ date:   2024-06-20 1:53:49 -0500
 categories: serverless
 ---
 
-## Kubernetes Ingress
+## Adding ingress for OpenFaaS
+
+- choose nginx as the ingress controller
 
 ### How Ingress-Nginx works
 - <strong> [Kubernetes Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)</strong>
@@ -92,11 +94,14 @@ kubectl -n openfaas-fn describe pod <pod's name>
 
 ![s4](/assets/2024-06-21/s4.png)
 
-
-### Open-tracing for ingress-nginx
-[use open-telemetry for ingress-nginx](https://kubernetes.github.io/ingress-nginx/user-guide/third-party-addons/opentelemetry/)
+## Make distributed tracing work
 
 ![s1](/assets/2024-06-21/s1.png)
+
+### distributed tracing for ingress-nginx
+#### Enable open-telemetry for ingress nginx
+[use open-telemetry for ingress-nginx](https://kubernetes.github.io/ingress-nginx/user-guide/third-party-addons/opentelemetry/)
+
 
 - To enable `open-telemetry`'s instrumentation in `ingress-nginx`
   + [referenc](https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md)
@@ -108,6 +113,27 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/enable-opentelemetry: "true"
     nginx.ingress.kubernetes.io/opentelemetry-trust-incoming-span: "true"
+```
+
+### configure open-telemetry collector
+
+### setup Grafana & Tempo as the backend
+
+#### Tempo
+
+- [Tempo's architecture](https://grafana.com/docs/tempo/latest/operations/architecture/)
+  + Tempo's <strong>query frontend</strong> should connected with Grafana
+  + Tempo's <strong>distributor</strong> should connected with open-telemetry collector 
+
+![tempo](/assets/2024-06-21/d4.png)
+
+#### Grafana
+
+- in version 13, they made a new change: 
+  + see their [github repo](https://github.com/grafana/helm-charts/commit/fe8ee3b8d7a2e79edf0cafb5e8809ad0a99c4d67)
+
+```
+ingester.zoneAwareReplication.enabled
 ```
 
 [Tempo query: Query with TraceQL](https://grafana.com/docs/tempo/latest/traceql/)
