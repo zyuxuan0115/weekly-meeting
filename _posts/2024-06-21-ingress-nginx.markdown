@@ -120,4 +120,24 @@ metadata:
 ### OpenFaaS's function ingress using nginx
 - example about how to add ingress for function: [OpenFaaS's function ingress operator](https://github.com/openfaas/ingress-operator)
 - openfaas's yaml files is [here](https://github.com/openfaas/faas-netes/tree/master/chart/openfaas/templates)
-- generate a yaml file for `helm` to install `OpenFaaS` is [here](https://github.com/openfaas/faas-netes/blob/master/chart/openfaas/README.md#deployment-with-helm-template)
+
+## 2 openfaas gateway + 2 nginx ingress controllers?
+
+### 2 openfaas gateway? --doable
+- deploy the 2nd openfaas in another namespace
+	* generate a yaml file for `helm` to install `OpenFaaS` is [here](https://github.com/openfaas/faas-netes/blob/master/chart/openfaas/README.md#deployment-with-helm-template)
+- problem remained
+  * [How to deploy a function without faas-cli](https://ericstoekl.github.io/faas/getting-started/faas-cli/)
+    + only support very old version of openfaas
+
+### 2 ingress-nginx with 2 openfaas gateway?
+
+#### Simple fanout solution
+![simple-fanout](/assets/2024-06-21/d3.png)
+
+- doesn't work
+
+#### multiple ingress controller
+- ingress-nginx: [multiple controllers](https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/)
+  + already successully deployed 
+  + but nginx ingress controller doesn't connect with openfaas gateway2 successfully

@@ -1,0 +1,12 @@
+---
+layout: post
+title:  "2024-06-20 ingress nginx"
+date:   2024-06-20 1:53:49 -0500
+categories: serverless
+---
+
+```bash
+kubectl get -n openfaas-fn pods -o yaml
+# or even simpler
+kubectl get -n openfaas-fn svc -o yaml
+```
