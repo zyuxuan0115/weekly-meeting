@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "2024-06-20 2 OpenFaaS in 1 kubernetes"
-date:   2024-06-20 1:53:49 -0500
+title:  "2024-06-27 2 OpenFaaS in 1 kubernetes"
+date:   2024-06-27 1:53:49 -0500
 categories: serverless
 ---
 #### Command that can be used for getting IP:function 
@@ -11,3 +11,62 @@ kubectl get -n openfaas-fn pods -o yaml
 # or even simpler
 kubectl get -n openfaas-fn svc -o yaml
 ```
+
+diable distributed tracing by just change the value of a secrets
+
+
+#### Command line for sending query to Tempo
+
+- [Tempo CLI](https://grafana.com/docs/tempo/latest/operations/tempo_cli/)
+- [an example of TraceQL search](https://grafana.com/docs/tempo/latest/api_docs/#example-of-traceql-search)
+  + `curl -G -s http://localhost:3200/api/search --data-urlencode 'q={ status=error }' | jq`
+
+
+```json
+{
+  "traces": [
+    {
+      "traceID": "2f3e0cee77ae5dc9c17ade3689eb2e54",
+      "rootServiceName": "shop-backend",
+      "rootTraceName": "update-billing",
+      "startTimeUnixNano": "1684778327699392724",
+      "durationMs": 557,
+      "spanSets": [
+        {
+          "spans": [
+            {
+              "spanID": "563d623c76514f8e",
+              "startTimeUnixNano": "1684778327735077898",
+              "durationNanos": "446979497",
+              "attributes": [
+                {
+                  "key": "status",
+                  "value": {
+                    "stringValue": "error"
+                  }
+                }
+              ]
+            }
+          ],
+          "matched": 1
+        }
+      ]
+    }
+  ],
+  "metrics": {
+    "totalBlocks": 13
+  }
+}
+```
+
+#### Tempo storage
+
+I noticed that the traces showed in Grafana  will disappear after a while (normally about an hour). I guess that it might not be deleted by Tempo since in Tempo's configuration, it is only required to keep the traces for an hour. 
+
+- Here is also a thread discussing this on stackoverflow
+  + [Grafana Tempo doesn't show traces after sometime](https://stackoverflow.com/questions/77282841/grafana-tempo-doesnt-show-traces-after-sometime) 
+
+- [disappeared tracing recodes?!](https://community.grafana.com/t/traces-diappearing-after-about-an-hour-i-have-no-clue-why/68690/6)
+
+
+

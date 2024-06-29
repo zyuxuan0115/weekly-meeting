@@ -27,9 +27,6 @@ kubectl -n ingress-nginx get pods
 kubectl -n ingress-nginx describe pod <pod name>
 # If the service type is NodePort, to get the port of the service
 kubectl -n openfaas describe svc gateway-external
-# get the node port of the service
-NODE_PORT="$(kubectl get services/gateway-external -n openfaas -o go-template='{{(index .spec.ports 0).nodePort}}')"
-echo $NODE_PORT
 # get ingress
 kubectl get ingress -n openfaas
 # get all namespace in kubernetes
@@ -66,9 +63,7 @@ spec:
 
 - If you use `NodePort` as the service type, use the following command to get the port of nginx
 
-```bash
-NODE_PORT="$(kubectl get svc/ingress-nginx-controller -n ingress-nginx -o go-template='{{(index .spec.ports 0).nodePort}}')"
-```
+`NODE_PORT=$(kubectl get svc/ingress-nginx-controller -n ingress-nginx`
 
 
 
@@ -161,9 +156,13 @@ ingester.zoneAwareReplication.enabled
 #### Simple fanout solution
 ![simple-fanout](/assets/2024-06-21/d3.png)
 
-- doesn't work
+- 2 rules doesn't work
+- 30 rules still doesn't work
+	+ openfaas gateway will accept
 
 #### multiple ingress controller
+![d5](/assets/2024-06-21/d5.png)
+
 - ingress-nginx: [multiple controllers](https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/)
   + already successully deployed 
   + but nginx ingress controller doesn't connect with openfaas gateway2 successfully
