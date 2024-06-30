@@ -4,6 +4,12 @@ title:  "2024-06-27 2 OpenFaaS in 1 kubernetes"
 date:   2024-06-27 1:53:49 -0500
 categories: serverless
 ---
+
+### 2 OpenFaaS in 1 kubernetes cluster
+
+![d5](/assets/2024-06-21/d5.png)
+
+### Getting call frequency
 #### Command that can be used for getting IP:function 
 
 ```bash
@@ -12,54 +18,42 @@ kubectl get -n openfaas-fn pods -o yaml
 kubectl get -n openfaas-fn svc -o yaml
 ```
 
-diable distributed tracing by just change the value of a secrets
-
-
 #### Command line for sending query to Tempo
 
 - [Tempo CLI](https://grafana.com/docs/tempo/latest/operations/tempo_cli/)
-- [an example of TraceQL search](https://grafana.com/docs/tempo/latest/api_docs/#example-of-traceql-search)
+  +	`tempo-cli command [subcommand] [options] [arguments...]`
+- [Tempo HTTP API](https://grafana.com/docs/tempo/latest/api_docs/#example-of-traceql-search)
   + `curl -G -s http://localhost:3200/api/search --data-urlencode 'q={ status=error }' | jq`
 
 
-```json
-{
-  "traces": [
-    {
-      "traceID": "2f3e0cee77ae5dc9c17ade3689eb2e54",
-      "rootServiceName": "shop-backend",
-      "rootTraceName": "update-billing",
-      "startTimeUnixNano": "1684778327699392724",
-      "durationMs": 557,
-      "spanSets": [
-        {
-          "spans": [
-            {
-              "spanID": "563d623c76514f8e",
-              "startTimeUnixNano": "1684778327735077898",
-              "durationNanos": "446979497",
-              "attributes": [
-                {
-                  "key": "status",
-                  "value": {
-                    "stringValue": "error"
-                  }
-                }
-              ]
-            }
-          ],
-          "matched": 1
-        }
-      ]
-    }
-  ],
-  "metrics": {
-    "totalBlocks": 13
-  }
-}
+our TraceQL query in <strong>Grafana</strong> is:
+
+```
+{span.http.method="POST" && resource.service.name="nginx"}
 ```
 
-#### Tempo storage
+```bash
+curl -G -s http://localhost:8082/api/search --data-urlencode 'tags=http.method=POST' --data-urlencode 'tags=service.name=nginx' | jq
+curl -G -s http://localhost:8082/api/search --data-urlencode 'tags=http.method=POST' | jq
+```
+
+![s1](/assets/2024-06-27/s1.png)
+
+```bash
+curl -G -s http://localhost:8082/api/traces/7fda52b90580266f2eefc4f45b38a120 | jq
+```
+
+![s2](/assets/2024-06-27/s2.png)
+
+![s3](/assets/2024-06-27/s3.png)
+
+### The overhead of adding Ingress-Nginx
+
+
+#### diable distributed tracing by just change the value of a secrets
+
+
+### Tempo storage
 
 I noticed that the traces showed in Grafana  will disappear after a while (normally about an hour). I guess that it might not be deleted by Tempo since in Tempo's configuration, it is only required to keep the traces for an hour. 
 
@@ -67,6 +61,7 @@ I noticed that the traces showed in Grafana  will disappear after a while (norma
   + [Grafana Tempo doesn't show traces after sometime](https://stackoverflow.com/questions/77282841/grafana-tempo-doesnt-show-traces-after-sometime) 
 
 - [disappeared tracing recodes?!](https://community.grafana.com/t/traces-diappearing-after-about-an-hour-i-have-no-clue-why/68690/6)
+	+ according to their discussion, we need to set the following fields in Tempo 
 
 
 
