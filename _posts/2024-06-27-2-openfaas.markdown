@@ -9,6 +9,37 @@ categories: serverless
 
 ![d5](/assets/2024-06-21/d5.png)
 
+- [ingress path in kubernetes](https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types)
+- [simple fanout](https://kubernetes.io/docs/concepts/services-networking/ingress/#simple-fanout)
+
+#### How RPC works
+
+- we have a [func_info.json](https://github.com/zyuxuan0115/faas-test/blob/main/DeathStarBench/social_network_rust_lite/OpenFaaSRPC/func_info.json) to record the location of each function
+
+```rust
+  if callee_cluster_id == 1 {
+    url = String::from("http://gateway.openfaas.svc.cluster.local.:8080/function/");
+  }
+  else {
+    url = String::from("http://gateway.openfaas2.svc.cluster.local.:8080/function/");
+  }
+```
+
+### Tempo storage
+
+I noticed that the traces showed in Grafana  will disappear after a while (normally about an hour). I guess that it might not be deleted by Tempo since in Tempo's configuration, it is only required to keep the traces for an hour. 
+
+- Here are also threads discussing this
+  + StackOverflow: [Grafana Tempo doesn't show traces after sometime](https://stackoverflow.com/questions/77282841/grafana-tempo-doesnt-show-traces-after-sometime) 
+  + Grafana offical forum: [Traces diappearing after about an hour](https://community.grafana.com/t/traces-diappearing-after-about-an-hour-i-have-no-clue-why/68690/6)
+	  * according to their discussion and the [helm charts of Tempo-distributed](https://github.com/grafana/helm-charts/tree/main/charts/tempo-distributed), we need to set the following fields in Tempo to extend the time of storing tracings in Tempo's local storage
+
+```
+--set ingester.config.complete_block_timeout="24h"
+--set ingester.config.max_block_duration="24h"
+``` 
+
+
 ### Getting call frequency
 #### Command that can be used for getting IP:function 
 
@@ -49,19 +80,59 @@ curl -G -s http://localhost:8082/api/traces/7fda52b90580266f2eefc4f45b38a120 | j
 
 ### The overhead of adding Ingress-Nginx
 
+![overhead](/assets/2024-06-27/overhead.svg)
 
 #### diable distributed tracing by just change the value of a secrets
 
+- from command line
 
-### Tempo storage
+```bash
+# at the beginning, disable ingress
+faas-cli secret create ingress-enable --from-literal=0 -n openfaas2-fn 
+# turn on ingress for distributed tracing
+faas-cli secret update ingress-enable --from-literal=1 -n openfaas2-fn
+```
 
-I noticed that the traces showed in Grafana  will disappear after a while (normally about an hour). I guess that it might not be deleted by Tempo since in Tempo's configuration, it is only required to keep the traces for an hour. 
+- in the code: 
 
-- Here is also a thread discussing this on stackoverflow
-  + [Grafana Tempo doesn't show traces after sometime](https://stackoverflow.com/questions/77282841/grafana-tempo-doesnt-show-traces-after-sometime) 
+```rust
+// get the secret
+let lines: Vec<String> = read_lines("/var/openfaas/secrets/ingress-enable");
+let ingress-enable = lines[0];
+// update rest api's url
+let mut url: String = String::new(); 
+if ingress-enable == 0 {
+  if callee_cluster_id == 1 {
+    url = String::from("http://gateway.openfaas.svc.cluster.local.:8080/function/");
+  }
+  else {
+    url = String::from("http://gateway.openfaas2.svc.cluster.local.:8080/function/");
+  }
+}
+else {
+  if callee_cluster_id == 1 {
+    url = String::from("http://ingress-nginx-controller.ingress-nginx.svc.cluster.local.:80/function/");
+  }
+  else {
+    url = String::from("http://ingress-nginx-controller.ingress-nginx2.svc.cluster.local.:80/function/");
+  } 
+}
+```
 
-- [disappeared tracing recodes?!](https://community.grafana.com/t/traces-diappearing-after-about-an-hour-i-have-no-clue-why/68690/6)
-	+ according to their discussion, we need to set the following fields in Tempo 
 
 
+### Other things to discuss
+#### instrumentation for distributed tracing
 
+- The original DeathStarBench code also has [distributed tracing instrumented](https://github.com/delimitrou/DeathStarBench/blob/master/socialNetwork/src/ComposePostService/ComposePostHandler.h#L189)
+
+#### potential security issue?
+
+- secrets for database
+  + for example in our [social-graph-get-followees function](https://github.com/zyuxuan0115/faas-test/blob/main/DeathStarBench/social_network_rust_lite/cluster-1/social-graph-get-followees/deployFunc.yml), we have `redis-password` as the kubernetes secret 
+  + `kubectl get secrets -n openfaas-fn` 
+
+#### asynchronize calls
+
+- In origianl DeathStarBench, they launch the callee function asynchronously
+  + see how `compose-post` call `text-service` & `media-service` [here](https://github.com/delimitrou/DeathStarBench/blob/master/socialNetwork/src/ComposePostService/ComposePostHandler.h#L374)
